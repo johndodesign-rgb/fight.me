@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>90-Day Plan</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --black: #0a0a0a;
+    --off-black: #111111;
+    --card: #161616;
+    --border: #222222;
+    --red: #e63232;
+    --red-dim: #8a1f1f;
+    --amber: #d4841a;
+    --green: #2a7a4a;
+    --text: #e8e8e8;
+    --muted: #666666;
+    --mono: 'DM Mono', monospace;
+    --display: 'Bebas Neue', sans-serif;
+    --body: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 0 0 80px;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 48px 32px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(230,50,50,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(52px, 8vw, 88px);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    color: var(--text);
+  }
+
+  h1 span {
+    color: var(--red);
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 32px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .meta-item strong {
+    color: var(--text);
+    display: block;
+    font-size: 13px;
+  }
+
+  /* NAV TABS */
+  .phase-nav {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    gap: 0;
+    overflow-x: auto;
+  }
+
+  .phase-tab {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 16px 24px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+
+  .phase-tab:hover { color: var(--text); }
+  .phase-tab.active {
+    color: var(--red);
+    border-bottom-color: var(--red);
+  }
+
+  /* MAIN LAYOUT */
+  main {
+    padding: 32px;
+    max-width: 1100px;
+  }
+
+  .phase-content { display: none; }
+  .phase-content.active { display: block; }
+
+  .phase-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .phase-title {
+    font-family: var(--display);
+    font-size: 42px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+  }
+
+  .phase-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: var(--red-dim);
+    color: var(--red);
+    padding: 6px 12px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .phase-desc {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.7;
+    max-width: 600px;
+    margin-top: 8px;
+  }
+
+  /* WEEK GRID */
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .day-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .day-card:hover { border-color: #333; }
+
+  .day-card.rest {
+    opacity: 0.5;
+  }
+
+  .day-card-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .day-name {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .day-type {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+  }
+
+  .type-lift { background: rgba(230,50,50,0.15); color: var(--red); }
+  .type-cardio { background: rgba(42,122,74,0.15); color: #3aaa6a; }
+  .type-combo { background: rgba(212,132,26,0.15); color: var(--amber); }
+  .type-rest { background: rgba(102,102,102,0.1); color: var(--muted); }
+
+  .day-card-body { padding: 16px; }
+
+  .session-title {
+    font-weight: 500;
+    font-size: 13px;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  .exercise-list {
+    list-style: none;
+  }
+
+  .exercise-list li {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    padding: 4px 0;
+    border-bottom: 1px solid #1a1a1a;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .exercise-list li:last-child { border-bottom: none; }
+
+  .ex-name { color: #bbb; }
+  .ex-detail { color: #555; font-size: 10px; white-space: nowrap; }
+
+  /* PRINCIPLES SECTION */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 16px;
+  }
+
+  .principles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .principle-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--red-dim);
+    padding: 16px;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .principle-card h4 {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .principle-card p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ZONE 2 EXPLAINER */
+  .callout {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid #2a7a4a;
+    padding: 20px 24px;
+    border-radius: 0 4px 4px 0;
+    margin-bottom: 32px;
+  }
+
+  .callout h4 {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #3aaa6a;
+    margin-bottom: 8px;
+  }
+
+  .callout p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* PROGRESSION TABLE */
+  .progression-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 40px;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+
+  .progression-table th {
+    text-align: left;
+    padding: 10px 16px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .progression-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #191919;
+    color: #aaa;
+    vertical-align: top;
+  }
+
+  .progression-table td:first-child {
+    color: var(--red);
+    white-space: nowrap;
+  }
+
+  .progression-table tr:last-child td { border-bottom: none; }
+
+  /* BAND KEY */
+  .band-key {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+
+  .band-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .band-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* HR ZONES */
+  .hr-zones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .hr-zone {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 16px;
+    border-radius: 4px;
+    text-align: center;
+  }
+
+  .hr-zone .zone-num {
+    font-family: var(--display);
+    font-size: 48px;
+    line-height: 1;
+    color: var(--border);
+  }
+
+  .hr-zone.z2 .zone-num { color: #2a7a4a; }
+  .hr-zone.z3 .zone-num { color: var(--amber); }
+  .hr-zone.z4 .zone-num { color: #c04020; }
+
+  .hr-zone .zone-bpm {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    margin: 4px 0;
+  }
+
+  .hr-zone .zone-desc {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: var(--black); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="label">90-Day Training Framework</div>
+  <h1>STRONG<br>AS <span>F***</span></h1>
+  <div class="header-meta">
+    <div class="meta-item"><strong>Age 46 · 213 lbs</strong>Profile</div>
+    <div class="meta-item"><strong>4 days/week</strong>Frequency</div>
+    <div class="meta-item"><strong>Dumbbells + Bands + Bench</strong>Equipment</div>
+    <div class="meta-item"><strong>6-3 Framework + Boxing Conditioning</strong>Method</div>
+  </div>
+</header>
+
+<div class="phase-nav">
+  <button class="phase-tab active" onclick="showPhase('overview')">Overview</button>
+  <button class="phase-tab" onclick="showPhase('phase1')">Phase 1 · Weeks 1–4</button>
+  <button class="phase-tab" onclick="showPhase('phase2')">Phase 2 · Weeks 5–8</button>
+  <button class="phase-tab" onclick="showPhase('phase3')">Phase 3 · Weeks 9–12</button>
+  <button class="phase-tab" onclick="showPhase('reference')">Reference</button>
+</div>
+
+<main>
+
+  <!-- OVERVIEW -->
+  <div class="phase-content active" id="overview">
+    <div class="phase-header">
+      <div>
+        <div class="label">The Framework</div>
+        <div class="phase-title">HOW THIS WORKS</div>
+        <p class="phase-desc">Four training days. Six movement patterns. Progressive overload across three phases. Cardio that doesn't require a treadmill. Every phase builds on the last — you're not starting over, you're loading the same foundation harder.</p>
+      </div>
+    </div>
+
+    <div class="section-label">Core Principles</div>
+    <div class="principles-grid">
+      <div class="principle-card">
+        <h4>The 6 Patterns</h4>
+        <p>Push · Pull · Squat · Hinge · Carry · Rotate. Hit all six every week. This is non-negotiable — everything else is variable.</p>
+      </div>
+      <div class="principle-card">
+        <h4>Volume Target</h4>
+        <p>10–15 working sets per pattern per week above 70% effort. Only 2–4 of those go truly hard (80%+). The rest build tissue.</p>
+      </div>
+      <div class="principle-card">
+        <h4>Unilateral Work</h4>
+        <p>One movement per pattern per week is single-limb. Fixes imbalances, builds rotational stability — boxing-critical.</p>
+      </div>
+      <div class="principle-card">
+        <h4>Isolation Fills Gaps</h4>
+        <p>2–3 sets per muscle group weekly to failure. Short rest (30–60 sec). Compounds alone leave development on the table.</p>
+      </div>
+      <div class="principle-card">
+        <h4>Zone 2 Cardio</h4>
+        <p>Jump rope or footwork at conversational pace — you can hold full sentences. Nose breathing only. Builds your engine.</p>
+      </div>
+      <div class="principle-card">
+        <h4>Heart Rate at 46</h4>
+        <p>Zone 2 ceiling: ~134 bpm (180 − 46). Feels embarrassingly easy. That's correct. Trust the adaptation.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <h4>Zone 2 via Jump Rope — The Ground Rules</h4>
+      <p>Jump rope for zone 2 works, but you have to keep the intensity genuinely low. Slow single-bounce rhythm, not speed work. If you can't hold a conversation or nose-breathe continuously, slow down. Start with 10-minute blocks with 2-min rest. Work toward 20–30 continuous minutes by week 8. Footwork drills (shuffle, lateral step, pivot sequences) are excellent — they train boxing-specific movement patterns while staying aerobic.</p>
+    </div>
+
+    <div class="section-label">90-Day Progression Arc</div>
+    <table class="progression-table">
+      <tr>
+        <th>Phase</th>
+        <th>Weeks</th>
+        <th>Strength Focus</th>
+        <th>Cardio Focus</th>
+        <th>Key Adaptation</th>
+      </tr>
+      <tr>
+        <td>1 · Foundation</td>
+        <td>1–4</td>
+        <td>Pattern mastery · 3×10 tempo work · light loads</td>
+        <td>Zone 2 only · 2×/week · 20–30 min</td>
+        <td>Movement quality, connective tissue prep, aerobic base</td>
+      </tr>
+      <tr>
+        <td>2 · Load</td>
+        <td>5–8</td>
+        <td>Increase intensity to 75–80% · add dead stops · variable resistance</td>
+        <td>Zone 2 + 1× HIIT · jump rope intervals begin</td>
+        <td>Strength gains, rate of force development, mitochondrial density</td>
+      </tr>
+      <tr>
+        <td>3 · Peak</td>
+        <td>9–12</td>
+        <td>2–4 true hard sets · maintain volume · power emphasis</td>
+        <td>Full protocol · Zone 2 + HIIT + speed intervals</td>
+        <td>Power output, conditioning capacity, integrated performance</td>
+      </tr>
+    </table>
+
+    <div class="section-label">Weekly Structure (All Phases)</div>
+    <div class="week-grid">
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Monday</span>
+          <span class="day-type type-lift">Lift A</span>
+        </div>
+        <div class="day-card-body">
+          <div class="session-title">Total Body — Push/Pull/Hinge</div>
+          <ul class="exercise-list">
+            <li><span class="ex-name">Push pattern</span><span class="ex-detail">bilateral</span></li>
+            <li><span class="ex-name">Pull pattern</span><span class="ex-detail">bilateral</span></li>
+            <li><span class="ex-name">Hinge pattern</span><span class="ex-detail">bilateral</span></li>
+            <li><span class="ex-name">Isolation × 2</span><span class="ex-detail">to failure</span></li>
+            <li><span class="ex-name">Carry</span><span class="ex-detail">3×40 sec</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Tuesday</span>
+          <span class="day-type type-cardio">Cardio</span>
+        </div>
+        <div class="day-card-body">
+          <div class="session-title">Zone 2 · Jump Rope / Footwork</div>
+          <ul class="exercise-list">
+            <li><span class="ex-name">Warm-up walk</span><span class="ex-detail">5 min</span></li>
+            <li><span class="ex-name">Zone 2 rope/footwork</span><span class="ex-detail">20–30 min</span></li>
+            <li><span class="ex-name">Shadow boxing</span><span class="ex-detail">5–10 min</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card rest">
+        <div class="day-card-header">
+          <span class="day-name">Wednesday</span>
+          <span class="day-type type-rest">Rest</span>
+        </div>
+        <div class="day-card-body">
+          <div class="session-title">Active Recovery</div>
+          <ul class="exercise-list">
+            <li><span class="ex-name">Walk / light movement</span><span class="ex-detail">optional</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Thursday</span>
+          <span class="day-type type-lift">Lift B</span>
+        </div>
+        <div class="day-card-body">
+          <div class="session-title">Total Body — Squat/Rotate/Unilateral</div>
+          <ul class="exercise-list">
+            <li><span class="ex-name">Squat pattern</span><span class="ex-detail">unilateral</span></li>
+            <li><span class="ex-name">Push pattern</span><span class="ex-detail">unilateral</span></li>
+            <li><span class="ex-name">Pull pattern</span><span class="ex-detail">unilateral</span></li>
+            <li><span class="ex-name">Rotation</span><span class="ex-detail">band or MB</span></li>
+            <li><span class="ex-name">Isolation × 2</span><span class="ex-detail">to failure</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card rest">
+        <div class="day-card-header">
+          <span class="day-name">Friday</span>
+          <span class="day-type type-rest">Rest</span>
+        </div>
+        <div class="day-card-body">
+          <div class="session-title">Active Recovery</div>
+          <ul class="exercise-list">
+            <li><span class="ex-name">Walk / stretch</span><span class="ex-detail">optional</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Saturday</span>
+          <span class="day-type type-combo">Lift + Intervals</span>
+        </div>
+        <div class="day-card-body">
+          <div class="session-title">Total Body + Conditioning</div>
+          <ul class="exercise-list">
+            <li><span class="ex-name">Hinge pattern</span><span class="ex-detail">dead stop</span></li>
+            <li><span class="ex-name">Push pattern</span><span class="ex-detail">tempo</span></li>
+            <li><span class="ex-name">Pull pattern</span><span class="ex-detail">tempo</span></li>
+            <li><span class="ex-name">HIIT finisher</span><span class="ex-detail">Ph.2+ only</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card rest">
+        <div class="day-card-header">
+          <span class="day-name">Sunday</span>
+          <span class="day-type type-rest">Rest</span>
+        </div>
+        <div class="day-card-body">
+          <div class="session-title">Full Rest</div>
+          <ul class="exercise-list">
+            <li><span class="ex-name">No training</span><span class="ex-detail">mandatory</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 1 -->
+  <div class="phase-content" id="phase1">
+    <div class="phase-header">
+      <div>
+        <div class="label">Weeks 1–4</div>
+        <div class="phase-title">FOUNDATION</div>
+        <p class="phase-desc">Build the pattern. Connective tissue adapts slower than muscle — don't skip this. Tempo work dominates: 3 seconds down, 1-second pause, normal up. Loads should feel moderate, never grinding. Zone 2 cardio only. Your aerobic base is being built here even if it doesn't feel like it.</p>
+      </div>
+      <div class="phase-badge">Phase 1 of 3</div>
+    </div>
+
+    <div class="section-label">Monday · Lift A — Push / Pull / Hinge</div>
+    <div class="week-grid">
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Push · Bilateral</span>
+          <span class="day-type type-lift">Tempo</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">DB Bench Press</span><span class="ex-detail">3×12 · 3-1-1</span></li>
+            <li><span class="ex-name">Band Chest Press</span><span class="ex-detail">2×15 · light</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Pull · Bilateral</span>
+          <span class="day-type type-lift">Tempo</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">DB Bent Row</span><span class="ex-detail">3×12 · 3-1-1</span></li>
+            <li><span class="ex-name">Band Pull-Apart</span><span class="ex-detail">3×20 · red</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Hinge · Bilateral</span>
+          <span class="day-type type-lift">Tempo</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">DB Romanian DL</span><span class="ex-detail">3×12 · 3-1-1</span></li>
+            <li><span class="ex-name">Glute Bridge</span><span class="ex-detail">3×15 · bodyweight</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Carry + Isolation</span>
+          <span class="day-type type-lift">Finisher</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">Farmer Carry</span><span class="ex-detail">3×40 sec · 40–50lb</span></li>
+            <li><span class="ex-name">DB Curl</span><span class="ex-detail">2×12–15 · failure</span></li>
+            <li><span class="ex-name">Tricep Kickback</span><span class="ex-detail">2×12–15 · failure</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Thursday · Lift B — Squat / Rotate / Unilateral</div>
+    <div class="week-grid">
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Squat · Unilateral</span>
+          <span class="day-type type-lift">Tempo</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">Split Squat</span><span class="ex-detail">3×10/side · 3-1-1</span></li>
+            <li><span class="ex-name">Goblet Squat</span><span class="ex-detail">2×15 · moderate</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Push · Unilateral</span>
+          <span class="day-type type-lift">Tempo</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">Single-Arm DB Press</span><span class="ex-detail">3×10/side · 3-1-1</span></li>
+            <li><span class="ex-name">Band Overhead Press</span><span class="ex-detail">2×15 · red/black</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Pull · Unilateral</span>
+          <span class="day-type type-lift">Tempo</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">Single-Arm Row</span><span class="ex-detail">3×10/side · 3-1-1</span></li>
+            <li><span class="ex-name">Band Rear Delt Fly</span><span class="ex-detail">2×15 · red</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Rotation + Isolation</span>
+          <span class="day-type type-lift">Finisher</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">Band Pallof Press</span><span class="ex-detail">3×10/side · black</span></li>
+            <li><span class="ex-name">Woodchop</span><span class="ex-detail">3×10/side · band</span></li>
+            <li><span class="ex-name">Lateral Raise</span><span class="ex-detail">2×15 · failure</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Saturday · Lift C — Dead Stops + Tempo Emphasis</div>
+    <div class="week-grid">
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Hinge · Dead Stop</span>
+          <span class="day-type type-lift">Power</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">DB Deadlift from Floor</span><span class="ex-detail">4×8 · pause + reset</span></li>
+            <li><span class="ex-name">Good Morning</span><span class="ex-detail">2×12 · band</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Push · Dead Stop</span>
+          <span class="day-type type-lift">Power</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">Hand-Release Push-Up</span><span class="ex-detail">4×8–10 · explosive up</span></li>
+            <li><span class="ex-name">DB Floor Press</span><span class="ex-detail">3×10 · dead stop</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Pull + Carry</span>
+          <span class="day-type type-lift">Volume</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">Band Face Pull</span><span class="ex-detail">3×15 · purple</span></li>
+            <li><span class="ex-name">DB Shrug Carry</span><span class="ex-detail">2×40 sec · heavy</span></li>
+            <li><span class="ex-name">Leg Curl (band)</span><span class="ex-detail">2×15 · failure</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <h4>Phase 1 Cardio — Tuesday Zone 2</h4>
+      <p>20–25 minutes total. Jump rope: slow single-bounce, aiming for continuous movement. If you break rhythm, rest 90 seconds, continue. Alternatively: footwork ladder drills at low intensity, or simple shuffle/pivot sequences. Heart rate target: stay under 134 bpm. Should feel genuinely easy. Shadow boxing cool-down for 5 minutes — loose, no intensity, just movement.</p>
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase-content" id="phase2">
+    <div class="phase-header">
+      <div>
+        <div class="label">Weeks 5–8</div>
+        <div class="phase-title">LOAD</div>
+        <p class="phase-desc">Patterns are dialed. Now you load them. Increase working weight 5–10% across the board. Introduce variable resistance (bands on DB movements). HIIT enters on Saturday. Zone 2 sessions extend to 30 minutes. This is where you start to feel genuinely different.</p>
+      </div>
+      <div class="phase-badge">Phase 2 of 3</div>
+    </div>
+
+    <div class="section-label">Key Changes from Phase 1</div>
+    <div class="principles-grid">
+      <div class="principle-card">
+        <h4>Load Up</h4>
+        <p>Push intensity to 75–80% on primary lifts. If phase 1 was 30lb DBs, try 35–40. Last 2 reps should be genuinely hard.</p>
+      </div>
+      <div class="principle-card">
+        <h4>Variable Resistance</h4>
+        <p>Add band to DB bench press and RDL. Loop red or black band under bench/feet. Movement gets harder at lockout — trains power.</p>
+      </div>
+      <div class="principle-card">
+        <h4>HIIT Enters</h4>
+        <p>Saturday: 4 rounds of 30-second jump rope all-out, 90-second rest. Keep it after lifting. Total: 8 minutes of real work.</p>
+      </div>
+      <div class="principle-card">
+        <h4>Zone 2 Extends</h4>
+        <p>Tuesday sessions hit 30 minutes continuous. Start mixing jump rope and footwork sequences in the same session.</p>
+      </div>
+    </div>
+
+    <div class="section-label">Monday · Lift A — Phase 2</div>
+    <div class="week-grid">
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Push · Variable</span>
+          <span class="day-type type-lift">+ Band</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">DB Bench + Band</span><span class="ex-detail">4×8 · 75–80% · red band</span></li>
+            <li><span class="ex-name">Incline DB Press</span><span class="ex-detail">3×10</span></li>
+            <li><span class="ex-name">Band Chest Fly</span><span class="ex-detail">2×15 · failure</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Pull · Loaded</span>
+          <span class="day-type type-lift">Heavier</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">DB Bent Row</span><span class="ex-detail">4×8 · heavy · 2-1-1</span></li>
+            <li><span class="ex-name">Band Pull-Down</span><span class="ex-detail">3×12 · purple/green</span></li>
+            <li><span class="ex-name">DB Curl</span><span class="ex-detail">2×12 · failure</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Hinge · Variable</span>
+          <span class="day-type type-lift">+ Band</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">DB RDL + Band</span><span class="ex-detail">4×8 · band under feet</span></li>
+            <li><span class="ex-name">Single-Leg RDL</span><span class="ex-detail">3×8/side · unilateral</span></li>
+            <li><span class="ex-name">Hip Thrust</span><span class="ex-detail">3×12 · heavy DB</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Carry + Isolation</span>
+          <span class="day-type type-lift">Finisher</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">Single-Arm Carry</span><span class="ex-detail">3×40 sec/side · heavy</span></li>
+            <li><span class="ex-name">Skull Crusher (band)</span><span class="ex-detail">2×15 · failure</span></li>
+            <li><span class="ex-name">Hammer Curl</span><span class="ex-detail">2×12 · failure</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Thursday · Lift B — Phase 2</div>
+    <div class="week-grid">
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Squat · Loaded</span>
+          <span class="day-type type-lift">Heavier</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">Bulgarian Split Squat</span><span class="ex-detail">4×8/side · heavy DBs</span></li>
+            <li><span class="ex-name">DB Goblet Squat</span><span class="ex-detail">3×10 · pause at bottom</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Push/Pull · Unilateral</span>
+          <span class="day-type type-lift">Single-Arm</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">Single-Arm DB Press</span><span class="ex-detail">4×8/side</span></li>
+            <li><span class="ex-name">Single-Arm Row</span><span class="ex-detail">4×8/side · heavy</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Rotation · Boxing</span>
+          <span class="day-type type-lift">Power</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">Band Rotational Press</span><span class="ex-detail">3×10/side · black</span></li>
+            <li><span class="ex-name">Woodchop High-Low</span><span class="ex-detail">3×10/side · heavy band</span></li>
+            <li><span class="ex-name">Anti-Rotation Hold</span><span class="ex-detail">3×20 sec/side</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Saturday · Lift C + HIIT — Phase 2</div>
+    <div class="week-grid">
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Dead Stop Lifting</span>
+          <span class="day-type type-lift">Power</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">DB Deadlift · Dead Stop</span><span class="ex-detail">4×6 · heavy</span></li>
+            <li><span class="ex-name">Hand-Release Push-Up</span><span class="ex-detail">4×8 · explosive</span></li>
+            <li><span class="ex-name">DB Row · Dead Stop</span><span class="ex-detail">3×8</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">HIIT Finisher</span>
+          <span class="day-type type-combo">Intervals</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">Jump Rope · All-Out</span><span class="ex-detail">4× 30 sec</span></li>
+            <li><span class="ex-name">Rest</span><span class="ex-detail">90 sec between</span></li>
+            <li><span class="ex-name">Total work time</span><span class="ex-detail">~8 minutes</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase-content" id="phase3">
+    <div class="phase-header">
+      <div>
+        <div class="label">Weeks 9–12</div>
+        <div class="phase-title">PEAK</div>
+        <p class="phase-desc">This is what you built toward. True hard sets — 2–4 per session pushing 80%+. Full conditioning protocol. Jump rope intervals extend. You're training like an athlete now, not just exercising. Week 12 is a deload: same movements, 60% load, half the volume. Let the adaptation complete.</p>
+      </div>
+      <div class="phase-badge">Phase 3 of 3</div>
+    </div>
+
+    <div class="section-label">Key Changes from Phase 2</div>
+    <div class="principles-grid">
+      <div class="principle-card">
+        <h4>True Hard Sets</h4>
+        <p>2–4 sets per session at 80%+ — last rep genuinely difficult. Not failure, but close. These are your strength drivers.</p>
+      </div>
+      <div class="principle-card">
+        <h4>Speed Intervals Enter</h4>
+        <p>Tuesday: 6× 15-second max-effort jump rope, 60-second full rest. Pure explosiveness. These train punch power transfer.</p>
+      </div>
+      <div class="principle-card">
+        <h4>HIIT Extends</h4>
+        <p>Saturday: 5–6 rounds, 45-second intervals, 90-second rest. You've earned the conditioning to handle this now.</p>
+      </div>
+      <div class="principle-card">
+        <h4>Week 12: Deload</h4>
+        <p>Drop to 60% load, cut sets by half. Keep moving, don't push. This is when gains actually solidify. Don't skip it.</p>
+      </div>
+    </div>
+
+    <div class="section-label">Monday · Lift A — Phase 3</div>
+    <div class="week-grid">
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Push · Hard Sets</span>
+          <span class="day-type type-lift">80%+</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">DB Bench + Band</span><span class="ex-detail">2×5 · 85% · hard</span></li>
+            <li><span class="ex-name">DB Bench</span><span class="ex-detail">3×10 · 75% · volume</span></li>
+            <li><span class="ex-name">Push-Up Variation</span><span class="ex-detail">2× failure</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Pull · Hard Sets</span>
+          <span class="day-type type-lift">80%+</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">DB Bent Row</span><span class="ex-detail">2×6 · 85% · hard</span></li>
+            <li><span class="ex-name">Single-Arm Row</span><span class="ex-detail">3×8/side · 75%</span></li>
+            <li><span class="ex-name">Band Face Pull</span><span class="ex-detail">3×15 · failure</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Hinge · Hard Sets</span>
+          <span class="day-type type-lift">80%+</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">DB Deadlift</span><span class="ex-detail">2×5 · 85% · hard</span></li>
+            <li><span class="ex-name">Single-Leg RDL</span><span class="ex-detail">3×8/side</span></li>
+            <li><span class="ex-name">Glute Bridge · Band</span><span class="ex-detail">3×15 · failure</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Carry + Isolation</span>
+          <span class="day-type type-lift">Finisher</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">Mixed Carry</span><span class="ex-detail">4×40 sec · vary grip</span></li>
+            <li><span class="ex-name">DB Curl · Slow Eccentric</span><span class="ex-detail">2×10 · 4-sec down</span></li>
+            <li><span class="ex-name">Band Tricep Pushdown</span><span class="ex-detail">2×15 · failure</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Tuesday · Speed Intervals + Zone 2 — Phase 3</div>
+    <div class="week-grid">
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Speed Intervals</span>
+          <span class="day-type type-combo">Explosive</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">Warm-up rope</span><span class="ex-detail">3 min · easy</span></li>
+            <li><span class="ex-name">Max effort rope</span><span class="ex-detail">6× 15 sec</span></li>
+            <li><span class="ex-name">Full rest</span><span class="ex-detail">60 sec between</span></li>
+            <li><span class="ex-name">Zone 2 rope/footwork</span><span class="ex-detail">20 min · after rest</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-card-header">
+          <span class="day-name">Shadow Boxing</span>
+          <span class="day-type type-cardio">Skill</span>
+        </div>
+        <div class="day-card-body">
+          <ul class="exercise-list">
+            <li><span class="ex-name">Round 1</span><span class="ex-detail">3 min · jab/cross only</span></li>
+            <li><span class="ex-name">Round 2</span><span class="ex-detail">3 min · add hooks</span></li>
+            <li><span class="ex-name">Round 3</span><span class="ex-detail">3 min · full combos</span></li>
+            <li><span class="ex-name">Rest</span><span class="ex-detail">1 min between rounds</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <h4>Week 12 Deload Protocol</h4>
+      <p>Use the same movements from weeks 9–11. Drop all weights to 60%. Cut sets by half — if you were doing 4×8, do 2×8. No HIIT. Zone 2 cardio only, 20 minutes max. This feels wrong. Do it anyway. Adaptation happens during recovery, not during the work. Come out of deload ready to test your numbers.</p>
+    </div>
+  </div>
+
+  <!-- REFERENCE -->
+  <div class="phase-content" id="reference">
+    <div class="phase-header">
+      <div>
+        <div class="label">Quick Reference</div>
+        <div class="phase-title">REFERENCE</div>
+        <p class="phase-desc">Heart rate zones, band resistance guide, tempo notation, and the full movement pattern menu for exercise substitutions.</p>
+      </div>
+    </div>
+
+    <div class="section-label">Heart Rate Zones · Age 46</div>
+    <div class="hr-zones">
+      <div class="hr-zone z2">
+        <div class="zone-num">2</div>
+        <div class="zone-bpm">115–134 bpm</div>
+        <div class="zone-desc">Conversational · nose breathing · your base</div>
+      </div>
+      <div class="hr-zone z3">
+        <div class="zone-num">3</div>
+        <div class="zone-bpm">135–152 bpm</div>
+        <div class="zone-desc">Gray zone · avoid for long sessions</div>
+      </div>
+      <div class="hr-zone z4">
+        <div class="zone-num">4</div>
+        <div class="zone-bpm">153–170 bpm</div>
+        <div class="zone-desc">HIIT target · short bursts only</div>
+      </div>
+    </div>
+
+    <div class="section-label">Band Resistance Guide</div>
+    <div class="band-key">
+      <div class="band-item"><div class="band-dot" style="background:#e63232"></div>Red · ~10–15 lbs · warm-up, isolation, high-rep</div>
+      <div class="band-item"><div class="band-dot" style="background:#1a1aff"></div>Black · ~25–35 lbs · primary assistance, rotation</div>
+      <div class="band-item"><div class="band-dot" style="background:#7b2fbe"></div>Purple · ~30–50 lbs · pull-downs, heavy rows</div>
+      <div class="band-item"><div class="band-dot" style="background:#2a7a4a"></div>Green · ~50–70 lbs · heaviest load, pull-ups assist</div>
+    </div>
+
+    <div class="section-label">Tempo Notation</div>
+    <table class="progression-table">
+      <tr><th>Notation</th><th>Meaning</th><th>Example</th></tr>
+      <tr><td>3-1-1</td><td>3 sec lower · 1 sec pause · 1 sec lift</td><td>DB press: slow down, pause at chest, press up</td></tr>
+      <tr><td>2-1-1</td><td>2 sec lower · 1 sec pause · 1 sec lift</td><td>Phase 2 standard — slightly faster than Phase 1</td></tr>
+      <tr><td>1-0-1</td><td>Normal speed</td><td>Used for hard sets and dead stop work</td></tr>
+    </table>
+
+    <div class="section-label">Movement Pattern Menu</div>
+    <table class="progression-table">
+      <tr><th>Pattern</th><th>Primary</th><th>Unilateral Swap</th><th>Variable Resistance</th></tr>
+      <tr><td>Push</td><td>DB Bench, Floor Press, Push-Up</td><td>Single-Arm DB Press</td><td>Band on DB bench, Band press</td></tr>
+      <tr><td>Pull</td><td>DB Bent Row, Band Pull-Down</td><td>Single-Arm Row, Band Pull</td><td>Band-resisted row</td></tr>
+      <tr><td>Squat</td><td>Goblet Squat, DB Squat</td><td>Split Squat, Bulgarian</td><td>Band squat, Jump squat</td></tr>
+      <tr><td>Hinge</td><td>DB RDL, DB Deadlift</td><td>Single-Leg RDL</td><td>Band + DB RDL, Hip thrust</td></tr>
+      <tr><td>Carry</td><td>Farmer Carry, Suitcase Carry</td><td>Single-Arm Carry (suitcase)</td><td>N/A — add weight</td></tr>
+      <tr><td>Rotate</td><td>Pallof Press, Woodchop</td><td>All rotation is unilateral</td><td>Heavy band woodchop, slam</td></tr>
+    </table>
+
+    <div class="section-label">Jump Rope Progression</div>
+    <table class="progression-table">
+      <tr><th>Phase</th><th>Zone 2 Session</th><th>Interval Work</th></tr>
+      <tr><td>Phase 1</td><td>10 min on / 2 min rest × 2 blocks · slow single-bounce</td><td>None</td></tr>
+      <tr><td>Phase 2</td><td>30 min continuous · mix rope + footwork</td><td>4× 30 sec all-out / 90 sec rest · Saturdays</td></tr>
+      <tr><td>Phase 3</td><td>30 min · rope + footwork + 3 rounds shadow boxing</td><td>6× 15 sec max / 60 sec rest · Tuesdays · 5× 45 sec / 90 sec rest · Saturdays</td></tr>
+    </table>
+
+  </div>
+
+</main>
+
+<script>
+function showPhase(id) {
+  document.querySelectorAll('.phase-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.phase-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
