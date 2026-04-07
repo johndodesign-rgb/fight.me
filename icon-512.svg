@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" fill="#060606"/>
+  <rect width="512" height="512" fill="url(#grid)" opacity="0.04"/>
+  <defs>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="white" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+  <text x="40" y="320" font-family="'Barlow Condensed', sans-serif" font-weight="900" font-size="240" fill="#edeae4" letter-spacing="-6">f</text>
+  <text x="168" y="320" font-family="'Barlow Condensed', sans-serif" font-weight="900" font-size="240" fill="#e8311a" letter-spacing="-6">.m</text>
+  <rect x="40" y="348" width="432" height="4" fill="#e8311a" opacity="0.4"/>
+</svg>

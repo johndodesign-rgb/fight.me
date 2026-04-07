@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#060606">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="manifest" href="manifest.json">
+<title>fight.me</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,700;0,900;1,900&family=Barlow:wght@300;400&family=DM+Mono:wght@300;400&display=swap');
+
+  :root {
+    --black: #060606;
+    --card: #0f0f0f;
+    --card2: #141414;
+    --line: #1a1a1a;
+    --line2: #242424;
+    --white: #edeae4;
+    --dim: #666;
+    --muted: #333;
+    --punch: #e8311a;
+    --punch-dim: #4a0f07;
+    --mono: 'DM Mono', monospace;
+    --display: 'Barlow Condensed', sans-serif;
+    --body: 'Barlow', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    min-height: 100%;
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--body);
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.018;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* NAV */
+  nav {
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    background: rgba(6,6,6,0.95);
+    backdrop-filter: blur(8px);
+    z-index: 50;
+  }
+
+  .nav-logo {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .nav-logo span { color: var(--punch); }
+
+  .nav-back {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.15s;
+  }
+
+  .nav-back:hover { color: var(--white); }
+
+  /* HERO */
+  .hero {
+    padding: 56px 24px 48px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .hero-glow {
+    position: absolute;
+    bottom: -100px; right: -80px;
+    width: 400px; height: 300px;
+    background: radial-gradient(ellipse, rgba(232,49,26,0.07) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--punch);
+    margin-bottom: 12px;
+  }
+
+  .hero-title {
+    font-family: var(--display);
+    font-size: clamp(64px, 15vw, 96px);
+    font-weight: 900;
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-title span { color: var(--punch); }
+
+  .hero-desc {
+    font-size: 14px;
+    color: var(--dim);
+    line-height: 1.8;
+    max-width: 360px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ENTRY CARDS */
+  .entries {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 2px 0;
+  }
+
+  .entry-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 28px 24px;
+    background: var(--card);
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .entry-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--punch);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.25s ease;
+  }
+
+  .entry-card:hover::before { transform: scaleY(1); }
+  .entry-card:hover { background: var(--card2); padding-left: 28px; }
+  .entry-card:active { transform: scale(0.99); }
+
+  .entry-icon {
+    width: 52px; height: 52px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+    background: rgba(232,49,26,0.08);
+    border: 1px solid rgba(232,49,26,0.15);
+  }
+
+  .entry-info { flex: 1; }
+
+  .entry-name {
+    font-family: var(--display);
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+    letter-spacing: 0.01em;
+  }
+
+  .entry-desc {
+    font-size: 12px;
+    color: var(--dim);
+    line-height: 1.5;
+  }
+
+  .entry-arrow {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--punch);
+    opacity: 0;
+    transition: opacity 0.15s, transform 0.15s;
+    flex-shrink: 0;
+  }
+
+  .entry-card:hover .entry-arrow { opacity: 1; transform: translateX(4px); }
+
+  .entry-badge {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .badge-soon { background: var(--muted); color: var(--dim); }
+  .badge-live { background: rgba(232,49,26,0.12); color: var(--punch); }
+
+  /* FOOTER */
+  footer {
+    padding: 32px 24px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-text {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .footer-link {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--dim);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .footer-link:hover { color: var(--green-bright); }
+  .footer-link span { color: #28b05a; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">fight<span>.me</span></div>
+  <a class="nav-back" href="index.html">← Home</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-eyebrow">Build the fighter. Not just the body.</div>
+  <div class="hero-title">fight<span>.me</span></div>
+  <div class="hero-desc">Honest assessment, track placement, and the tools to develop from foundation to ring-ready.</div>
+</div>
+
+<div class="entries">
+
+  <a class="entry-card" href="fight-me.html">
+    <div class="entry-icon">🥊</div>
+    <div class="entry-info">
+      <div class="entry-name">Fighter</div>
+      <div class="entry-desc">Take the assessment, get placed in the right track, and see your training dashboard.</div>
+    </div>
+    <span class="entry-badge badge-live">Live</span>
+    <div class="entry-arrow">→</div>
+  </a>
+
+  <a class="entry-card" href="fight-me-coaches.html">
+    <div class="entry-icon">📋</div>
+    <div class="entry-info">
+      <div class="entry-name">Coach</div>
+      <div class="entry-desc">Roster management, fighter signals, track overrides, and early access sign-up.</div>
+    </div>
+    <span class="entry-badge badge-live">Live</span>
+    <div class="entry-arrow">→</div>
+  </a>
+
+  <a class="entry-card" href="fight-me-analyzer.html">
+    <div class="entry-icon">📷</div>
+    <div class="entry-info">
+      <div class="entry-name">Analyzer</div>
+      <div class="entry-desc">Jab and combo analysis via camera. Prop your phone at 45°, throw reps, get feedback.</div>
+    </div>
+    <span class="entry-badge badge-live">Beta</span>
+    <div class="entry-arrow">→</div>
+  </a>
+
+</div>
+
+<footer>
+  <div class="footer-text">fight.me · Alpha</div>
+  <a class="footer-link" href="fit-me-hub.html">Go to fit<span>.me</span> →</a>
+</footer>
+
+</body>
+</html>

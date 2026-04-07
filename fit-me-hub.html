@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#060606">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="manifest" href="manifest.json">
+<title>fit.me</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,700;0,900;1,900&family=Barlow:wght@300;400&family=DM+Mono:wght@300;400&display=swap');
+
+  :root {
+    --black: #060606;
+    --card: #0f0f0f;
+    --card2: #141414;
+    --line: #1a1a1a;
+    --line2: #242424;
+    --white: #edeae4;
+    --dim: #666;
+    --muted: #333;
+    --punch: #e8311a;
+    --green: #28b05a;
+    --green-dim: #0a2e1a;
+    --green-mid: #1a5c35;
+    --mono: 'DM Mono', monospace;
+    --display: 'Barlow Condensed', sans-serif;
+    --body: 'Barlow', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    min-height: 100%;
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--body);
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.018;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* NAV */
+  nav {
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    background: rgba(6,6,6,0.95);
+    backdrop-filter: blur(8px);
+    z-index: 50;
+  }
+
+  .nav-logo {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .nav-logo span { color: var(--green); }
+
+  .nav-back {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.15s;
+  }
+
+  .nav-back:hover { color: var(--white); }
+
+  /* HERO */
+  .hero {
+    padding: 56px 24px 48px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .hero-glow {
+    position: absolute;
+    bottom: -100px; right: -80px;
+    width: 400px; height: 300px;
+    background: radial-gradient(ellipse, rgba(40,176,90,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 12px;
+  }
+
+  .hero-title {
+    font-family: var(--display);
+    font-size: clamp(64px, 15vw, 96px);
+    font-weight: 900;
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-title span { color: var(--green); }
+
+  .hero-desc {
+    font-size: 14px;
+    color: var(--dim);
+    line-height: 1.8;
+    max-width: 360px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* SYSTEM GENERATED LABEL */
+  .system-generated {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(40,176,90,0.04);
+  }
+
+  .sg-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px rgba(40,176,90,0.5);
+    flex-shrink: 0;
+    animation: sgPulse 2s ease infinite;
+  }
+
+  @keyframes sgPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .sg-text {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--green);
+  }
+
+  /* PLAN CARD */
+  .plan-section {
+    padding: 24px;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 12px;
+  }
+
+  .plan-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--green);
+    border-radius: 0 0 3px 3px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+
+  .plan-card:hover { border-color: var(--green-mid); background: var(--card2); }
+  .plan-card:active { transform: scale(0.99); }
+
+  .plan-card-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .plan-generated-by {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .plan-name {
+    font-family: var(--display);
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .plan-meta {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.05em;
+  }
+
+  .plan-card-body {
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .plan-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .plan-stat-val {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--green);
+  }
+
+  .plan-stat-label {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .plan-card-phases {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .phase-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .phase-row-name {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  .phase-row-bar {
+    flex: 1;
+    height: 3px;
+    background: var(--line2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .phase-row-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
+
+  .phase-row-weeks {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    width: 40px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .plan-card-footer {
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .plan-open-text {
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--green);
+  }
+
+  .plan-open-arrow {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--green);
+    transition: transform 0.15s;
+  }
+
+  .plan-card:hover .plan-open-arrow { transform: translateX(4px); }
+
+  /* COMING SOON */
+  .coming-soon-section {
+    padding: 0 24px 24px;
+  }
+
+  .coming-soon-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .cs-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    padding: 16px;
+    border-radius: 2px;
+    opacity: 0.5;
+  }
+
+  .cs-icon { font-size: 20px; margin-bottom: 8px; }
+
+  .cs-name {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+    color: var(--dim);
+  }
+
+  .cs-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .cs-badge {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 32px 24px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-text {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .footer-link {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--dim);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .footer-link:hover { color: var(--punch); }
+  .footer-link span { color: var(--punch); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">fit<span>.me</span></div>
+  <a class="nav-back" href="index.html">← Home</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-eyebrow">The foundation that makes everything work.</div>
+  <div class="hero-title">fit<span>.me</span></div>
+  <div class="hero-desc">Strength and conditioning programs built around the 6-3 framework. The engine behind the fighter.</div>
+</div>
+
+<div class="system-generated">
+  <div class="sg-dot"></div>
+  <div class="sg-text">System generated · Foundation Track · Active program below</div>
+</div>
+
+<div class="plan-section">
+  <div class="section-label">Your Active Program</div>
+
+  <a class="plan-card" href="90day-plan.html">
+    <div class="plan-card-header">
+      <div class="plan-generated-by">⚙ Generated by fight.me · Foundation Track placement</div>
+      <div class="plan-name">Strong as F*** &<br>Conditioned as Hell</div>
+      <div class="plan-meta">90 days · 4 days/week · Dumbbells + Bands + Bench</div>
+    </div>
+
+    <div class="plan-card-body">
+      <div class="plan-stat">
+        <div class="plan-stat-val">90</div>
+        <div class="plan-stat-label">Days total</div>
+      </div>
+      <div class="plan-stat">
+        <div class="plan-stat-val">4</div>
+        <div class="plan-stat-label">Days / week</div>
+      </div>
+      <div class="plan-stat">
+        <div class="plan-stat-val">6</div>
+        <div class="plan-stat-label">Patterns</div>
+      </div>
+    </div>
+
+    <div class="plan-card-phases">
+      <div class="phase-row">
+        <div class="phase-row-name">Foundation</div>
+        <div class="phase-row-bar"><div class="phase-row-fill" style="width:100%"></div></div>
+        <div class="phase-row-weeks">Wk 1–4</div>
+      </div>
+      <div class="phase-row">
+        <div class="phase-row-name">Load</div>
+        <div class="phase-row-bar"><div class="phase-row-fill" style="width:66%"></div></div>
+        <div class="phase-row-weeks">Wk 5–8</div>
+      </div>
+      <div class="phase-row">
+        <div class="phase-row-name">Peak</div>
+        <div class="phase-row-bar"><div class="phase-row-fill" style="width:33%"></div></div>
+        <div class="phase-row-weeks">Wk 9–12</div>
+      </div>
+    </div>
+
+    <div class="plan-card-footer">
+      <div class="plan-open-text">Open Program</div>
+      <div class="plan-open-arrow">→</div>
+    </div>
+  </a>
+</div>
+
+<div class="coming-soon-section">
+  <div class="section-label">Coming Soon</div>
+  <div class="coming-soon-grid">
+    <div class="cs-card">
+      <div class="cs-icon">🫀</div>
+      <div class="cs-name">Aerobic Base</div>
+      <div class="cs-desc">Zone 2 foundation. Jump rope, footwork, conditioning.</div>
+      <div class="cs-badge">Phase 2</div>
+    </div>
+    <div class="cs-card">
+      <div class="cs-icon">⚡</div>
+      <div class="cs-name">Speed & Power</div>
+      <div class="cs-desc">Rate of force development. Bands, dead stops, variable resistance.</div>
+      <div class="cs-badge">Phase 2</div>
+    </div>
+    <div class="cs-card">
+      <div class="cs-icon">🥗</div>
+      <div class="cs-name">feed.me</div>
+      <div class="cs-desc">Nutrition layer. Fighter-specific fueling and recovery.</div>
+      <div class="cs-badge">Phase 3</div>
+    </div>
+    <div class="cs-card">
+      <div class="cs-icon">😴</div>
+      <div class="cs-name">Recovery</div>
+      <div class="cs-desc">Sleep and readiness signals integrated with training load.</div>
+      <div class="cs-badge">Phase 3</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-text">fit.me · Alpha</div>
+  <a class="footer-link" href="fight-me-hub.html">Go to fight<span>.me</span> →</a>
+</footer>
+
+<script>
+  // Animate phase bars on load
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.querySelectorAll('.phase-row-fill').forEach(el => {
+        const w = el.style.width;
+        el.style.width = '0%';
+        setTimeout(() => { el.style.width = w; }, 50);
+      });
+    }, 300);
+  });
+</script>
+
+</body>
+</html>
