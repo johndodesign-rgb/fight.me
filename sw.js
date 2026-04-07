@@ -1,17 +1,17 @@
 const CACHE = 'fightfit-v1';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/fight-me-hub.html',
-  '/fit-me-hub.html',
-  '/fight-me.html',
-  '/fight-me-coaches.html',
-  '/fight-me-fighter.html',
-  '/fight-me-analyzer.html',
-  '/90day-plan.html',
-  '/manifest.json',
-  '/icon-192.svg',
-  '/icon-512.svg'
+  '/fight.me/',
+  '/fight.me/index.html',
+  '/fight.me/fight-me-hub.html',
+  '/fight.me/fit-me-hub.html',
+  '/fight.me/fight-me.html',
+  '/fight.me/fight-me-coaches.html',
+  '/fight.me/fight-me-fighter.html',
+  '/fight.me/fight-me-analyzer.html',
+  '/fight.me/90day-plan.html',
+  '/fight.me/manifest.json',
+  '/fight.me/icon-192.svg',
+  '/fight.me/icon-512.svg'
 ];
 
 self.addEventListener('install', e => {
