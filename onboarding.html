@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#060606">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<title>fight.me · Assessment</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,700;0,900;1,700&family=Barlow:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap');
+
+  :root {
+    --black: #060606;
+    --ink: #0c0c0c;
+    --card: #111;
+    --line: #1a1a1a;
+    --line2: #242424;
+    --line3: #303030;
+    --white: #edeae4;
+    --dim: #777;
+    --muted: #3a3a3a;
+    --punch: #e8311a;
+    --punch-dim: #4a0f07;
+    --punch-mid: #8a1a0a;
+    --amber: #c97b1a;
+    --green: #28b05a;
+    --mono: 'DM Mono', monospace;
+    --display: 'Barlow Condensed', sans-serif;
+    --body: 'Barlow', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--body);
+    overflow: hidden;
+  }
+
+  /* GRAIN */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.02;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; height: 100vh; flex-direction: column; overflow: hidden; }
+  .screen.active { display: flex; }
+
+  /* ── WELCOME ── */
+  #screen-welcome {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 48px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .welcome-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
+    pointer-events: none;
+  }
+
+  .welcome-glow {
+    position: absolute;
+    bottom: -100px; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse, rgba(232,49,26,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .welcome-logo {
+    font-family: var(--display);
+    font-size: 80px;
+    font-weight: 900;
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 4px;
+  }
+
+  .welcome-logo .punch { color: var(--punch); }
+  .welcome-logo .green { color: var(--green); }
+  .welcome-logo .separator {
+    display: block;
+    font-size: 16px;
+    font-weight: 300;
+    letter-spacing: 0.3em;
+    color: var(--line3);
+    margin: 8px 0;
+  }
+
+  .welcome-tagline {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 48px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .welcome-copy {
+    max-width: 320px;
+    font-size: 14px;
+    color: var(--dim);
+    line-height: 1.8;
+    margin: 0 auto 48px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .welcome-copy strong { color: var(--white); font-weight: 500; }
+
+  .btn-begin {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--punch);
+    color: var(--white);
+    border: none;
+    padding: 18px 56px;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    transition: all 0.15s;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+  }
+
+  .btn-begin:hover { background: #ff3d20; transform: translateY(-2px); }
+  .btn-begin:active { transform: scale(0.97); }
+
+  .welcome-note {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-top: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── QUIZ ── */
+  #screen-quiz {
+    display: none;
+    flex-direction: column;
+  }
+
+  #screen-quiz.active { display: flex; }
+
+  .quiz-top {
+    padding: 52px 24px 20px;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+
+  .quiz-progress-bar {
+    position: absolute;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--punch);
+    transition: width 0.4s ease;
+  }
+
+  .quiz-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0;
+  }
+
+  .quiz-counter {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--punch);
+  }
+
+  .quiz-skip {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+
+  .quiz-skip:hover { color: var(--dim); }
+
+  .quiz-body {
+    flex: 1;
+    padding: 32px 24px 24px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .quiz-q-text {
+    font-family: var(--display);
+    font-size: clamp(26px, 6vw, 38px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+    margin-bottom: 6px;
+  }
+
+  .quiz-q-sub {
+    font-size: 12px;
+    color: var(--dim);
+    font-style: italic;
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  .quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .quiz-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    width: 100%;
+  }
+
+  .quiz-option:hover {
+    border-color: var(--punch-mid);
+    background: rgba(232,49,26,0.04);
+  }
+
+  .quiz-option:active { transform: scale(0.99); }
+
+  .quiz-option.selected {
+    border-color: var(--punch);
+    background: rgba(232,49,26,0.08);
+  }
+
+  .option-key {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    width: 14px;
+    flex-shrink: 0;
+    text-align: center;
+    transition: color 0.15s;
+  }
+
+  .quiz-option.selected .option-key { color: var(--punch); }
+
+  .option-text {
+    font-size: 13px;
+    color: #bbb;
+    line-height: 1.4;
+    transition: color 0.15s;
+  }
+
+  .quiz-option.selected .option-text { color: var(--white); }
+
+  .quiz-bottom {
+    padding: 16px 24px 40px;
+    border-top: 1px solid var(--line);
+  }
+
+  .btn-next {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--punch);
+    color: var(--white);
+    border: none;
+    padding: 16px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.15s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  .btn-next.enabled {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .btn-next.enabled:hover { background: #ff3d20; }
+  .btn-next.enabled:active { transform: scale(0.98); }
+
+  /* ── RESULT ── */
+  #screen-result {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 48px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .result-glow {
+    position: absolute;
+    top: -100px; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 500px;
+    pointer-events: none;
+    transition: background 0.5s;
+  }
+
+  .result-eyebrow {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .result-track {
+    font-family: var(--display);
+    font-size: clamp(56px, 14vw, 88px);
+    font-weight: 900;
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 8px;
+  }
+
+  .result-subtitle {
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 300;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .result-rationale {
+    max-width: 340px;
+    margin: 0 auto 36px;
+    background: var(--card);
+    border: 1px solid var(--line2);
+    padding: 20px;
+    text-align: left;
+    position: relative;
+    z-index: 1;
+    border-radius: 3px;
+  }
+
+  .rationale-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 10px;
+  }
+
+  .rationale-body {
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.8;
+  }
+
+  .rationale-body strong { color: var(--white); font-weight: 500; }
+
+  .btn-dashboard {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--punch);
+    color: var(--white);
+    border: none;
+    padding: 18px 48px;
+    cursor: pointer;
+    transition: all 0.15s;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    position: relative;
+    z-index: 1;
+  }
+
+  .btn-dashboard:hover { background: #ff3d20; transform: translateY(-2px); }
+  .btn-dashboard:active { transform: scale(0.98); }
+
+  /* TRACK COLORS */
+  .track-foundation { color: var(--punch); }
+  .track-transition { color: var(--amber); }
+  .track-fighter { color: var(--green); }
+
+  .glow-foundation { background: radial-gradient(ellipse, rgba(232,49,26,0.1) 0%, transparent 60%); }
+  .glow-transition { background: radial-gradient(ellipse, rgba(201,123,26,0.1) 0%, transparent 60%); }
+  .glow-fighter { background: radial-gradient(ellipse, rgba(40,176,90,0.1) 0%, transparent 60%); }
+
+  /* SLIDE ANIMATION */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide-in {
+    animation: slideUp 0.35s ease forwards;
+  }
+</style>
+</head>
+<body>
+
+<!-- WELCOME -->
+<div class="screen active" id="screen-welcome">
+  <div class="welcome-grid"></div>
+  <div class="welcome-glow"></div>
+
+  <div class="welcome-logo">
+    <span class="punch">fight</span><span style="color:var(--line3)">.me</span>
+    <span class="separator">×</span>
+    <span style="color:var(--white)">fit</span><span class="green">.me</span>
+  </div>
+
+  <div class="welcome-tagline">Build the fighter. Build the foundation.</div>
+
+  <div class="welcome-copy">
+    Before you train, we need to know where you actually are. <strong>Not where you think you are.</strong><br><br>
+    Six honest questions. Two minutes. Your entire program follows from your answers.
+  </div>
+
+  <button class="btn-begin" onclick="showScreen('screen-quiz')">Begin Assessment</button>
+  <div class="welcome-note">6 questions · ~2 minutes · no flattery</div>
+</div>
+
+<!-- QUIZ -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-top">
+    <div class="quiz-progress-bar" id="progress-bar" style="width:0%"></div>
+    <div class="quiz-meta">
+      <div class="quiz-counter" id="quiz-counter">Question 1 of 6</div>
+      <button class="quiz-skip" onclick="skipToFoundation()">Skip → Foundation</button>
+    </div>
+  </div>
+
+  <div class="quiz-body" id="quiz-body">
+    <!-- populated by JS -->
+  </div>
+
+  <div class="quiz-bottom">
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()">Next →</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="screen-result">
+  <div class="result-glow" id="result-glow"></div>
+  <div class="result-eyebrow">Your honest starting point</div>
+  <div class="result-track" id="result-track">—</div>
+  <div class="result-subtitle" id="result-subtitle">Track</div>
+  <div class="result-rationale">
+    <div class="rationale-label">Why you're here</div>
+    <div class="rationale-body" id="rationale-body">—</div>
+  </div>
+  <button class="btn-dashboard" onclick="goToDashboard()">See Your Dashboard →</button>
+</div>
+
+<script>
+  // ── DATA ──
+  const questions = [
+    {
+      text: "Can you do 3 minutes of jump rope without stopping?",
+      sub: "Be honest. This is where the system starts.",
+      options: [
+        { text: "Not really — I'd break within a minute", score: 0 },
+        { text: "Maybe — depends on the day", score: 1 },
+        { text: "Yes, but I'd be breathing hard by the end", score: 2 },
+        { text: "Easily. I could go longer.", score: 3 }
+      ]
+    },
+    {
+      text: "After a hard round of shadow boxing, how long to feel recovered?",
+      sub: "Recovery rate is one of your most honest fitness markers.",
+      options: [
+        { text: "More than 3 minutes — I'm really gassing", score: 0 },
+        { text: "2–3 minutes to feel normal", score: 1 },
+        { text: "About 90 seconds", score: 2 },
+        { text: "Under a minute — I recover fast", score: 3 }
+      ]
+    },
+    {
+      text: "What's your honest boxing experience?",
+      sub: "No judgment. Just calibration.",
+      options: [
+        { text: "None — I haven't trained boxing at all", score: 0 },
+        { text: "Some basics — watched a lot, done a little", score: 1 },
+        { text: "Regular training, haven't sparred", score: 2 },
+        { text: "I've sparred or competed", score: 3 }
+      ]
+    },
+    {
+      text: "Can you keep your hands up through a full round when you're tired?",
+      sub: "Hand drop under fatigue is one of the clearest signs of conditioning gaps.",
+      options: [
+        { text: "No — they come down when I'm working hard", score: 0 },
+        { text: "Sometimes — it's a conscious effort", score: 1 },
+        { text: "Mostly — occasional lapses", score: 2 },
+        { text: "Yes — automatic even when fatigued", score: 3 }
+      ]
+    },
+    {
+      text: "How's your current strength base?",
+      sub: "Think relative to your bodyweight, not absolute numbers.",
+      options: [
+        { text: "Minimal — I don't train strength regularly", score: 0 },
+        { text: "Some base — occasional lifting", score: 1 },
+        { text: "Solid — I train consistently", score: 2 },
+        { text: "Strong — I've trained seriously for years", score: 3 }
+      ]
+    },
+    {
+      text: "If you threw 10 hard combinations right now, what happens?",
+      sub: "Power endurance tells you where the gaps actually are.",
+      options: [
+        { text: "Arm fatigue kicks in fast — I slow way down", score: 0 },
+        { text: "I'd get through it but feel it", score: 1 },
+        { text: "Fine — I'd want a breath after", score: 2 },
+        { text: "No problem — I could keep going", score: 3 }
+      ]
+    }
+  ];
+
+  const tracks = {
+    foundation: {
+      label: 'FOUNDATION',
+      subtitle: 'Track · Build the engine first',
+      colorClass: 'track-foundation',
+      glowClass: 'glow-foundation',
+      rationale: `Your conditioning and movement base needs work before glove work will stick. <strong>This isn't a demotion — it's the serious track.</strong> The fighters who skip Foundation are the ones who plateau at six months. You're building the real thing.`
+    },
+    transition: {
+      label: 'TRANSITION',
+      subtitle: 'Track · Almost ready for the ring',
+      colorClass: 'track-transition',
+      glowClass: 'glow-transition',
+      rationale: `You've got a real base, but gaps will show under pressure — recovery time, power endurance, or technique breakdown when fatigued. <strong>Transition closes those gaps</strong> while introducing boxing fundamentals. Sparring-ready in 8–12 weeks if you do this right.`
+    },
+    fighter: {
+      label: 'FIGHTER',
+      subtitle: 'Track · The work gets harder here',
+      colorClass: 'track-fighter',
+      glowClass: 'glow-fighter',
+      rationale: `The conditioning base is there, you know your body under pressure, and you have real experience. <strong>Fighter track is about refinement.</strong> But the system still watches — it doesn't care about your assessment score. It watches your training.`
+    }
+  };
+
+  // ── STATE ──
+  let currentQ = 0;
+  let answers = [];
+  let selectedScore = null;
+  let placedTrack = null;
+
+  const keys = ['A','B','C','D'];
+
+  // ── QUIZ ──
+  function renderQuestion() {
+    const q = questions[currentQ];
+    const pct = (currentQ / questions.length) * 100;
+
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('quiz-counter').textContent = `Question ${currentQ + 1} of ${questions.length}`;
+
+    const body = document.getElementById('quiz-body');
+    body.innerHTML = `
+      <div class="slide-in">
+        <div class="quiz-q-text">${q.text}</div>
+        <div class="quiz-q-sub">${q.sub}</div>
+        <div class="quiz-options">
+          ${q.options.map((opt, i) => `
+            <button class="quiz-option" onclick="selectOption(this, ${opt.score})">
+              <span class="option-key">${keys[i]}</span>
+              <span class="option-text">${opt.text}</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    selectedScore = null;
+    const btn = document.getElementById('btn-next');
+    btn.classList.remove('enabled');
+    btn.textContent = currentQ < questions.length - 1 ? 'Next →' : 'See My Results →';
+  }
+
+  function selectOption(el, score) {
+    document.querySelectorAll('.quiz-option').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedScore = score;
+    document.getElementById('btn-next').classList.add('enabled');
+  }
+
+  function nextQuestion() {
+    if (selectedScore === null) return;
+    answers.push(selectedScore);
+
+    if (currentQ < questions.length - 1) {
+      currentQ++;
+      renderQuestion();
+    } else {
+      computeResult();
+    }
+  }
+
+  function skipToFoundation() {
+    placedTrack = 'foundation';
+    saveAndShowResult();
+  }
+
+  function computeResult() {
+    const total = answers.reduce((a, b) => a + b, 0);
+    const max = questions.length * 3;
+    const pct = total / max;
+    if (pct < 0.35) placedTrack = 'foundation';
+    else if (pct < 0.70) placedTrack = 'transition';
+    else placedTrack = 'fighter';
+    saveAndShowResult();
+  }
+
+  function saveAndShowResult() {
+    // Save to localStorage
+    const data = {
+      track: placedTrack,
+      score: answers.reduce((a, b) => a + b, 0),
+      date: new Date().toISOString(),
+      answers: [...answers]
+    };
+    localStorage.setItem('fightme_placement', JSON.stringify(data));
+
+    // Populate result screen
+    const t = tracks[placedTrack];
+    const trackEl = document.getElementById('result-track');
+    trackEl.textContent = t.label;
+    trackEl.className = 'result-track ' + t.colorClass;
+    document.getElementById('result-subtitle').textContent = t.subtitle;
+    document.getElementById('result-glow').className = 'result-glow ' + t.glowClass;
+    document.getElementById('rationale-body').innerHTML = t.rationale;
+
+    // Animate progress bar to 100%
+    document.getElementById('progress-bar').style.width = '100%';
+
+    showScreen('screen-result');
+  }
+
+  function goToDashboard() {
+    window.location.href = 'dashboard.html';
+  }
+
+  // ── SCREENS ──
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  // ── INIT ──
+  renderQuestion();
+</script>
+</body>
+</html>

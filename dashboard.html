@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#060606">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="manifest" href="manifest.json">
+<title>Dashboard · fight & fit</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,700;0,900;1,700&family=Barlow:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap');
+
+  :root {
+    --black: #060606;
+    --ink: #0c0c0c;
+    --card: #111;
+    --card2: #161616;
+    --line: #1a1a1a;
+    --line2: #242424;
+    --white: #edeae4;
+    --dim: #777;
+    --muted: #3a3a3a;
+    --punch: #e8311a;
+    --punch-dim: #4a0f07;
+    --punch-mid: #7a1a0a;
+    --amber: #c97b1a;
+    --green: #28b05a;
+    --green-dim: #0a2e1a;
+    --green-mid: #1a5c35;
+    --mono: 'DM Mono', monospace;
+    --display: 'Barlow Condensed', sans-serif;
+    --body: 'Barlow', sans-serif;
+    --track-color: var(--punch);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    min-height: 100%;
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--body);
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.018;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    padding: 48px 20px 16px;
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    background: rgba(6,6,6,0.95);
+    backdrop-filter: blur(10px);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .topbar-left { flex: 1; }
+
+  .topbar-greeting {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 4px;
+  }
+
+  .topbar-system {
+    font-family: var(--display);
+    font-size: 26px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .topbar-system .punch { color: var(--punch); }
+  .topbar-system .green { color: var(--green); }
+  .topbar-system .sep { color: var(--line2); font-weight: 300; font-size: 20px; margin: 0 4px; }
+
+  .topbar-track {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── PLACEMENT BANNER ── */
+  .placement-banner {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .placement-track-big {
+    font-family: var(--display);
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    flex-shrink: 0;
+  }
+
+  .placement-info { flex: 1; }
+
+  .placement-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 3px;
+  }
+
+  .placement-desc {
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.5;
+  }
+
+  .placement-desc strong { color: var(--white); font-weight: 500; }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 20px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .section-title {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::before {
+    content: '';
+    width: 16px;
+    height: 1px;
+  }
+
+  .section-link {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .section-link:hover { color: var(--white); }
+
+  /* ── TODAY CARD ── */
+  .today-card {
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-radius: 3px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .today-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--track-color);
+  }
+
+  .today-card:hover { background: var(--card2); }
+  .today-card:active { transform: scale(0.99); }
+
+  .today-card-header {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .today-day {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .today-badge {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+  }
+
+  .today-card-body { padding: 14px 16px; }
+
+  .today-session-name {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .today-session-desc {
+    font-size: 12px;
+    color: var(--dim);
+    margin-bottom: 14px;
+  }
+
+  .today-blocks {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .today-block {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--ink);
+    border: 1px solid var(--line2);
+    border-radius: 2px;
+  }
+
+  .tb-name { font-size: 12px; color: #ccc; }
+  .tb-detail { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+
+  .today-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-top: 1px solid var(--line);
+  }
+
+  .today-cta-text {
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .today-cta-arrow {
+    font-family: var(--mono);
+    font-size: 14px;
+    transition: transform 0.15s;
+  }
+
+  .today-card:hover .today-cta-arrow { transform: translateX(4px); }
+
+  /* ── SIGNAL CARD ── */
+  .signal-card {
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .signal-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .signal-row:last-child { border-bottom: none; }
+
+  .signal-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .sd-ok { background: var(--green); }
+  .sd-warn { background: var(--amber); }
+  .sd-flag { background: var(--punch); box-shadow: 0 0 6px rgba(232,49,26,0.5); }
+
+  .signal-info { flex: 1; }
+  .signal-name { font-size: 12px; color: var(--white); margin-bottom: 1px; }
+  .signal-detail { font-family: var(--mono); font-size: 9px; color: var(--muted); }
+
+  .signal-trend {
+    font-family: var(--mono);
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+
+  .trend-up { color: var(--green); }
+  .trend-same { color: var(--muted); }
+  .trend-down { color: var(--punch); }
+
+  /* ── FIT.ME CARD ── */
+  .fitme-card {
+    background: rgba(40,176,90,0.04);
+    border: 1px solid var(--green-mid);
+    border-radius: 3px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: all 0.15s;
+  }
+
+  .fitme-card:hover { background: rgba(40,176,90,0.07); }
+  .fitme-card:active { transform: scale(0.99); }
+
+  .fitme-card-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--green-dim);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .fitme-card-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--green);
+  }
+
+  .fitme-card-body { padding: 14px; }
+
+  .fitme-program-name {
+    font-family: var(--display);
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .fitme-program-meta {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--dim);
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+  }
+
+  .fitme-program-desc {
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.6;
+  }
+
+  .fitme-program-desc strong { color: var(--white); font-weight: 500; }
+
+  .fitme-card-footer {
+    padding: 10px 14px;
+    border-top: 1px solid var(--green-dim);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .fitme-open { font-family: var(--display); font-size: 15px; font-weight: 700; color: var(--green); }
+  .fitme-arrow { font-family: var(--mono); font-size: 13px; color: var(--green); transition: transform 0.15s; }
+  .fitme-card:hover .fitme-arrow { transform: translateX(4px); }
+
+  /* ── PATH CARD ── */
+  .path-card {
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-radius: 3px;
+    padding: 14px;
+  }
+
+  .path-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .path-step {
+    display: flex;
+    gap: 14px;
+    align-items: stretch;
+  }
+
+  .path-step-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .path-node {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 9px;
+    border: 1.5px solid;
+    flex-shrink: 0;
+  }
+
+  .pn-current { border-color: var(--punch); color: var(--punch); background: rgba(232,49,26,0.08); }
+  .pn-locked { border-color: var(--muted); color: var(--muted); }
+  .pn-done { border-color: var(--punch); background: var(--punch); color: var(--white); }
+
+  .path-connector {
+    width: 1px;
+    flex: 1;
+    min-height: 14px;
+    margin: 3px 0;
+    background: var(--line2);
+  }
+
+  .path-step-content {
+    padding-bottom: 14px;
+    flex: 1;
+  }
+
+  .path-step:last-child .path-step-content { padding-bottom: 0; }
+
+  .path-step-name {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  .path-step-detail {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+
+  .path-progress {
+    height: 2px;
+    background: var(--line2);
+    border-radius: 2px;
+    margin-top: 6px;
+    overflow: hidden;
+    max-width: 100px;
+  }
+
+  .path-progress-fill {
+    height: 100%;
+    background: var(--punch);
+    border-radius: 2px;
+  }
+
+  /* ── QUICK LINKS ── */
+  .quick-links {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .quick-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px;
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-radius: 3px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.15s;
+  }
+
+  .quick-link:hover { background: var(--card2); border-color: var(--line3); }
+  .quick-link:active { transform: scale(0.98); }
+
+  .ql-icon { font-size: 18px; flex-shrink: 0; }
+  .ql-name { font-family: var(--display); font-size: 17px; font-weight: 700; line-height: 1; }
+  .ql-desc { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+  /* ── FOOTER ── */
+  .dash-footer {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 1px solid var(--line);
+  }
+
+  .retake-btn {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--line2);
+    padding: 12px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 2px;
+  }
+
+  .retake-btn:hover { color: var(--dim); border-color: var(--line3); }
+
+  .footer-meta {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* TRACK THEMING */
+  body.track-foundation { --track-color: var(--punch); }
+  body.track-transition { --track-color: var(--amber); }
+  body.track-fighter { --track-color: var(--green); }
+
+  .badge-foundation { background: rgba(232,49,26,0.12); color: var(--punch); }
+  .badge-transition { background: rgba(201,123,26,0.12); color: var(--amber); }
+  .badge-fighter { background: rgba(40,176,90,0.12); color: var(--green); }
+
+  .color-foundation { color: var(--punch); }
+  .color-transition { color: var(--amber); }
+  .color-fighter { color: var(--green); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-up {
+    opacity: 0;
+    animation: fadeUp 0.4s ease forwards;
+  }
+
+  .fade-up:nth-child(1) { animation-delay: 0.05s; }
+  .fade-up:nth-child(2) { animation-delay: 0.1s; }
+  .fade-up:nth-child(3) { animation-delay: 0.15s; }
+  .fade-up:nth-child(4) { animation-delay: 0.2s; }
+  .fade-up:nth-child(5) { animation-delay: 0.25s; }
+  .fade-up:nth-child(6) { animation-delay: 0.3s; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-greeting">Training System · Alpha</div>
+    <div class="topbar-system">
+      fight<span class="punch">.me</span><span class="sep">×</span>fit<span class="green">.me</span>
+    </div>
+  </div>
+  <div class="topbar-track" id="topbar-track-badge">—</div>
+</div>
+
+<!-- PLACEMENT BANNER -->
+<div class="placement-banner fade-up" id="placement-banner">
+  <div class="placement-track-big" id="placement-track-big">—</div>
+  <div class="placement-info">
+    <div class="placement-label">Your track</div>
+    <div class="placement-desc" id="placement-desc">—</div>
+  </div>
+</div>
+
+<!-- TODAY — FIGHT.ME -->
+<div class="section fade-up">
+  <div class="section-header">
+    <div class="section-title" id="fight-section-title" style="--dot-color: var(--punch)">
+      fight.me · Today
+    </div>
+    <a class="section-link" href="fight-me-hub.html">All →</a>
+  </div>
+  <a class="today-card" href="fight-me-fighter.html" id="today-card">
+    <div class="today-card-header">
+      <span class="today-day" id="today-day">Monday</span>
+      <span class="today-badge" id="today-badge">—</span>
+    </div>
+    <div class="today-card-body">
+      <div class="today-session-name" id="today-session-name">—</div>
+      <div class="today-session-desc" id="today-session-desc">—</div>
+      <div class="today-blocks" id="today-blocks"></div>
+    </div>
+    <div class="today-cta">
+      <div class="today-cta-text" id="today-cta-text">Start Session</div>
+      <div class="today-cta-arrow">→</div>
+    </div>
+  </a>
+</div>
+
+<!-- SIGNALS -->
+<div class="section fade-up">
+  <div class="section-header">
+    <div class="section-title">Performance Signals</div>
+    <a class="section-link" href="fight-me-fighter.html">Details →</a>
+  </div>
+  <div class="signal-card" id="signal-card">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<!-- FIT.ME PROGRAM -->
+<div class="section fade-up">
+  <div class="section-header">
+    <div class="section-title">fit.me · Active Program</div>
+    <a class="section-link" href="fit-me-hub.html">All →</a>
+  </div>
+  <a class="fitme-card" href="90day-plan.html" id="fitme-card">
+    <div class="fitme-card-header">
+      <span class="fitme-card-label">⚙ Generated from your track placement</span>
+      <span class="fitme-card-label" id="fitme-weeks">—</span>
+    </div>
+    <div class="fitme-card-body">
+      <div class="fitme-program-name" id="fitme-program-name">—</div>
+      <div class="fitme-program-meta" id="fitme-program-meta">—</div>
+      <div class="fitme-program-desc" id="fitme-program-desc">—</div>
+    </div>
+    <div class="fitme-card-footer">
+      <div class="fitme-open">Open Program</div>
+      <div class="fitme-arrow">→</div>
+    </div>
+  </a>
+</div>
+
+<!-- PATH -->
+<div class="section fade-up">
+  <div class="section-header">
+    <div class="section-title">Your Path</div>
+  </div>
+  <div class="path-card">
+    <div class="path-steps" id="path-steps">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- QUICK LINKS -->
+<div class="section fade-up">
+  <div class="section-header">
+    <div class="section-title">Quick Access</div>
+  </div>
+  <div class="quick-links">
+    <a class="quick-link" href="fight-me-analyzer.html">
+      <div class="ql-icon">📷</div>
+      <div>
+        <div class="ql-name">Analyzer</div>
+        <div class="ql-desc">Punch analysis</div>
+      </div>
+    </a>
+    <a class="quick-link" href="fight-me-coaches.html">
+      <div class="ql-icon">📋</div>
+      <div>
+        <div class="ql-name">Coach View</div>
+        <div class="ql-desc">Roster & signals</div>
+      </div>
+    </a>
+    <a class="quick-link" href="fight-me-fighter.html">
+      <div class="ql-icon">⏱</div>
+      <div>
+        <div class="ql-name">Session Timer</div>
+        <div class="ql-desc">Live session</div>
+      </div>
+    </a>
+    <a class="quick-link" href="fit-me-hub.html">
+      <div class="ql-icon">💪</div>
+      <div>
+        <div class="ql-name">fit.me</div>
+        <div class="ql-desc">All programs</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="dash-footer fade-up">
+  <button class="retake-btn" onclick="retakeAssessment()">↺ Retake Assessment (Test Mode)</button>
+  <div class="footer-meta" id="footer-meta">—</div>
+</div>
+
+<script>
+  // ── TRACK CONFIG ──
+  const trackConfig = {
+    foundation: {
+      label: 'FOUNDATION',
+      badgeClass: 'badge-foundation',
+      colorClass: 'color-foundation',
+      trackClass: 'track-foundation',
+      desc: '<strong>Build the engine first.</strong> Conditioning and movement before glove work.',
+      today: {
+        day: getDayLabel(),
+        badge: 'Zone 2 · Cardio',
+        badgeClass: 'badge-foundation',
+        session: 'Zone 2 + Movement',
+        desc: 'Week 1 · Tuesday · Foundation Track',
+        blocks: [
+          { name: 'Jump rope · slow single-bounce', detail: '3× 10 min / 2 min rest' },
+          { name: 'Footwork pattern drills', detail: '10 min' },
+          { name: 'Shadow boxing · no intensity', detail: '5 min cooldown' }
+        ],
+        cta: 'Start Session'
+      },
+      signals: [
+        { dot: 'sd-warn', name: 'Aerobic Recovery', detail: 'Target: under 90 sec · Building baseline', trend: '→ monitoring', trendClass: 'trend-same' },
+        { dot: 'sd-ok', name: 'Footwork Quality', detail: 'Movement patterns tracking clean', trend: '↑ good', trendClass: 'trend-up' },
+        { dot: 'sd-ok', name: 'Session Consistency', detail: 'All sessions logged this week', trend: '↑ solid', trendClass: 'trend-up' }
+      ],
+      fitme: {
+        name: 'Strong as F*** &\nConditioned as Hell',
+        meta: '90 days · 4 days/week · Dumbbells + Bands + Bench',
+        desc: 'Built around the 6-3 framework — six movement patterns, three times a week. <strong>This is your foundation.</strong> The strength base that makes everything in the ring work.',
+        weeks: 'Week 1 of 12'
+      },
+      path: [
+        { node: 'pn-current', label: 'Foundation', detail: 'Weeks 1–4 · Current', progress: 25 },
+        { node: 'pn-locked', label: 'Fundamentals', detail: 'Weeks 5–8 · Locked', progress: 0 },
+        { node: 'pn-locked', label: 'Glove Work', detail: 'Weeks 9–12 · Locked', progress: 0 },
+        { node: 'pn-locked', label: 'Sparring Prep', detail: 'Weeks 13–16 · Locked', progress: 0 }
+      ]
+    },
+    transition: {
+      label: 'TRANSITION',
+      badgeClass: 'badge-transition',
+      colorClass: 'color-transition',
+      trackClass: 'track-transition',
+      desc: '<strong>Almost ring-ready.</strong> Closing the gaps before glove work.',
+      today: {
+        day: getDayLabel(),
+        badge: 'Technical + Conditioning',
+        badgeClass: 'badge-transition',
+        session: 'Jab / Cross Fundamentals',
+        desc: 'Week 1 · Monday · Transition Track',
+        blocks: [
+          { name: 'Jab / cross foundation', detail: '3× 3 min rounds' },
+          { name: 'Footwork under fatigue', detail: '2× 4 min' },
+          { name: 'HIIT finisher · jump rope', detail: '4× 30 sec' }
+        ],
+        cta: 'Start Session'
+      },
+      signals: [
+        { dot: 'sd-ok', name: 'Aerobic Base', detail: 'Zone 2 base solid · Recovery under 90 sec', trend: '↑ good', trendClass: 'trend-up' },
+        { dot: 'sd-warn', name: 'Power Endurance', detail: 'Combination speed dropping in round 3+', trend: '↓ watch', trendClass: 'trend-down' },
+        { dot: 'sd-ok', name: 'Technical Consistency', detail: 'Jab / cross mechanics holding', trend: '→ stable', trendClass: 'trend-same' }
+      ],
+      fitme: {
+        name: 'Strong as F*** &\nConditioned as Hell',
+        meta: '90 days · 4 days/week · Dumbbells + Bands + Bench',
+        desc: 'Phase 2 is active — loading the patterns you built in Foundation. <strong>Power endurance work</strong> is directly addressing the late-round drop you\'re seeing.',
+        weeks: 'Week 5 of 12'
+      },
+      path: [
+        { node: 'pn-done', label: 'Foundation', detail: 'Complete', progress: 100 },
+        { node: 'pn-current', label: 'Transition', detail: 'Weeks 5–8 · Current', progress: 40 },
+        { node: 'pn-locked', label: 'Glove Work', detail: 'Weeks 9–12 · Locked', progress: 0 },
+        { node: 'pn-locked', label: 'Sparring Prep', detail: 'Weeks 13–16 · Locked', progress: 0 }
+      ]
+    },
+    fighter: {
+      label: 'FIGHTER',
+      badgeClass: 'badge-fighter',
+      colorClass: 'color-fighter',
+      trackClass: 'track-fighter',
+      desc: '<strong>The work gets harder.</strong> Refinement, performance, sparring prep.',
+      today: {
+        day: getDayLabel(),
+        badge: 'Sparring Prep',
+        badgeClass: 'badge-fighter',
+        session: 'Full Combination Work',
+        desc: 'Week 1 · Wednesday · Fighter Track',
+        blocks: [
+          { name: 'Full combination rounds', detail: '5× 3 min rounds' },
+          { name: 'Defensive footwork', detail: 'Slip / roll / pivot' },
+          { name: 'Speed intervals', detail: '6× 15 sec max effort' }
+        ],
+        cta: 'Start Session'
+      },
+      signals: [
+        { dot: 'sd-ok', name: 'Conditioning', detail: 'Engine solid · Sub-60 sec recovery', trend: '↑ strong', trendClass: 'trend-up' },
+        { dot: 'sd-ok', name: 'Recovery', detail: 'Competitive level between rounds', trend: '↑ good', trendClass: 'trend-up' },
+        { dot: 'sd-warn', name: 'Right Shoulder', detail: 'Fatigue-related drop detected in round 3', trend: '↓ watch', trendClass: 'trend-down' }
+      ],
+      fitme: {
+        name: 'Strong as F*** &\nConditioned as Hell',
+        meta: '90 days · 4 days/week · Dumbbells + Bands + Bench',
+        desc: 'Phase 3 — peak loading. Hard sets driving strength. <strong>Unilateral shoulder work</strong> flagged by fight.me is in this week\'s program.',
+        weeks: 'Week 9 of 12'
+      },
+      path: [
+        { node: 'pn-done', label: 'Foundation', detail: 'Complete', progress: 100 },
+        { node: 'pn-done', label: 'Transition', detail: 'Complete', progress: 100 },
+        { node: 'pn-current', label: 'Glove Work', detail: 'Weeks 9–12 · Current', progress: 25 },
+        { node: 'pn-locked', label: 'Sparring Prep', detail: 'Weeks 13–16 · Locked', progress: 0 }
+      ]
+    }
+  };
+
+  function getDayLabel() {
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    return days[new Date().getDay()];
+  }
+
+  // ── INIT ──
+  function init() {
+    const raw = localStorage.getItem('fightme_placement');
+    if (!raw) {
+      window.location.href = 'onboarding.html';
+      return;
+    }
+
+    const data = JSON.parse(raw);
+    const track = data.track || 'foundation';
+    const cfg = trackConfig[track];
+
+    // Apply body class for theming
+    document.body.classList.add(cfg.trackClass);
+
+    // Topbar badge
+    const badge = document.getElementById('topbar-track-badge');
+    badge.textContent = cfg.label;
+    badge.className = 'topbar-track ' + cfg.badgeClass;
+
+    // Placement banner
+    const trackBig = document.getElementById('placement-track-big');
+    trackBig.textContent = cfg.label;
+    trackBig.className = 'placement-track-big ' + cfg.colorClass;
+    document.getElementById('placement-desc').innerHTML = cfg.desc;
+
+    // Today card
+    document.getElementById('today-day').textContent = cfg.today.day;
+    const todayBadge = document.getElementById('today-badge');
+    todayBadge.textContent = cfg.today.badge;
+    todayBadge.className = 'today-badge ' + cfg.today.badgeClass;
+    document.getElementById('today-session-name').textContent = cfg.today.session;
+    document.getElementById('today-session-desc').textContent = cfg.today.desc;
+    document.getElementById('today-cta-text').textContent = cfg.today.cta;
+
+    const blocksEl = document.getElementById('today-blocks');
+    cfg.today.blocks.forEach(b => {
+      const el = document.createElement('div');
+      el.className = 'today-block';
+      el.innerHTML = `<span class="tb-name">${b.name}</span><span class="tb-detail">${b.detail}</span>`;
+      blocksEl.appendChild(el);
+    });
+
+    // Signals
+    const signalCard = document.getElementById('signal-card');
+    cfg.signals.forEach(s => {
+      const el = document.createElement('div');
+      el.className = 'signal-row';
+      el.innerHTML = `
+        <div class="signal-dot ${s.dot}"></div>
+        <div class="signal-info">
+          <div class="signal-name">${s.name}</div>
+          <div class="signal-detail">${s.detail}</div>
+        </div>
+        <div class="signal-trend ${s.trendClass}">${s.trend}</div>
+      `;
+      signalCard.appendChild(el);
+    });
+
+    // fit.me card
+    document.getElementById('fitme-program-name').textContent = cfg.fitme.name;
+    document.getElementById('fitme-program-meta').textContent = cfg.fitme.meta;
+    document.getElementById('fitme-program-desc').innerHTML = cfg.fitme.desc;
+    document.getElementById('fitme-weeks').textContent = cfg.fitme.weeks;
+
+    // Path
+    const pathEl = document.getElementById('path-steps');
+    cfg.path.forEach((step, i) => {
+      const stepEl = document.createElement('div');
+      stepEl.className = 'path-step';
+      stepEl.innerHTML = `
+        <div class="path-step-line">
+          <div class="path-node ${step.node}">${step.node === 'pn-done' ? '✓' : (i + 1)}</div>
+          ${i < cfg.path.length - 1 ? '<div class="path-connector"></div>' : ''}
+        </div>
+        <div class="path-step-content">
+          <div class="path-step-name" style="color:${step.node === 'pn-locked' ? 'var(--muted)' : step.node === 'pn-current' ? 'var(--white)' : 'var(--dim)'}">${step.label}</div>
+          <div class="path-step-detail">${step.detail}</div>
+          ${step.progress > 0 ? `<div class="path-progress"><div class="path-progress-fill" style="width:${step.progress}%"></div></div>` : ''}
+        </div>
+      `;
+      pathEl.appendChild(stepEl);
+    });
+
+    // Footer
+    const placedDate = new Date(data.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    document.getElementById('footer-meta').textContent = `Placed ${placedDate} · ${cfg.label} Track`;
+  }
+
+  function retakeAssessment() {
+    localStorage.removeItem('fightme_placement');
+    window.location.href = 'onboarding.html';
+  }
+
+  init();
+</script>
+</body>
+</html>

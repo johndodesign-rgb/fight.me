@@ -379,7 +379,13 @@
 
   // Register service worker
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    navigator.serviceWorker.register('/fight.me/sw.js').catch(() => {});
+  }
+
+  // Route based on placement
+  const placement = localStorage.getItem('fightme_placement');
+  if (placement) {
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 400);
   }
 
   // iOS detection — show manual instructions

@@ -9,7 +9,8 @@ const ASSETS = [
   '/fight.me/fight-me-fighter.html',
   '/fight.me/fight-me-analyzer.html',
   '/fight.me/90day-plan.html',
-  '/fight.me/manifest.json',
+  '/fight.me/onboarding.html',
+  '/fight.me/dashboard.html',
   '/fight.me/icon-192.svg',
   '/fight.me/icon-512.svg'
 ];
