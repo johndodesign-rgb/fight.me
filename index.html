@@ -382,10 +382,19 @@
     navigator.serviceWorker.register('/fight.me/sw.js').catch(() => {});
   }
 
-  // Route based on placement
-  const placement = localStorage.getItem('fightme_placement');
-  if (placement) {
-    setTimeout(() => { window.location.href = 'dashboard.html'; }, 400);
+  // ?reset clears placement and forces onboarding — test mode
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('reset')) {
+    localStorage.removeItem('fightme_placement');
+    window.location.replace('onboarding.html');
+  } else {
+    // Route based on placement
+    const placement = localStorage.getItem('fightme_placement');
+    if (placement) {
+      window.location.replace('dashboard.html');
+    } else {
+      window.location.replace('onboarding.html');
+    }
   }
 
   // iOS detection — show manual instructions
