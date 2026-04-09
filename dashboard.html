@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="manifest" href="manifest.json">
-<title>Dashboard · fight & fit</title>
+<title>Dashboard · .me Training System</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,700;0,900;1,700&family=Barlow:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap');
 
@@ -79,16 +79,40 @@
   }
 
   .topbar-system {
-    font-family: var(--display);
-    font-size: 26px;
-    font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     line-height: 1;
-    letter-spacing: -0.01em;
   }
 
-  .topbar-system .punch { color: var(--punch); }
-  .topbar-system .green { color: var(--green); }
-  .topbar-system .sep { color: var(--line2); font-weight: 300; font-size: 20px; margin: 0 4px; }
+  .topbar-wordmark {
+    font-family: var(--display);
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .topbar-wordmark .punch { color: var(--punch); }
+
+  .topbar-stack {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1px;
+    border-left: 1px solid var(--line2);
+    padding-left: 10px;
+  }
+
+  .topbar-stack span {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dim);
+    line-height: 1.3;
+    display: block;
+  }
 
   .topbar-track {
     font-family: var(--mono);
@@ -582,9 +606,12 @@
 
 <div class="topbar">
   <div class="topbar-left">
-    <div class="topbar-greeting">Training System · Alpha</div>
     <div class="topbar-system">
-      fight<span class="punch">.me</span><span class="sep">×</span>fit<span class="green">.me</span>
+      <div class="topbar-wordmark"><span class="punch">.</span>me</div>
+      <div class="topbar-stack">
+        <span>Training</span>
+        <span>System</span>
+      </div>
     </div>
   </div>
   <div class="topbar-track" id="topbar-track-badge">—</div>
