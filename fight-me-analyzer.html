@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>fight.me · Jab Analyzer</title>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,700;0,900;1,700&family=Barlow:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap');
+
+  :root {
+    --black: #060606;
+    --ink: #0c0c0c;
+    --card: #111;
+    --line: #1a1a1a;
+    --line2: #242424;
+    --white: #edeae4;
+    --dim: #777;
+    --muted: #3a3a3a;
+    --punch: #e8311a;
+    --punch-dim: #4a0f07;
+    --amber: #c97b1a;
+    --green: #28b05a;
+    --mono: 'DM Mono', monospace;
+    --display: 'Barlow Condensed', sans-serif;
+    --body: 'Barlow', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--body);
+    font-size: 15px;
+    overflow: hidden;
+  }
+
+  /* SCREENS */
+  .screen { display: none; height: 100vh; flex-direction: column; overflow: hidden; }
+  .screen.active { display: flex; }
+
+  /* ── SETUP SCREEN ── */
+  #screen-setup {
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .setup-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 50% at 50% 100%, rgba(232,49,26,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .wordmark {
+    font-family: var(--display);
+    font-size: 52px;
+    font-weight: 900;
+    line-height: 0.9;
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .wordmark .punch { color: var(--punch); }
+
+  .screen-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .setup-diagram {
+    width: 200px;
+    height: 160px;
+    position: relative;
+    margin: 0 auto 32px;
+    z-index: 1;
+  }
+
+  .diagram-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .setup-instructions {
+    max-width: 320px;
+    margin: 0 auto 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .instruction-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+
+  .instruction-item:last-child { border-bottom: none; }
+
+  .inst-num {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--punch);
+    line-height: 1;
+    flex-shrink: 0;
+    width: 20px;
+  }
+
+  .inst-text {
+    font-size: 13px;
+    color: var(--dim);
+    line-height: 1.5;
+    padding-top: 2px;
+  }
+
+  .inst-text strong { color: var(--white); font-weight: 500; }
+
+  .punch-selector {
+    display: flex;
+    gap: 8px;
+    margin: 0 auto 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .punch-btn {
+    flex: 1;
+    padding: 14px 0;
+    background: var(--card);
+    border: 1px solid var(--line2);
+    color: var(--dim);
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 2px;
+  }
+
+  .punch-btn.active {
+    background: rgba(232,49,26,0.1);
+    border-color: var(--punch);
+    color: var(--white);
+  }
+
+  .btn-start {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--punch);
+    color: var(--white);
+    border: none;
+    padding: 18px 56px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    z-index: 1;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+  }
+
+  .btn-start:hover { background: #ff3d20; }
+  .btn-start:active { transform: scale(0.98); }
+
+  /* ── CAMERA SCREEN ── */
+  #screen-camera {
+    position: relative;
+    background: #000;
+  }
+
+  #video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+  }
+
+  #canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transform: scaleX(-1);
+  }
+
+  .camera-ui {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+  }
+
+  .camera-top {
+    padding: 48px 20px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    pointer-events: all;
+  }
+
+  .camera-logo {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 900;
+    color: rgba(237,234,228,0.9);
+  }
+
+  .camera-logo span { color: var(--punch); }
+
+  .cam-back {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 2px;
+    pointer-events: all;
+  }
+
+  /* READINESS HUD */
+  .readiness-hud {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .readiness-ring {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.3s;
+    position: relative;
+  }
+
+  .readiness-ring.ready { border-color: rgba(40,176,90,0.6); box-shadow: 0 0 20px rgba(40,176,90,0.2); }
+  .readiness-ring.partial { border-color: rgba(201,123,26,0.6); }
+  .readiness-ring.not-ready { border-color: rgba(232,49,26,0.4); }
+
+  .readiness-icon {
+    font-size: 36px;
+  }
+
+  .readiness-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+    background: rgba(0,0,0,0.5);
+    padding: 4px 12px;
+    border-radius: 2px;
+  }
+
+  /* STATUS CHECKS */
+  .status-checks {
+    position: absolute;
+    top: 110px;
+    left: 0; right: 0;
+    padding: 0 20px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .status-chip {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: all 0.3s;
+  }
+
+  .chip-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+
+  .status-chip.ok .chip-dot { background: var(--green); }
+  .status-chip.warn .chip-dot { background: var(--amber); }
+  .status-chip.ok { border-color: rgba(40,176,90,0.2); }
+  .status-chip.warn { border-color: rgba(201,123,26,0.2); }
+
+  /* CAMERA BOTTOM */
+  .camera-bottom {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 20px 20px 48px;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    pointer-events: all;
+  }
+
+  .rep-counter {
+    font-family: var(--display);
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--white);
+    line-height: 1;
+    text-align: center;
+  }
+
+  .rep-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-top: -4px;
+    margin-bottom: 8px;
+  }
+
+  .record-btn {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: var(--punch);
+    border: 3px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    transition: all 0.15s;
+    box-shadow: 0 0 30px rgba(232,49,26,0.4);
+  }
+
+  .record-btn:active { transform: scale(0.94); }
+  .record-btn.recording {
+    background: #ff1a00;
+    box-shadow: 0 0 40px rgba(232,49,26,0.7);
+    animation: recordPulse 1s ease infinite;
+  }
+
+  @keyframes recordPulse {
+    0%, 100% { box-shadow: 0 0 30px rgba(232,49,26,0.5); }
+    50% { box-shadow: 0 0 50px rgba(232,49,26,0.9); }
+  }
+
+  .btn-analyze {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--punch);
+    color: var(--white);
+    border: none;
+    padding: 16px 48px;
+    cursor: pointer;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    display: none;
+  }
+
+  .countdown-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.5);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .countdown-overlay.visible { opacity: 1; }
+
+  .countdown-num {
+    font-family: var(--display);
+    font-size: 160px;
+    font-weight: 900;
+    color: var(--white);
+    line-height: 1;
+    animation: countPulse 1s ease;
+  }
+
+  @keyframes countPulse {
+    0% { transform: scale(1.4); opacity: 0; }
+    20% { transform: scale(1); opacity: 1; }
+    80% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0.8); opacity: 0; }
+  }
+
+  .flash-overlay {
+    position: absolute;
+    inset: 0;
+    background: white;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.1s;
+  }
+
+  .flash-overlay.flash { opacity: 0.3; }
+
+  /* ── ANALYSIS SCREEN ── */
+  #screen-analysis {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .analysis-header {
+    padding: 48px 20px 20px;
+    border-bottom: 1px solid var(--line);
+    background: var(--ink);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .analysis-punch-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--punch);
+    margin-bottom: 4px;
+  }
+
+  .analysis-title {
+    font-family: var(--display);
+    font-size: 36px;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .analysis-meta {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+  }
+
+  .analysis-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* OVERALL SCORE */
+  .score-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .score-circle {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 2px solid;
+  }
+
+  .score-num {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .score-denom {
+    font-family: var(--mono);
+    font-size: 8px;
+    color: var(--dim);
+  }
+
+  .score-info { flex: 1; }
+
+  .score-label {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .score-desc {
+    font-size: 12px;
+    color: var(--dim);
+    line-height: 1.5;
+  }
+
+  /* SIGNAL CARDS */
+  .signal-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .signal-card-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .signal-card-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .signal-status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .ssd-good { background: var(--green); box-shadow: 0 0 6px rgba(40,176,90,0.5); }
+  .ssd-warn { background: var(--amber); box-shadow: 0 0 6px rgba(201,123,26,0.5); }
+  .ssd-flag { background: var(--punch); box-shadow: 0 0 6px rgba(232,49,26,0.5); }
+
+  .signal-card-name {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .signal-card-badge {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+  }
+
+  .scb-good { background: rgba(40,176,90,0.12); color: var(--green); }
+  .scb-warn { background: rgba(201,123,26,0.12); color: var(--amber); }
+  .scb-flag { background: rgba(232,49,26,0.12); color: var(--punch); }
+
+  .signal-card-body { padding: 14px 16px; }
+
+  .signal-finding {
+    font-size: 13px;
+    color: var(--white);
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+
+  .signal-finding em { color: var(--punch); font-style: normal; font-weight: 500; }
+  .signal-finding .good-em { color: var(--green); font-style: normal; font-weight: 500; }
+
+  .signal-cue {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    line-height: 1.6;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+  }
+
+  .signal-cue strong { color: var(--white); }
+
+  /* VISUAL BAR */
+  .signal-bar-wrap {
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .signal-bar-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--dim);
+    width: 80px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .signal-bar-track {
+    flex: 1;
+    height: 4px;
+    background: var(--line2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .signal-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
+
+  .signal-bar-val {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--white);
+    width: 32px;
+    flex-shrink: 0;
+  }
+
+  /* FITME NUDGE */
+  .fitme-nudge {
+    background: rgba(74,15,7,0.3);
+    border: 1px solid var(--punch-dim);
+    border-radius: 3px;
+    padding: 16px;
+    display: none;
+  }
+
+  .fitme-nudge.visible { display: block; }
+
+  .fitme-nudge-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--punch);
+    margin-bottom: 8px;
+  }
+
+  .fitme-nudge-text {
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+
+  .fitme-nudge-text strong { color: var(--white); font-weight: 500; }
+
+  .fitme-nudge-btn {
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--punch);
+    color: var(--white);
+    border: none;
+    padding: 10px 24px;
+    cursor: pointer;
+    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  }
+
+  /* REP NAV */
+  .rep-nav {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+
+  .rep-pip {
+    flex: 1;
+    height: 3px;
+    background: var(--line2);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .rep-pip.active { background: var(--punch); }
+  .rep-pip.done { background: rgba(232,49,26,0.4); }
+
+  /* BOTTOM ACTIONS */
+  .analysis-actions {
+    padding: 16px 20px 48px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn-retry {
+    flex: 1;
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--punch);
+    color: var(--white);
+    border: none;
+    padding: 16px;
+    cursor: pointer;
+    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  }
+
+  .btn-done {
+    flex: 1;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--dim);
+    border: 1px solid var(--line2);
+    padding: 16px;
+    cursor: pointer;
+  }
+
+  /* LOADING */
+  .loading-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--black);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    z-index: 200;
+    transition: opacity 0.5s;
+  }
+
+  .loading-screen.hidden { opacity: 0; pointer-events: none; }
+
+  .loading-logo {
+    font-family: var(--display);
+    font-size: 48px;
+    font-weight: 900;
+  }
+
+  .loading-logo span { color: var(--punch); }
+
+  .loading-text {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .loading-bar {
+    width: 120px;
+    height: 2px;
+    background: var(--line2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .loading-fill {
+    height: 100%;
+    background: var(--punch);
+    border-radius: 2px;
+    animation: loadFill 2s ease forwards;
+  }
+
+  @keyframes loadFill {
+    from { width: 0%; }
+    to { width: 100%; }
+  }
+
+  /* POSE SKELETON */
+  .pose-point { fill: rgba(232,49,26,0.8); }
+  .pose-line { stroke: rgba(232,49,26,0.4); stroke-width: 2; fill: none; }
+  .pose-highlight { stroke: rgba(232,49,26,1); stroke-width: 3; fill: none; }
+
+  /* ANGLE INDICATOR */
+  .angle-badge {
+    position: absolute;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--white);
+    background: rgba(0,0,0,0.7);
+    padding: 3px 8px;
+    border-radius: 2px;
+    border: 1px solid rgba(232,49,26,0.4);
+    pointer-events: none;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-screen" id="loading">
+  <div class="loading-logo">fight<span>.me</span></div>
+  <div class="loading-text" id="loading-text">Loading pose model...</div>
+  <div class="loading-bar"><div class="loading-fill"></div></div>
+</div>
+
+<!-- SETUP SCREEN -->
+<div class="screen active" id="screen-setup">
+  <div class="setup-bg"></div>
+  <div class="wordmark">fight<span class="punch">.me</span></div>
+  <div class="screen-label">Punch Analyzer · Beta</div>
+
+  <div class="setup-diagram">
+    <svg class="diagram-svg" viewBox="0 0 200 160">
+      <!-- Phone -->
+      <rect x="10" y="50" width="30" height="50" rx="3" fill="none" stroke="#333" stroke-width="1.5"/>
+      <rect x="14" y="54" width="22" height="38" rx="1" fill="#1a1a1a"/>
+      <circle cx="25" cy="98" r="2" fill="#333"/>
+      <!-- 45 degree line -->
+      <line x1="40" y1="75" x2="130" y2="75" stroke="#333" stroke-width="1" stroke-dasharray="4,4"/>
+      <text x="70" y="68" font-family="DM Mono" font-size="8" fill="#444" text-anchor="middle">45°</text>
+      <!-- Fighter silhouette -->
+      <circle cx="150" cy="45" r="10" fill="none" stroke="#e8311a" stroke-width="1.5"/>
+      <line x1="150" y1="55" x2="150" y2="95" stroke="#e8311a" stroke-width="1.5"/>
+      <line x1="150" y1="65" x2="135" y2="80" stroke="#e8311a" stroke-width="1.5"/>
+      <line x1="150" y1="65" x2="170" y2="72" stroke="#e8311a" stroke-width="1.5"/>
+      <line x1="150" y1="95" x2="140" y2="115" stroke="#e8311a" stroke-width="1.5"/>
+      <line x1="150" y1="95" x2="160" y2="115" stroke="#e8311a" stroke-width="1.5"/>
+      <!-- floor mark -->
+      <line x1="135" y1="130" x2="165" y2="130" stroke="#333" stroke-width="2" stroke-dasharray="3,2"/>
+      <text x="150" y="142" font-family="DM Mono" font-size="7" fill="#444" text-anchor="middle">STAND HERE</text>
+      <!-- shoulder height indicator -->
+      <line x1="42" y1="65" x2="55" y2="65" stroke="#444" stroke-width="1"/>
+      <text x="48" y="62" font-family="DM Mono" font-size="6" fill="#444" text-anchor="middle">SH</text>
+    </svg>
+  </div>
+
+  <div class="setup-instructions">
+    <div class="instruction-item">
+      <div class="inst-num">1</div>
+      <div class="inst-text">Prop phone at <strong>shoulder height</strong>, angled 45° to your stance</div>
+    </div>
+    <div class="instruction-item">
+      <div class="inst-num">2</div>
+      <div class="inst-text">Stand <strong>6–8 feet back</strong> — full upper body visible in frame</div>
+    </div>
+    <div class="instruction-item">
+      <div class="inst-num">3</div>
+      <div class="inst-text">Good lighting. <strong>Face the camera side-on.</strong> Mark your spot.</div>
+    </div>
+    <div class="instruction-item">
+      <div class="inst-num">4</div>
+      <div class="inst-text">Hit record, wait for countdown, <strong>throw clean reps</strong></div>
+    </div>
+  </div>
+
+  <div class="punch-selector">
+    <button class="punch-btn active" onclick="selectPunch('jab', this)">JAB</button>
+    <button class="punch-btn" onclick="selectPunch('cross', this)">CROSS</button>
+    <button class="punch-btn" onclick="selectPunch('1-2', this)">1-2</button>
+  </div>
+
+  <button class="btn-start" onclick="startCamera()">Start Camera →</button>
+</div>
+
+<!-- CAMERA SCREEN -->
+<div class="screen" id="screen-camera">
+  <video id="video" playsinline autoplay muted></video>
+  <canvas id="canvas"></canvas>
+
+  <div class="flash-overlay" id="flash"></div>
+  <div class="countdown-overlay" id="countdown-overlay">
+    <div class="countdown-num" id="countdown-num">3</div>
+  </div>
+
+  <div class="camera-ui">
+    <div class="camera-top">
+      <div class="camera-logo">fight<span>.me</span></div>
+      <button class="cam-back" onclick="stopCamera()">← Back</button>
+    </div>
+
+    <!-- STATUS CHIPS -->
+    <div class="status-checks">
+      <div class="status-chip" id="chip-pose">
+        <div class="chip-dot"></div>Pose
+      </div>
+      <div class="status-chip" id="chip-distance">
+        <div class="chip-dot"></div>Distance
+      </div>
+      <div class="status-chip" id="chip-lighting">
+        <div class="chip-dot"></div>Lighting
+      </div>
+    </div>
+
+    <!-- READINESS -->
+    <div class="readiness-hud" id="readiness-hud">
+      <div class="readiness-ring not-ready" id="readiness-ring">
+        <div class="readiness-icon" id="readiness-icon">⧖</div>
+      </div>
+      <div class="readiness-label" id="readiness-label">Detecting pose...</div>
+    </div>
+
+    <div class="camera-bottom">
+      <div class="rep-counter" id="rep-counter">0</div>
+      <div class="rep-label">REPS RECORDED</div>
+      <button class="record-btn" id="record-btn" onclick="handleRecord()">●</button>
+      <button class="btn-analyze" id="btn-analyze" onclick="showAnalysis()">Analyze <span id="rep-count-btn">0</span> Reps →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ANALYSIS SCREEN -->
+<div class="screen" id="screen-analysis">
+  <div class="analysis-header">
+    <div class="analysis-punch-label" id="analysis-punch-label">Jab Analysis</div>
+    <div class="analysis-title" id="analysis-title">3 Reps · Session Review</div>
+    <div class="analysis-meta" id="analysis-meta">Today · Foundation Track</div>
+  </div>
+
+  <div class="analysis-body">
+
+    <!-- REP NAV -->
+    <div class="rep-nav" id="rep-nav"></div>
+
+    <!-- SCORE -->
+    <div class="score-card" id="score-card">
+      <div class="score-circle" id="score-circle">
+        <div class="score-num" id="score-num">—</div>
+        <div class="score-denom">/ 10</div>
+      </div>
+      <div class="score-info">
+        <div class="score-label" id="score-label">Analyzing...</div>
+        <div class="score-desc" id="score-desc">Reviewing rep data</div>
+      </div>
+    </div>
+
+    <!-- SIGNAL: GUARD HEIGHT -->
+    <div class="signal-card" id="card-guard">
+      <div class="signal-card-header">
+        <div class="signal-card-left">
+          <div class="signal-status-dot" id="dot-guard"></div>
+          <div class="signal-card-name">Guard Height</div>
+        </div>
+        <div class="signal-card-badge" id="badge-guard">—</div>
+      </div>
+      <div class="signal-card-body">
+        <div class="signal-bar-wrap">
+          <div class="signal-bar-label">Before punch</div>
+          <div class="signal-bar-track"><div class="signal-bar-fill" id="bar-guard-before" style="width:0%;background:var(--green)"></div></div>
+          <div class="signal-bar-val" id="val-guard-before">—</div>
+        </div>
+        <div class="signal-bar-wrap">
+          <div class="signal-bar-label">At extension</div>
+          <div class="signal-bar-track"><div class="signal-bar-fill" id="bar-guard-during" style="width:0%;background:var(--amber)"></div></div>
+          <div class="signal-bar-val" id="val-guard-during">—</div>
+        </div>
+        <div class="signal-finding" id="finding-guard">Analyzing guard position...</div>
+        <div class="signal-cue" id="cue-guard"></div>
+      </div>
+    </div>
+
+    <!-- SIGNAL: SHOULDER ROTATION -->
+    <div class="signal-card" id="card-shoulder">
+      <div class="signal-card-header">
+        <div class="signal-card-left">
+          <div class="signal-status-dot" id="dot-shoulder"></div>
+          <div class="signal-card-name">Shoulder Rotation</div>
+        </div>
+        <div class="signal-card-badge" id="badge-shoulder">—</div>
+      </div>
+      <div class="signal-card-body">
+        <div class="signal-bar-wrap">
+          <div class="signal-bar-label">Rotation angle</div>
+          <div class="signal-bar-track"><div class="signal-bar-fill" id="bar-shoulder" style="width:0%;background:var(--punch)"></div></div>
+          <div class="signal-bar-val" id="val-shoulder">—</div>
+        </div>
+        <div class="signal-finding" id="finding-shoulder">Analyzing shoulder drive...</div>
+        <div class="signal-cue" id="cue-shoulder"></div>
+      </div>
+    </div>
+
+    <!-- SIGNAL: EXTENSION -->
+    <div class="signal-card" id="card-extension">
+      <div class="signal-card-header">
+        <div class="signal-card-left">
+          <div class="signal-status-dot" id="dot-extension"></div>
+          <div class="signal-card-name">Extension & Return</div>
+        </div>
+        <div class="signal-card-badge" id="badge-extension">—</div>
+      </div>
+      <div class="signal-card-body">
+        <div class="signal-bar-wrap">
+          <div class="signal-bar-label">Extension</div>
+          <div class="signal-bar-track"><div class="signal-bar-fill" id="bar-extension" style="width:0%;background:var(--green)"></div></div>
+          <div class="signal-bar-val" id="val-extension">—</div>
+        </div>
+        <div class="signal-finding" id="finding-extension">Analyzing extension completeness...</div>
+        <div class="signal-cue" id="cue-extension"></div>
+      </div>
+    </div>
+
+    <!-- FIT.ME NUDGE -->
+    <div class="fitme-nudge" id="fitme-nudge">
+      <div class="fitme-nudge-label">⚑ fight.me · System Flag</div>
+      <div class="fitme-nudge-text" id="fitme-nudge-text"></div>
+      <button class="fitme-nudge-btn">Open fit.me →</button>
+    </div>
+
+  </div>
+
+  <div class="analysis-actions">
+    <button class="btn-retry" onclick="retrySession()">Throw Again</button>
+    <button class="btn-done" onclick="showScreen('screen-setup')">Done</button>
+  </div>
+</div>
+
+<script>
+  // ── STATE ──
+  let detector = null;
+  let stream = null;
+  let animFrame = null;
+  let selectedPunch = 'jab';
+  let isRecording = false;
+  let repCount = 0;
+  let repData = [];
+  let currentRepFrames = [];
+  let poseReady = false;
+  let recordCountdown = null;
+
+  // Simulated analysis data for demo (real data from TF when pose detected)
+  const analysisTemplates = {
+    jab: [
+      {
+        score: 7,
+        label: 'Clean fundamentals',
+        desc: 'Guard position and extension are solid. Shoulder rotation needs work.',
+        guard: { before: 88, during: 71, status: 'warn', finding: 'Guard drops <em>~4 inches</em> at extension — a telegraph. The opponent sees it coming.', cue: 'Cue: Keep the rear hand glued to your chin as you throw. Drive the jab from the shoulder, not the arm.' },
+        shoulder: { val: 32, status: 'flag', finding: 'Shoulder rotation only <em>32°</em> — you\'re arm-punching. Power starts at the hip, not the shoulder.', cue: 'Cue: Think "turn the shoulder to the target" — the arm follows the shoulder, never leads it.' },
+        extension: { val: 87, status: 'good', finding: '<span class="good-em">Good extension completeness</span> — arm reaching target distance. Hand returning clean.', cue: '' },
+        fitme: false
+      },
+      {
+        score: 5,
+        label: 'Guard needs work',
+        desc: 'Guard dropping significantly before extension. Fatigue may be a factor.',
+        guard: { before: 70, during: 45, status: 'flag', finding: 'Guard dropping <em>significantly</em> — both before and during the punch. This is a fatigue signal, not just technique.', cue: 'Cue: If this is happening across multiple reps, your shoulder endurance is the root cause — not your form awareness.' },
+        shoulder: { val: 28, status: 'flag', finding: 'Minimal shoulder rotation at <em>28°</em>. Combined with guard drop, this suggests fatigue affecting whole-body mechanics.', cue: 'Cue: Shoulder rotation requires core engagement. If your base is fatigued, rotation goes first.' },
+        extension: { val: 76, status: 'warn', finding: 'Extension <em>slightly short</em> — stopping 15% before full reach. Common when arm is fatigued.', cue: 'Cue: Full extension comes from the shoulder drive completing. Fix the rotation, extension follows.' },
+        fitme: true,
+        fitmeText: 'Guard dropping and rotation failing across reps suggests <strong>shoulder endurance</strong> is the limiting factor — not technique awareness. This is a fit.me problem. The Foundation Strength program includes targeted unilateral shoulder work that will address this at the source.'
+      },
+      {
+        score: 9,
+        label: 'Strong mechanics',
+        desc: 'Guard solid, rotation clean, extension complete. A few minor refinements available.',
+        guard: { before: 95, during: 89, status: 'good', finding: '<span class="good-em">Guard holding well</span> — minimal drop at extension. Rear hand staying near chin.', cue: '' },
+        shoulder: { val: 48, status: 'good', finding: '<span class="good-em">Solid shoulder rotation at 48°</span> — power chain engaging. Hip-to-shoulder connection visible.', cue: '' },
+        extension: { val: 94, status: 'good', finding: '<span class="good-em">Full extension and clean return</span> — hand back to guard in under 0.4 seconds.', cue: '' },
+        fitme: false
+      }
+    ]
+  };
+
+  // ── INIT ──
+  async function initModel() {
+    try {
+      document.getElementById('loading-text').textContent = 'Loading TensorFlow...';
+      await tf.ready();
+      document.getElementById('loading-text').textContent = 'Loading pose model...';
+      detector = await poseDetection.createDetector(
+        poseDetection.SupportedModels.MoveNet,
+        { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING }
+      );
+      document.getElementById('loading-text').textContent = 'Ready';
+      setTimeout(() => {
+        document.getElementById('loading').classList.add('hidden');
+      }, 600);
+    } catch (err) {
+      // Model failed to load (network issue etc) — run in demo mode
+      console.warn('Pose model unavailable, running in demo mode:', err);
+      document.getElementById('loading-text').textContent = 'Demo mode (no camera model)';
+      setTimeout(() => {
+        document.getElementById('loading').classList.add('hidden');
+      }, 1200);
+    }
+  }
+
+  // ── PUNCH SELECTION ──
+  function selectPunch(punch, btn) {
+    selectedPunch = punch;
+    document.querySelectorAll('.punch-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  // ── CAMERA ──
+  async function startCamera() {
+    showScreen('screen-camera');
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false
+      });
+      const video = document.getElementById('video');
+      video.srcObject = stream;
+      await video.play();
+      resizeCanvas();
+      startPoseLoop();
+    } catch (err) {
+      // Camera not available — enter demo mode
+      console.warn('Camera not available:', err);
+      enterDemoMode();
+    }
+  }
+
+  function enterDemoMode() {
+    document.getElementById('readiness-ring').className = 'readiness-ring ready';
+    document.getElementById('readiness-icon').textContent = '★';
+    document.getElementById('readiness-label').textContent = 'Demo Mode · Ready';
+    document.getElementById('chip-pose').className = 'status-chip ok';
+    document.getElementById('chip-distance').className = 'status-chip ok';
+    document.getElementById('chip-lighting').className = 'status-chip ok';
+    poseReady = true;
+  }
+
+  function stopCamera() {
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+    repCount = 0;
+    repData = [];
+    isRecording = false;
+    poseReady = false;
+    document.getElementById('rep-counter').textContent = '0';
+    document.getElementById('btn-analyze').style.display = 'none';
+    document.getElementById('record-btn').classList.remove('recording');
+    document.getElementById('record-btn').textContent = '●';
+    showScreen('screen-setup');
+  }
+
+  function resizeCanvas() {
+    const canvas = document.getElementById('canvas');
+    const video = document.getElementById('video');
+    canvas.width = video.videoWidth || window.innerWidth;
+    canvas.height = video.videoHeight || window.innerHeight;
+  }
+
+  // ── POSE LOOP ──
+  async function startPoseLoop() {
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    async function loop() {
+      if (!stream) return;
+      animFrame = requestAnimationFrame(loop);
+
+      if (video.readyState < 2) return;
+      if (canvas.width !== video.videoWidth) resizeCanvas();
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (detector && video.videoWidth > 0) {
+        try {
+          const poses = await detector.estimatePoses(video);
+          if (poses.length > 0) {
+            const pose = poses[0];
+            drawSkeleton(ctx, pose, canvas.width, canvas.height);
+            analyzePoseReadiness(pose, canvas.width, canvas.height);
+            if (isRecording) {
+              currentRepFrames.push(extractKeypoints(pose));
+              detectRepComplete(pose);
+            }
+          } else {
+            setNotReady('No pose detected');
+          }
+        } catch (e) {
+          // silently continue
+        }
+      }
+    }
+    loop();
+  }
+
+  function extractKeypoints(pose) {
+    const kp = {};
+    pose.keypoints.forEach(k => { kp[k.name] = { x: k.x, y: k.y, score: k.score }; });
+    return kp;
+  }
+
+  function drawSkeleton(ctx, pose, w, h) {
+    const kp = {};
+    pose.keypoints.forEach(k => { kp[k.name] = k; });
+
+    const connections = [
+      ['left_shoulder','right_shoulder'],
+      ['left_shoulder','left_elbow'],['left_elbow','left_wrist'],
+      ['right_shoulder','right_elbow'],['right_elbow','right_wrist'],
+      ['left_shoulder','left_hip'],['right_shoulder','right_hip'],
+    ];
+
+    ctx.strokeStyle = 'rgba(232,49,26,0.5)';
+    ctx.lineWidth = 2;
+    connections.forEach(([a,b]) => {
+      const pa = kp[a], pb = kp[b];
+      if (pa && pb && pa.score > 0.3 && pb.score > 0.3) {
+        ctx.beginPath();
+        ctx.moveTo(pa.x, pa.y);
+        ctx.lineTo(pb.x, pb.y);
+        ctx.stroke();
+      }
+    });
+
+    const highlight = ['left_wrist','right_wrist','left_shoulder','right_shoulder','left_elbow','right_elbow'];
+    pose.keypoints.forEach(k => {
+      if (k.score > 0.3) {
+        ctx.beginPath();
+        ctx.arc(k.x, k.y, highlight.includes(k.name) ? 5 : 3, 0, Math.PI * 2);
+        ctx.fillStyle = highlight.includes(k.name) ? 'rgba(232,49,26,0.9)' : 'rgba(232,49,26,0.5)';
+        ctx.fill();
+      }
+    });
+  }
+
+  function analyzePoseReadiness(pose, w, h) {
+    const kp = {};
+    pose.keypoints.forEach(k => { kp[k.name] = k; });
+
+    const ls = kp['left_shoulder'], rs = kp['right_shoulder'];
+    const lw = kp['left_wrist'], rw = kp['right_wrist'];
+
+    const poseOk = ls && rs && ls.score > 0.4 && rs.score > 0.4;
+    const bothVisible = lw && rw && lw.score > 0.3 && rw.score > 0.3;
+    const goodDistance = poseOk && Math.abs(ls.x - rs.x) > w * 0.1 && Math.abs(ls.x - rs.x) < w * 0.6;
+
+    setChip('chip-pose', poseOk ? 'ok' : 'warn');
+    setChip('chip-distance', goodDistance ? 'ok' : 'warn');
+    setChip('chip-lighting', poseOk ? 'ok' : 'warn');
+
+    if (poseOk && goodDistance) {
+      poseReady = true;
+      document.getElementById('readiness-ring').className = 'readiness-ring ready';
+      document.getElementById('readiness-icon').textContent = '✓';
+      document.getElementById('readiness-label').textContent = 'Ready to record';
+    } else if (poseOk) {
+      poseReady = false;
+      document.getElementById('readiness-ring').className = 'readiness-ring partial';
+      document.getElementById('readiness-icon').textContent = '↔';
+      document.getElementById('readiness-label').textContent = 'Move further back';
+    } else {
+      setNotReady('Step into frame');
+    }
+  }
+
+  function setNotReady(msg) {
+    poseReady = false;
+    document.getElementById('readiness-ring').className = 'readiness-ring not-ready';
+    document.getElementById('readiness-icon').textContent = '⧖';
+    document.getElementById('readiness-label').textContent = msg;
+  }
+
+  function setChip(id, status) {
+    const el = document.getElementById(id);
+    el.className = 'status-chip ' + status;
+  }
+
+  // ── REP DETECTION ──
+  let wristExtensionPeak = 0;
+  let wristReturnDetected = false;
+  let repInProgress = false;
+
+  function detectRepComplete(pose) {
+    const kp = {};
+    pose.keypoints.forEach(k => { kp[k.name] = k; });
+    const lw = kp['left_wrist'], ls = kp['left_shoulder'];
+    if (!lw || !ls || lw.score < 0.3) return;
+
+    const extension = (ls.x - lw.x) / 100; // rough extension metric
+    if (extension > wristExtensionPeak) {
+      wristExtensionPeak = extension;
+      repInProgress = true;
+    }
+    if (repInProgress && extension < wristExtensionPeak * 0.5) {
+      // wrist returned — rep complete
+      wristExtensionPeak = 0;
+      repInProgress = false;
+      logRep();
+    }
+  }
+
+  function logRep() {
+    repCount++;
+    repData.push([...currentRepFrames]);
+    currentRepFrames = [];
+    document.getElementById('rep-counter').textContent = repCount;
+    flashScreen();
+    if (repCount >= 1) {
+      document.getElementById('btn-analyze').style.display = 'block';
+      document.getElementById('rep-count-btn').textContent = repCount;
+    }
+  }
+
+  function flashScreen() {
+    const f = document.getElementById('flash');
+    f.classList.add('flash');
+    setTimeout(() => f.classList.remove('flash'), 200);
+  }
+
+  // ── RECORDING ──
+  function handleRecord() {
+    if (!poseReady && !document.getElementById('readiness-label').textContent.includes('Demo')) {
+      document.getElementById('readiness-label').textContent = 'Get in position first';
+      return;
+    }
+
+    if (isRecording) {
+      // Stop recording
+      isRecording = false;
+      document.getElementById('record-btn').classList.remove('recording');
+      document.getElementById('record-btn').textContent = '●';
+      if (repCount > 0) {
+        document.getElementById('btn-analyze').style.display = 'block';
+      }
+      return;
+    }
+
+    // Countdown then record
+    let count = 3;
+    const overlay = document.getElementById('countdown-overlay');
+    const numEl = document.getElementById('countdown-num');
+    overlay.classList.add('visible');
+    numEl.textContent = count;
+
+    recordCountdown = setInterval(() => {
+      count--;
+      if (count <= 0) {
+        clearInterval(recordCountdown);
+        overlay.classList.remove('visible');
+        isRecording = true;
+        document.getElementById('record-btn').classList.add('recording');
+        document.getElementById('record-btn').textContent = '⏹';
+        // In demo mode, simulate a rep after 2 seconds
+        if (!stream || !detector) {
+          setTimeout(() => {
+            if (isRecording) {
+              logRep();
+              setTimeout(() => { if (isRecording) logRep(); }, 1800);
+              setTimeout(() => { if (isRecording) logRep(); }, 3600);
+            }
+          }, 2000);
+        }
+      } else {
+        numEl.textContent = count;
+        numEl.style.animation = 'none';
+        numEl.offsetHeight;
+        numEl.style.animation = 'countPulse 1s ease';
+      }
+    }, 1000);
+  }
+
+  // ── ANALYSIS ──
+  function showAnalysis() {
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+
+    const punch = selectedPunch;
+    const templates = analysisTemplates['jab']; // use jab for cross/1-2 in demo
+    const template = templates[Math.min(repCount - 1, templates.length - 1)] || templates[0];
+
+    // Build rep nav
+    const nav = document.getElementById('rep-nav');
+    nav.innerHTML = '';
+    for (let i = 0; i < Math.max(repCount, 1); i++) {
+      const pip = document.createElement('div');
+      pip.className = 'rep-pip ' + (i === 0 ? 'active' : 'done');
+      pip.onclick = () => {
+        document.querySelectorAll('.rep-pip').forEach((p,j) => p.className = 'rep-pip ' + (j===i?'active':'done'));
+      };
+      nav.appendChild(pip);
+    }
+
+    document.getElementById('analysis-punch-label').textContent =
+      punch.toUpperCase() + ' Analysis';
+    document.getElementById('analysis-title').textContent =
+      `${Math.max(repCount, 1)} Rep${repCount !== 1 ? 's' : ''} · Session Review`;
+
+    // Score
+    const scoreEl = document.getElementById('score-circle');
+    const scoreNum = document.getElementById('score-num');
+    scoreNum.textContent = template.score;
+    const scoreColor = template.score >= 8 ? 'var(--green)' : template.score >= 6 ? 'var(--amber)' : 'var(--punch)';
+    scoreEl.style.borderColor = scoreColor;
+    scoreNum.style.color = scoreColor;
+    document.getElementById('score-label').textContent = template.label;
+    document.getElementById('score-desc').textContent = template.desc;
+
+    // Guard
+    applySignal('guard', template.guard);
+    // Shoulder
+    applySignal('shoulder', template.shoulder);
+    // Extension
+    applySignal('extension', template.extension);
+
+    // fit.me nudge
+    const nudge = document.getElementById('fitme-nudge');
+    if (template.fitme) {
+      nudge.classList.add('visible');
+      document.getElementById('fitme-nudge-text').innerHTML = template.fitmeText;
+    } else {
+      nudge.classList.remove('visible');
+    }
+
+    showScreen('screen-analysis');
+
+    // Animate bars after render
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        if (template.guard) {
+          document.getElementById('bar-guard-before').style.width = template.guard.before + '%';
+          document.getElementById('bar-guard-during').style.width = template.guard.during + '%';
+          document.getElementById('val-guard-before').textContent = template.guard.before + '%';
+          document.getElementById('val-guard-during').textContent = template.guard.during + '%';
+        }
+        if (template.shoulder) {
+          document.getElementById('bar-shoulder').style.width = Math.min(template.shoulder.val * 2, 100) + '%';
+          document.getElementById('val-shoulder').textContent = template.shoulder.val + '°';
+        }
+        if (template.extension) {
+          document.getElementById('bar-extension').style.width = template.extension.val + '%';
+          document.getElementById('val-extension').textContent = template.extension.val + '%';
+        }
+      }, 100);
+    });
+  }
+
+  function applySignal(key, data) {
+    if (!data) return;
+    const dot = document.getElementById('dot-' + key);
+    const badge = document.getElementById('badge-' + key);
+    const finding = document.getElementById('finding-' + key);
+    const cue = document.getElementById('cue-' + key);
+
+    const statusMap = {
+      good: { dotClass: 'ssd-good', badgeClass: 'scb-good', badgeText: 'Good' },
+      warn: { dotClass: 'ssd-warn', badgeClass: 'scb-warn', badgeText: 'Watch' },
+      flag: { dotClass: 'ssd-flag', badgeClass: 'scb-flag', badgeText: 'Flag' },
+    };
+
+    const s = statusMap[data.status] || statusMap.warn;
+    dot.className = 'signal-status-dot ' + s.dotClass;
+    badge.className = 'signal-card-badge ' + s.badgeClass;
+    badge.textContent = s.badgeText;
+    finding.innerHTML = data.finding;
+    cue.innerHTML = data.cue ? `<strong>Coach cue:</strong> ${data.cue}` : '';
+  }
+
+  function retrySession() {
+    repCount = 0;
+    repData = [];
+    currentRepFrames = [];
+    isRecording = false;
+    wristExtensionPeak = 0;
+    repInProgress = false;
+    document.getElementById('rep-counter').textContent = '0';
+    document.getElementById('btn-analyze').style.display = 'none';
+    document.getElementById('record-btn').classList.remove('recording');
+    document.getElementById('record-btn').textContent = '●';
+    startCamera();
+  }
+
+  // ── SCREEN NAV ──
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  // ── BOOT ──
+  initModel();
+</script>
+</body>
+</html>

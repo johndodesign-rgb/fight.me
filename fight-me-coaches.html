@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>fight.me · For Coaches</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,900;1,400;1,700&family=Barlow:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400&display=swap');
+
+  :root {
+    --black: #080808;
+    --ink: #0d0d0d;
+    --card: #131313;
+    --card2: #181818;
+    --line: #1c1c1c;
+    --line2: #252525;
+    --white: #ede9e3;
+    --white-dim: #8a8680;
+    --muted: #4a4a4a;
+    --punch: #e8311a;
+    --punch-dim: #4a0f07;
+    --punch-mid: #8a1e0e;
+    --gold: #b8922a;
+    --gold-dim: #3a2c0a;
+    --green: #1a6b3c;
+    --green-bright: #249955;
+    --mono: 'DM Mono', monospace;
+    --display: 'Barlow Condensed', sans-serif;
+    --body: 'Barlow', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* GRAIN */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.018;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid transparent;
+    transition: all 0.3s;
+    backdrop-filter: blur(0px);
+  }
+
+  nav.scrolled {
+    border-bottom-color: var(--line);
+    background: rgba(8,8,8,0.92);
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-logo {
+    font-family: var(--display);
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+
+  .nav-logo .punch { color: var(--punch); }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .nav-link {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--white-dim);
+    cursor: pointer;
+    background: none;
+    border: none;
+    transition: color 0.15s;
+  }
+
+  .nav-link:hover { color: var(--white); }
+
+  .nav-cta {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--punch);
+    color: var(--white);
+    padding: 10px 24px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s;
+    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  }
+
+  .nav-cta:hover { background: #ff3d20; }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 40px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
+  }
+
+  .hero-glow {
+    position: absolute;
+    bottom: -200px; left: -100px;
+    width: 800px; height: 600px;
+    background: radial-gradient(ellipse, rgba(232,49,26,0.07) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--punch);
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    width: 32px;
+    height: 1px;
+    background: var(--punch);
+  }
+
+  .hero-headline {
+    font-family: var(--display);
+    font-size: clamp(56px, 9vw, 120px);
+    font-weight: 900;
+    line-height: 0.88;
+    letter-spacing: -0.01em;
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+  }
+
+  .hero-headline .accent { color: var(--punch); font-style: italic; }
+  .hero-headline .dim { color: var(--white-dim); }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--white-dim);
+    font-weight: 300;
+    max-width: 480px;
+    margin-top: 28px;
+    margin-bottom: 48px;
+    line-height: 1.8;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-sub strong { color: var(--white); font-weight: 500; }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+  }
+
+  .btn-hero {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--punch);
+    color: var(--white);
+    padding: 18px 48px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+  }
+
+  .btn-hero:hover { background: #ff3d20; transform: translateY(-2px); }
+
+  .btn-ghost {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--white-dim);
+    background: none;
+    border: 1px solid var(--line2);
+    padding: 18px 32px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-ghost:hover { color: var(--white); border-color: #444; }
+
+  .hero-stat-row {
+    position: absolute;
+    bottom: 0; right: 40px;
+    display: flex;
+    gap: 0;
+    border-left: 1px solid var(--line);
+    border-top: 1px solid var(--line);
+    z-index: 1;
+  }
+
+  .hero-stat {
+    padding: 20px 32px;
+    border-right: 1px solid var(--line);
+    text-align: center;
+  }
+
+  .hero-stat-num {
+    font-family: var(--display);
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--punch);
+    line-height: 1;
+  }
+
+  .hero-stat-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ─── SECTION SHARED ─── */
+  section {
+    padding: 100px 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--punch);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    max-width: 40px;
+    height: 1px;
+    background: var(--punch-mid);
+  }
+
+  .section-headline {
+    font-family: var(--display);
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    margin-bottom: 16px;
+  }
+
+  .section-sub {
+    font-size: 14px;
+    color: var(--white-dim);
+    max-width: 500px;
+    line-height: 1.8;
+    margin-bottom: 56px;
+  }
+
+  /* ─── THE ARGUMENT ─── */
+  #section-argument {
+    border-top: 1px solid var(--line);
+  }
+
+  .argument-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    border: 1px solid var(--line);
+  }
+
+  @media (max-width: 768px) {
+    .argument-grid { grid-template-columns: 1fr; }
+  }
+
+  .argument-card {
+    padding: 40px 36px;
+    border-right: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .argument-card:last-child { border-right: none; }
+
+  .argument-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--punch);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+
+  .argument-card:hover::before { transform: scaleX(1); }
+
+  .argument-num {
+    font-family: var(--display);
+    font-size: 72px;
+    font-weight: 900;
+    color: var(--line2);
+    line-height: 1;
+    margin-bottom: 20px;
+    transition: color 0.3s;
+  }
+
+  .argument-card:hover .argument-num { color: var(--punch-mid); }
+
+  .argument-title {
+    font-family: var(--display);
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    letter-spacing: 0.01em;
+  }
+
+  .argument-text {
+    font-size: 13px;
+    color: var(--white-dim);
+    line-height: 1.8;
+  }
+
+  .argument-text strong { color: var(--white); font-weight: 500; }
+
+  /* ─── HOW IT WORKS ─── */
+  #section-how {
+    border-top: 1px solid var(--line);
+  }
+
+  .how-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+
+  @media (max-width: 768px) {
+    .how-layout { grid-template-columns: 1fr; }
+  }
+
+  .how-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .how-step {
+    display: flex;
+    gap: 24px;
+    padding: 28px 0;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .how-step:first-child { padding-top: 0; }
+  .how-step.active .how-step-num { color: var(--punch); }
+  .how-step.active .how-step-title { color: var(--white); }
+
+  .how-step-num {
+    font-family: var(--display);
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--muted);
+    line-height: 1;
+    flex-shrink: 0;
+    width: 48px;
+    transition: color 0.2s;
+  }
+
+  .how-step-content { flex: 1; }
+
+  .how-step-title {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white-dim);
+    margin-bottom: 6px;
+    transition: color 0.2s;
+  }
+
+  .how-step-text {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s;
+    opacity: 0;
+  }
+
+  .how-step.active .how-step-text {
+    max-height: 120px;
+    opacity: 1;
+  }
+
+  .how-step-text strong { color: var(--white-dim); font-weight: 500; }
+
+  /* HOW VISUAL */
+  .how-visual {
+    position: sticky;
+    top: 120px;
+  }
+
+  .how-panel {
+    display: none;
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .how-panel.active { display: block; }
+
+  .how-panel-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .how-panel-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--white-dim);
+  }
+
+  .how-panel-badge {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+  }
+
+  .badge-red { background: rgba(232,49,26,0.15); color: var(--punch); }
+  .badge-gold { background: rgba(184,146,42,0.15); color: var(--gold); }
+  .badge-green { background: rgba(26,107,60,0.2); color: var(--green-bright); }
+
+  .how-panel-body { padding: 24px; }
+
+  .mock-fighter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .mock-fighter-row:last-child { border-bottom: none; }
+
+  .mock-fighter-info { display: flex; align-items: center; gap: 12px; }
+
+  .mock-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--line2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white-dim);
+    flex-shrink: 0;
+  }
+
+  .mock-name {
+    font-size: 13px;
+    color: var(--white);
+  }
+
+  .mock-track {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .mock-signal {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+  }
+
+  .signal-dot-sm {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-ok { background: var(--green-bright); }
+  .dot-warn { background: var(--gold); }
+  .dot-flag { background: var(--punch); }
+
+  /* QUOTE PANEL */
+  .quote-block {
+    padding: 40px;
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-left: 3px solid var(--punch);
+    border-radius: 0 2px 2px 0;
+  }
+
+  .quote-text {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 400;
+    font-style: italic;
+    line-height: 1.4;
+    color: var(--white);
+    margin-bottom: 20px;
+  }
+
+  .quote-attr {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* SIGNAL DEMO PANEL */
+  .signal-demo {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .signal-demo-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px;
+    background: var(--ink);
+    border: 1px solid var(--line2);
+    border-radius: 2px;
+  }
+
+  .signal-demo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .signal-demo-text {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--white-dim);
+  }
+
+  .signal-demo-text strong { color: var(--white); font-weight: 500; display: block; margin-bottom: 2px; }
+
+  .signal-redirect {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--punch);
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── TRACK OVERVIEW ─── */
+  #section-tracks {
+    border-top: 1px solid var(--line);
+  }
+
+  .tracks-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--line);
+  }
+
+  @media (max-width: 768px) {
+    .tracks-grid { grid-template-columns: 1fr; }
+  }
+
+  .track-card {
+    padding: 40px 32px;
+    border-right: 1px solid var(--line);
+    position: relative;
+  }
+
+  .track-card:last-child { border-right: none; }
+
+  .track-card-accent {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .accent-red { background: var(--punch); }
+  .accent-gold { background: var(--gold); }
+  .accent-green { background: var(--green-bright); }
+
+  .track-name {
+    font-family: var(--display);
+    font-size: 36px;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 6px;
+    margin-top: 16px;
+  }
+
+  .track-name.red { color: var(--punch); }
+  .track-name.gold { color: var(--gold); }
+  .track-name.green { color: var(--green-bright); }
+
+  .track-subtitle {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .track-profile {
+    font-size: 12px;
+    color: var(--white-dim);
+    line-height: 1.8;
+    margin-bottom: 24px;
+  }
+
+  .track-profile strong { color: var(--white); font-weight: 500; }
+
+  .track-milestones {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .milestone {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  .milestone-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .milestone-dot.red { background: var(--punch); }
+  .milestone-dot.gold { background: var(--gold); }
+  .milestone-dot.green { background: var(--green-bright); }
+
+  /* ─── COACH CONTROLS ─── */
+  #section-controls {
+    border-top: 1px solid var(--line);
+  }
+
+  .controls-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+
+  @media (max-width: 768px) {
+    .controls-layout { grid-template-columns: 1fr; }
+  }
+
+  .control-card {
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .control-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .control-card-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--white-dim);
+  }
+
+  .control-card-body { padding: 20px; }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+    color: #aaa;
+  }
+
+  .toggle-row:last-child { border-bottom: none; }
+
+  .toggle {
+    width: 36px; height: 20px;
+    background: var(--green);
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+
+  .toggle.off { background: var(--line2); }
+
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    background: var(--white);
+    border-radius: 50%;
+    top: 3px;
+    transition: left 0.2s;
+  }
+
+  .toggle.off::after { left: 3px; }
+  .toggle:not(.off)::after { left: 19px; }
+
+  .fighter-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .fighter-table th {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 0 0 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .fighter-table td {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 12px;
+    color: #aaa;
+    vertical-align: middle;
+  }
+
+  .fighter-table tr:last-child td { border-bottom: none; }
+
+  .fighter-table td:first-child { color: var(--white); }
+
+  .flag-pill {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .flag-red { background: rgba(232,49,26,0.15); color: var(--punch); }
+  .flag-gold { background: rgba(184,146,42,0.15); color: var(--gold); }
+  .flag-green { background: rgba(26,107,60,0.2); color: var(--green-bright); }
+
+  /* ─── CTA ─── */
+  #section-cta {
+    border-top: 1px solid var(--line);
+    text-align: center;
+    padding: 120px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #section-cta::before {
+    content: '';
+    position: absolute;
+    bottom: -200px; left: 50%;
+    transform: translateX(-50%);
+    width: 800px; height: 600px;
+    background: radial-gradient(ellipse, rgba(232,49,26,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .cta-headline {
+    font-family: var(--display);
+    font-size: clamp(48px, 8vw, 88px);
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -0.01em;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-headline .accent { color: var(--punch); font-style: italic; }
+
+  .cta-sub {
+    font-size: 14px;
+    color: var(--white-dim);
+    max-width: 400px;
+    margin: 0 auto 48px;
+    line-height: 1.8;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+
+  .coach-form {
+    display: flex;
+    gap: 0;
+    max-width: 440px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .coach-input {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-right: none;
+    color: var(--white);
+    font-family: var(--body);
+    font-size: 14px;
+    padding: 16px 20px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .coach-input:focus { border-color: var(--punch-mid); }
+  .coach-input::placeholder { color: var(--muted); }
+
+  .coach-submit {
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--punch);
+    color: var(--white);
+    border: none;
+    padding: 16px 28px;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+
+  .coach-submit:hover { background: #ff3d20; }
+
+  .cta-note {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-top: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* FULLWIDTH DIVIDER */
+  .full-divider {
+    width: 100%;
+    border: none;
+    border-top: 1px solid var(--line);
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <div class="nav-logo">fight<span class="punch">.me</span></div>
+  <div class="nav-right">
+    <button class="nav-link" onclick="scrollTo('section-argument')">The Case</button>
+    <button class="nav-link" onclick="scrollTo('section-how')">How It Works</button>
+    <button class="nav-link" onclick="scrollTo('section-tracks')">Tracks</button>
+    <button class="nav-link" onclick="scrollTo('section-controls')">Coach Tools</button>
+    <button class="nav-cta" onclick="scrollTo('section-cta')">Get Early Access</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+
+  <div class="hero-eyebrow">For Coaches &amp; Gym Owners</div>
+
+  <h1 class="hero-headline">
+    Your fighters<br>
+    <span class="accent">aren't ready</span><br>
+    <span class="dim">for the ring yet.</span>
+  </h1>
+
+  <p class="hero-sub">
+    You already know this. <strong>fight.me makes it easier to say.</strong><br><br>
+    An honest training system that builds the foundation most adults skip — and routes them back to you when they're actually ready for glove work.
+  </p>
+
+  <div class="hero-actions">
+    <button class="btn-hero" onclick="scrollTo('section-cta')">Request Coach Access</button>
+    <button class="btn-ghost" onclick="scrollTo('section-argument')">See the Case →</button>
+  </div>
+
+  <div class="hero-stat-row">
+    <div class="hero-stat">
+      <div class="hero-stat-num">6mo</div>
+      <div class="hero-stat-label">avg plateau without<br>foundation work</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">3</div>
+      <div class="hero-stat-label">tracks · honest<br>placement</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">0</div>
+      <div class="hero-stat-label">flattery in<br>the assessment</div>
+    </div>
+  </div>
+</div>
+
+<!-- THE ARGUMENT -->
+<section id="section-argument">
+  <div class="section-label">The Case for fight.me</div>
+  <h2 class="section-headline reveal">One argument.<br>Three ways it matters.</h2>
+  <p class="section-sub reveal">You've seen it a hundred times. Adult converts who skip foundation work, plateau early, and blame the sport. fight.me addresses it before you have to.</p>
+
+  <div class="argument-grid reveal">
+    <div class="argument-card">
+      <div class="argument-num">01</div>
+      <div class="argument-title">It Won't Embarrass You In Front of Your Fighters</div>
+      <div class="argument-text">
+        fight.me was built with the sport in mind — not around it. <strong>The progression logic, the terminology, the drill structure</strong> — all of it reflects how coaches actually think about fighter development. We're not putting gloves on a generic fitness app.
+      </div>
+    </div>
+    <div class="argument-card">
+      <div class="argument-num">02</div>
+      <div class="argument-title">It Makes Your Job Easier, Not More Complicated</div>
+      <div class="argument-text">
+        Your fighters show up more prepared. The questions they ask you are better questions. <strong>The foundation work happens between sessions</strong> — not instead of them. You get a coach dashboard that flags who needs attention before you notice it yourself.
+      </div>
+    </div>
+    <div class="argument-card">
+      <div class="argument-num">03</div>
+      <div class="argument-title">Your Fighters Will Actually Stick With It</div>
+      <div class="argument-text">
+        The system doesn't shame people for where they are. It <strong>reframes Foundation as the serious track</strong> — the one that separates fighters who last from fighters who plateau. That's a message your students will hear from the app so you don't have to repeat it.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="section-how">
+  <div class="section-label">System Overview</div>
+  <h2 class="section-headline reveal">How it works<br>in your gym</h2>
+  <p class="section-sub reveal">Five moments that matter. Click each to see what it looks like.</p>
+
+  <div class="how-layout">
+    <div class="how-steps">
+      <div class="how-step active" onclick="setStep(0)">
+        <div class="how-step-num">1</div>
+        <div class="how-step-content">
+          <div class="how-step-title">Fighter takes the honest assessment</div>
+          <div class="how-step-text">Six questions. No flattery. <strong>Covers conditioning, movement quality, experience, and recovery</strong> — the markers that actually predict readiness. The system places them. If they lie, the training reveals it.</div>
+        </div>
+      </div>
+      <div class="how-step" onclick="setStep(1)">
+        <div class="how-step-num">2</div>
+        <div class="how-step-content">
+          <div class="how-step-title">They're placed in the right track</div>
+          <div class="how-step-text">Foundation, Transition, or Fighter. <strong>Each placement comes with a rationale</strong> — not just a label. The app explains why they're there and what they're building toward. No one feels demoted.</div>
+        </div>
+      </div>
+      <div class="how-step" onclick="setStep(2)">
+        <div class="how-step-num">3</div>
+        <div class="how-step-content">
+          <div class="how-step-title">You see it all from your dashboard</div>
+          <div class="how-step-text">Every fighter's track, their current week, their performance signals. <strong>Flag colors tell you who needs attention</strong> before they bring it to you. Gym owner and private coach views both available.</div>
+        </div>
+      </div>
+      <div class="how-step" onclick="setStep(3)">
+        <div class="how-step-num">4</div>
+        <div class="how-step-content">
+          <div class="how-step-title">The system self-corrects in real time</div>
+          <div class="how-step-text">Performance signals — gassing out, hand drop, slow recovery — trigger targeted recommendations. <strong>The app routes fighters to fit.me</strong> for foundation work when data shows a gap. No confrontation needed.</div>
+        </div>
+      </div>
+      <div class="how-step" onclick="setStep(4)">
+        <div class="how-step-num">5</div>
+        <div class="how-step-content">
+          <div class="how-step-title">They come back better</div>
+          <div class="how-step-text">When a fighter completes a fit.me program, they return to fight.me with a real upgrade. <strong>The unlock moment is visible to both fighter and coach.</strong> Progress feels earned because it is.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="how-visual">
+      <!-- Panel 0: Assessment -->
+      <div class="how-panel active" id="panel-0">
+        <div class="how-panel-header">
+          <span class="how-panel-title">Assessment · Question 2 of 6</span>
+          <span class="how-panel-badge badge-red">In Progress</span>
+        </div>
+        <div class="how-panel-body">
+          <div style="font-family:var(--display);font-size:22px;font-weight:700;line-height:1.2;margin-bottom:8px">After a hard round of shadow boxing, how long to feel recovered?</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:24px;font-style:italic">Recovery rate is one of your most honest fitness markers.</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="padding:12px 16px;background:var(--ink);border:1px solid var(--line2);font-size:12px;color:var(--muted);display:flex;gap:12px;align-items:center"><span style="font-family:var(--mono);font-size:9px;color:var(--muted)">A</span>More than 3 minutes — I'm really gassing</div>
+            <div style="padding:12px 16px;background:rgba(232,49,26,0.08);border:1px solid var(--punch-mid);font-size:12px;color:var(--white);display:flex;gap:12px;align-items:center"><span style="font-family:var(--mono);font-size:9px;color:var(--punch)">B</span>2–3 minutes to feel normal <span style="margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--punch)">selected</span></div>
+            <div style="padding:12px 16px;background:var(--ink);border:1px solid var(--line2);font-size:12px;color:var(--muted);display:flex;gap:12px;align-items:center"><span style="font-family:var(--mono);font-size:9px;color:var(--muted)">C</span>About 90 seconds</div>
+            <div style="padding:12px 16px;background:var(--ink);border:1px solid var(--line2);font-size:12px;color:var(--muted);display:flex;gap:12px;align-items:center"><span style="font-family:var(--mono);font-size:9px;color:var(--muted)">D</span>Under a minute — I recover fast</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 1: Placement -->
+      <div class="how-panel" id="panel-1">
+        <div class="how-panel-header">
+          <span class="how-panel-title">Track Placement</span>
+          <span class="how-panel-badge badge-red">Foundation</span>
+        </div>
+        <div class="how-panel-body">
+          <div style="font-family:var(--display);font-size:56px;font-weight:900;color:var(--punch);line-height:0.9;margin-bottom:8px">FOUN-<br>DATION</div>
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:20px">Track · Build the engine first</div>
+          <div style="background:var(--ink);border:1px solid var(--line2);padding:16px;border-radius:2px">
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Why you're here</div>
+            <div style="font-size:12px;color:#aaa;line-height:1.7">Your conditioning base needs work before glove work will stick. <strong style="color:var(--white)">This isn't a demotion — it's the serious track.</strong> The fighters who skip this are the ones who plateau at 6 months.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 2: Coach Dashboard -->
+      <div class="how-panel" id="panel-2">
+        <div class="how-panel-header">
+          <span class="how-panel-title">Coach Dashboard · 6 Fighters</span>
+          <span class="how-panel-badge badge-gold">2 Flagged</span>
+        </div>
+        <div class="how-panel-body">
+          <div class="mock-fighter-row">
+            <div class="mock-fighter-info">
+              <div class="mock-avatar">MR</div>
+              <div><div class="mock-name">Marcus R.</div><div class="mock-track">Foundation · Week 3</div></div>
+            </div>
+            <div class="mock-signal"><div class="signal-dot-sm dot-flag"></div><span style="color:var(--punch);font-size:10px">Gassing out</span></div>
+          </div>
+          <div class="mock-fighter-row">
+            <div class="mock-fighter-info">
+              <div class="mock-avatar">JL</div>
+              <div><div class="mock-name">Jamie L.</div><div class="mock-track">Transition · Week 6</div></div>
+            </div>
+            <div class="mock-signal"><div class="signal-dot-sm dot-warn"></div><span style="color:var(--gold);font-size:10px">Hand drop</span></div>
+          </div>
+          <div class="mock-fighter-row">
+            <div class="mock-fighter-info">
+              <div class="mock-avatar">DP</div>
+              <div><div class="mock-name">Dana P.</div><div class="mock-track">Fighter · Week 2</div></div>
+            </div>
+            <div class="mock-signal"><div class="signal-dot-sm dot-ok"></div><span style="color:var(--green-bright);font-size:10px">On track</span></div>
+          </div>
+          <div class="mock-fighter-row">
+            <div class="mock-fighter-info">
+              <div class="mock-avatar">TK</div>
+              <div><div class="mock-name">Tyler K.</div><div class="mock-track">Foundation · Week 1</div></div>
+            </div>
+            <div class="mock-signal"><div class="signal-dot-sm dot-ok"></div><span style="color:var(--green-bright);font-size:10px">On track</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 3: Signal / Redirect -->
+      <div class="how-panel" id="panel-3">
+        <div class="how-panel-header">
+          <span class="how-panel-title">Performance Signals · Marcus R.</span>
+          <span class="how-panel-badge badge-red">Action Needed</span>
+        </div>
+        <div class="how-panel-body">
+          <div class="signal-demo">
+            <div class="signal-demo-item">
+              <div class="signal-demo-dot dot-flag"></div>
+              <div class="signal-demo-text">
+                <strong>Aerobic base flagged</strong>
+                Recovery exceeding 3 min in sessions 4, 5, and 6. Pattern consistent — this is a conditioning gap, not fatigue.
+                <div class="signal-redirect">→ Routing to fit.me · Aerobic Base program</div>
+              </div>
+            </div>
+            <div class="signal-demo-item">
+              <div class="signal-demo-dot dot-warn"></div>
+              <div class="signal-demo-text">
+                <strong>Hands dropping · Round 3+</strong>
+                Detected in last 3 sessions. Likely fatigue-related, not technique. Will monitor.
+              </div>
+            </div>
+            <div class="signal-demo-item">
+              <div class="signal-demo-dot dot-ok"></div>
+              <div class="signal-demo-text">
+                <strong>Footwork quality · Good</strong>
+                Movement patterns holding up even under fatigue. Strong foundation here.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 4: Unlock -->
+      <div class="how-panel" id="panel-4">
+        <div class="how-panel-header">
+          <span class="how-panel-title">Program Unlock · Marcus R.</span>
+          <span class="how-panel-badge badge-green">Ready</span>
+        </div>
+        <div class="how-panel-body">
+          <div style="text-align:center;padding:20px 0">
+            <div style="font-family:var(--display);font-size:16px;font-weight:300;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Foundation Complete</div>
+            <div style="font-family:var(--display);font-size:48px;font-weight:900;color:var(--green-bright);line-height:1;margin-bottom:8px">GLOVE<br>WORK</div>
+            <div style="font-family:var(--display);font-size:14px;font-weight:300;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:24px">Unlocked</div>
+            <div style="background:var(--ink);border:1px solid var(--line2);padding:16px;text-align:left;border-radius:2px;font-size:12px;color:#aaa;line-height:1.7">
+              Aerobic base solid. Recovery under 90 sec. Movement quality maintained under fatigue. <strong style="color:var(--white)">Marcus is ready for controlled glove work.</strong> Notify coach.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRACKS -->
+<section id="section-tracks">
+  <div class="section-label">The Three Tracks</div>
+  <h2 class="section-headline reveal">Honest placement.<br>No flattery.</h2>
+  <p class="section-sub reveal">The assessment places fighters where they actually are. The system catches up if that changes. Coaches can override any placement.</p>
+
+  <div class="tracks-grid reveal">
+    <div class="track-card">
+      <div class="track-card-accent accent-red"></div>
+      <div class="track-name red">FOUN-<br>DATION</div>
+      <div class="track-subtitle">The serious track</div>
+      <div class="track-profile">
+        <strong>Who's here:</strong> Adult converts, returning athletes, anyone whose conditioning or movement base needs real work before glove time will stick.<br><br>
+        This isn't the beginner track. It's the track that separates fighters who last from fighters who plateau.
+      </div>
+      <div class="track-milestones">
+        <div class="milestone"><div class="milestone-dot red"></div>Aerobic base · Zone 2 foundation</div>
+        <div class="milestone"><div class="milestone-dot red"></div>Movement literacy · 6 patterns</div>
+        <div class="milestone"><div class="milestone-dot red"></div>Structural strength · 4 days/week</div>
+        <div class="milestone"><div class="milestone-dot red"></div>Unlocks: Fundamentals at Week 5</div>
+      </div>
+    </div>
+    <div class="track-card">
+      <div class="track-card-accent accent-gold"></div>
+      <div class="track-name gold">TRAN-<br>SITION</div>
+      <div class="track-subtitle">Almost ready for the ring</div>
+      <div class="track-profile">
+        <strong>Who's here:</strong> Fighters with a real base but identifiable gaps — recovery time, power endurance, or technique that breaks down under fatigue.<br><br>
+        The Transition track closes those gaps while introducing actual boxing fundamentals.
+      </div>
+      <div class="track-milestones">
+        <div class="milestone"><div class="milestone-dot gold"></div>Boxing fundamentals · Jab/cross/hook</div>
+        <div class="milestone"><div class="milestone-dot gold"></div>Conditioning under load</div>
+        <div class="milestone"><div class="milestone-dot gold"></div>Footwork under fatigue</div>
+        <div class="milestone"><div class="milestone-dot gold"></div>Unlocks: Glove Work at Week 9</div>
+      </div>
+    </div>
+    <div class="track-card">
+      <div class="track-card-accent accent-green"></div>
+      <div class="track-name green">FIGHTER</div>
+      <div class="track-subtitle">The work gets harder here</div>
+      <div class="track-profile">
+        <strong>Who's here:</strong> Fighters with real conditioning, boxing experience, and performance under pressure. The foundation is there.<br><br>
+        The Fighter track is about refinement — not starting over. The system still watches and flags when something slips.
+      </div>
+      <div class="track-milestones">
+        <div class="milestone"><div class="milestone-dot green"></div>Sparring preparation</div>
+        <div class="milestone"><div class="milestone-dot green"></div>Fight-specific conditioning</div>
+        <div class="milestone"><div class="milestone-dot green"></div>Performance signal monitoring</div>
+        <div class="milestone"><div class="milestone-dot green"></div>Unlocks: Sparring Prep at Week 13</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COACH CONTROLS -->
+<section id="section-controls">
+  <div class="section-label">Coach Tools</div>
+  <h2 class="section-headline reveal">Your gym.<br>Your rules.</h2>
+  <p class="section-sub reveal">fight.me works with your coaching, not around it. Override any placement, mute any signal, customize the progression timeline for each fighter.</p>
+
+  <div class="controls-layout reveal">
+    <div class="control-card">
+      <div class="control-card-header">
+        <span class="control-card-title">Gym Settings</span>
+        <span class="how-panel-badge badge-gold">Coach View</span>
+      </div>
+      <div class="control-card-body">
+        <div class="toggle-row">
+          <span>Auto-route to fit.me when flagged</span>
+          <div class="toggle" onclick="this.classList.toggle('off')"></div>
+        </div>
+        <div class="toggle-row">
+          <span>Fighter can see their own signals</span>
+          <div class="toggle" onclick="this.classList.toggle('off')"></div>
+        </div>
+        <div class="toggle-row">
+          <span>Notify me when track unlocks</span>
+          <div class="toggle" onclick="this.classList.toggle('off')"></div>
+        </div>
+        <div class="toggle-row">
+          <span>Require coach approval to advance</span>
+          <div class="toggle off" onclick="this.classList.toggle('off')"></div>
+        </div>
+        <div class="toggle-row">
+          <span>Show fit.me recommendations</span>
+          <div class="toggle" onclick="this.classList.toggle('off')"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-card">
+      <div class="control-card-header">
+        <span class="control-card-title">Fighter Roster · Active Flags</span>
+        <span class="how-panel-badge badge-red">3 Need Attention</span>
+      </div>
+      <div class="control-card-body">
+        <table class="fighter-table">
+          <tr>
+            <th>Fighter</th>
+            <th>Track</th>
+            <th>Signal</th>
+          </tr>
+          <tr>
+            <td>Marcus R.</td>
+            <td>Foundation W3</td>
+            <td><span class="flag-pill flag-red">Gas out</span></td>
+          </tr>
+          <tr>
+            <td>Jamie L.</td>
+            <td>Transition W6</td>
+            <td><span class="flag-pill flag-gold">Hand drop</span></td>
+          </tr>
+          <tr>
+            <td>Priya S.</td>
+            <td>Foundation W2</td>
+            <td><span class="flag-pill flag-gold">Recovery slow</span></td>
+          </tr>
+          <tr>
+            <td>Dana P.</td>
+            <td>Fighter W2</td>
+            <td><span class="flag-pill flag-green">On track</span></td>
+          </tr>
+          <tr>
+            <td>Tyler K.</td>
+            <td>Foundation W1</td>
+            <td><span class="flag-pill flag-green">On track</span></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="section-cta" style="max-width:100%;padding-left:0;padding-right:0;width:100%">
+  <div style="max-width:1100px;margin:0 auto;padding:120px 40px;text-align:center;position:relative">
+    <div class="cta-headline">
+      Your fighters<br>deserve an<br><span class="accent">honest system.</span>
+    </div>
+    <p class="cta-sub">fight.me is in early access for coaches and gym owners. Join the list and help shape what it becomes.</p>
+
+    <div class="coach-form">
+      <input class="coach-input" type="email" placeholder="your@gym.com">
+      <button class="coach-submit" onclick="handleSubmit(this)">Request Access</button>
+    </div>
+    <div class="cta-note">Early access · Free for founding coaches · No credit card</div>
+  </div>
+</section>
+
+<script>
+  // NAV scroll
+  window.addEventListener('scroll', () => {
+    document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Section scroll
+  function scrollTo(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // How it works steps
+  function setStep(index) {
+    document.querySelectorAll('.how-step').forEach((s, i) => {
+      s.classList.toggle('active', i === index);
+    });
+    document.querySelectorAll('.how-panel').forEach((p, i) => {
+      p.classList.toggle('active', i === index);
+    });
+  }
+
+  // Reveal on scroll
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => observer.observe(r));
+
+  // CTA
+  function handleSubmit(btn) {
+    btn.textContent = 'You\'re on the list ✓';
+    btn.style.background = 'var(--green)';
+    btn.style.cursor = 'default';
+  }
+</script>
+</body>
+</html>

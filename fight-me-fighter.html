@@ -1,0 +1,1842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>fight.me · Fighter</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,900;1,700&family=Barlow:wght@300;400;500&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap');
+
+  :root {
+    --black: #060606;
+    --ink: #0c0c0c;
+    --card: #111111;
+    --card2: #161616;
+    --line: #1a1a1a;
+    --line2: #222222;
+    --line3: #2e2e2e;
+    --white: #edeae4;
+    --dim: #888880;
+    --muted: #444;
+    --punch: #e8311a;
+    --punch-dim: #4a0f07;
+    --punch-mid: #7a1a0a;
+    --amber: #c97b1a;
+    --amber-dim: #3a2200;
+    --green: #1e7a45;
+    --green-bright: #28b05a;
+    --blue: #1a6ab8;
+    --mono: 'DM Mono', monospace;
+    --display: 'Barlow Condensed', sans-serif;
+    --body: 'Barlow', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--body);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* GRAIN */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.02;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── LAYOUT ── */
+  .app {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--ink);
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    gap: 8px;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 56px;
+    z-index: 50;
+  }
+
+  .sidebar-logo {
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--punch);
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+    width: 100%;
+    text-align: center;
+  }
+
+  .nav-icon {
+    width: 40px; height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 16px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    position: relative;
+  }
+
+  .nav-icon:hover { background: var(--line); color: var(--dim); }
+  .nav-icon.active { background: rgba(232,49,26,0.12); color: var(--punch); }
+
+  .nav-icon .tooltip {
+    position: absolute;
+    left: 52px;
+    background: var(--card2);
+    border: 1px solid var(--line2);
+    color: var(--white);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    padding: 6px 10px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+    border-radius: 2px;
+  }
+
+  .nav-icon:hover .tooltip { opacity: 1; }
+
+  .sidebar-bottom {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .avatar-sm {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--punch-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--punch);
+    cursor: pointer;
+  }
+
+  /* MAIN */
+  .main {
+    margin-left: 56px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    height: 52px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    background: rgba(6,6,6,0.92);
+    backdrop-filter: blur(8px);
+    z-index: 40;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .breadcrumb {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .breadcrumb span { color: var(--dim); }
+
+  .track-pill {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+    background: rgba(232,49,26,0.12);
+    color: var(--punch);
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .signal-dot-top {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--amber);
+    box-shadow: 0 0 6px var(--amber);
+  }
+
+  .topbar-signal-text {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--amber);
+    letter-spacing: 0.05em;
+  }
+
+  /* TABS */
+  .tab-bar {
+    display: flex;
+    border-bottom: 1px solid var(--line);
+    padding: 0 24px;
+  }
+
+  .tab {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 12px 20px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .tab:hover { color: var(--dim); }
+  .tab.active { color: var(--punch); border-bottom-color: var(--punch); }
+
+  /* CONTENT */
+  .content {
+    padding: 24px;
+    flex: 1;
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ── OVERVIEW TAB ── */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .overview-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-title {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .card-badge {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+  }
+
+  .badge-r { background: rgba(232,49,26,0.12); color: var(--punch); }
+  .badge-a { background: rgba(201,123,26,0.12); color: var(--amber); }
+  .badge-g { background: rgba(30,122,69,0.12); color: var(--green-bright); }
+  .badge-b { background: rgba(26,106,184,0.12); color: #5aacff; }
+
+  .card-body { padding: 16px; }
+
+  /* STREAK CARD */
+  .streak-big {
+    font-family: var(--display);
+    font-size: 72px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--punch);
+  }
+
+  .streak-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+    margin-bottom: 16px;
+  }
+
+  .streak-dots {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .streak-dot {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    background: var(--line2);
+  }
+
+  .streak-dot.done { background: var(--punch); }
+  .streak-dot.today { background: var(--punch); box-shadow: 0 0 6px var(--punch); }
+  .streak-dot.rest { background: var(--line2); opacity: 0.4; }
+
+  /* PHASE CARD */
+  .phase-arc {
+    position: relative;
+    height: 90px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .phase-bar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .phase-bar {
+    width: 100%;
+    max-width: 18px;
+    border-radius: 2px 2px 0 0;
+    transition: height 0.3s ease;
+  }
+
+  .phase-bar-label {
+    font-family: var(--mono);
+    font-size: 8px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* SIGNAL SUMMARY */
+  .signal-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .signal-row:last-child { border-bottom: none; }
+
+  .signal-icon {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  .si-r { background: rgba(232,49,26,0.12); }
+  .si-a { background: rgba(201,123,26,0.12); }
+  .si-g { background: rgba(30,122,69,0.12); }
+
+  .signal-info { flex: 1; }
+
+  .signal-name {
+    font-size: 12px;
+    color: var(--white);
+    margin-bottom: 1px;
+  }
+
+  .signal-detail {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+  }
+
+  .signal-trend {
+    font-family: var(--mono);
+    font-size: 10px;
+  }
+
+  .trend-up { color: var(--green-bright); }
+  .trend-same { color: var(--muted); }
+  .trend-down { color: var(--punch); }
+
+  /* NEXT SESSION */
+  .next-session-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .next-day {
+    font-family: var(--display);
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .next-type {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .session-blocks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .session-block-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    background: var(--ink);
+    border: 1px solid var(--line2);
+    border-radius: 2px;
+  }
+
+  .sbi-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sbi-color {
+    width: 3px;
+    height: 28px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .sbi-name { font-size: 12px; color: #ccc; }
+  .sbi-detail { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+
+  .start-btn {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--punch);
+    color: var(--white);
+    border: none;
+    padding: 12px 32px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 14px;
+    transition: background 0.15s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+
+  .start-btn:hover { background: #ff3d20; }
+
+  /* FIT.ME CARD */
+  .fitme-card {
+    border-color: var(--punch-dim);
+    background: rgba(74,15,7,0.15);
+    grid-column: span 2;
+  }
+
+  .fitme-card .card-title { color: var(--punch); }
+
+  .fitme-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .fitme-reason-text {
+    font-size: 12px;
+    color: var(--dim);
+    line-height: 1.8;
+    margin-bottom: 14px;
+  }
+
+  .fitme-reason-text strong { color: var(--white); font-weight: 500; }
+
+  .fitme-programs-mini {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .fitme-prog-mini {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--ink);
+    border: 1px solid var(--line2);
+    border-radius: 2px;
+  }
+
+  .fpm-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .fpm-name { font-size: 12px; color: var(--white); margin-bottom: 1px; }
+  .fpm-detail { font-family: var(--mono); font-size: 9px; color: var(--muted); }
+
+  .fitme-cta {
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--punch);
+    color: var(--white);
+    border: none;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: background 0.15s;
+    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  }
+
+  .fitme-cta:hover { background: #ff3d20; }
+
+  /* ── SESSION TAB ── */
+  .session-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    .session-layout { grid-template-columns: 1fr; }
+  }
+
+  /* TIMER */
+  .timer-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .timer-header {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .timer-session-name {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .round-counter {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+  }
+
+  .round-counter span { color: var(--punch); }
+
+  .timer-body {
+    padding: 32px 24px;
+    text-align: center;
+    position: relative;
+  }
+
+  .timer-phase-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    transition: color 0.3s;
+  }
+
+  .phase-work { color: var(--punch); }
+  .phase-rest { color: var(--green-bright); }
+  .phase-ready { color: var(--amber); }
+
+  .timer-display {
+    font-family: var(--display);
+    font-size: 96px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+    transition: color 0.3s;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .timer-display.work { color: var(--white); }
+  .timer-display.rest { color: var(--green-bright); }
+  .timer-display.ready { color: var(--amber); }
+
+  .timer-sub {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 32px;
+  }
+
+  /* PROGRESS RING */
+  .ring-wrap {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    opacity: 0.08;
+  }
+
+  .ring-svg { transform: rotate(-90deg); }
+
+  .ring-bg { fill: none; stroke: var(--line2); stroke-width: 3; }
+  .ring-fill { fill: none; stroke: var(--punch); stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+
+  /* TIMER CONTROLS */
+  .timer-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+
+  .timer-btn {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    border: 1px solid var(--line2);
+    background: var(--ink);
+    color: var(--white);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .timer-btn:hover { border-color: var(--line3); background: var(--card); }
+
+  .timer-btn.primary {
+    width: 72px; height: 72px;
+    background: var(--punch);
+    border-color: var(--punch);
+    font-size: 24px;
+  }
+
+  .timer-btn.primary:hover { background: #ff3d20; }
+
+  /* DRILL DISPLAY */
+  .drill-display {
+    background: var(--ink);
+    border-top: 1px solid var(--line);
+    padding: 20px 24px;
+  }
+
+  .drill-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .drill-name {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+
+  .drill-cue {
+    font-size: 12px;
+    color: var(--dim);
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  /* LIVE SIGNALS */
+  .live-signals {
+    background: var(--card2);
+    border: 1px solid var(--line);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-radius: 3px;
+    border-top: none;
+    margin-top: -3px;
+  }
+
+  .live-signal-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 2px;
+    border: 1px solid transparent;
+    transition: all 0.4s;
+  }
+
+  .live-signal-item.flagged {
+    background: rgba(232,49,26,0.06);
+    border-color: var(--punch-mid);
+  }
+
+  .live-signal-item.warn {
+    background: rgba(201,123,26,0.06);
+    border-color: rgba(201,123,26,0.3);
+  }
+
+  .live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: background 0.4s;
+  }
+
+  .ld-ok { background: var(--green-bright); }
+  .ld-warn { background: var(--amber); }
+  .ld-flag { background: var(--punch); box-shadow: 0 0 6px var(--punch); }
+
+  .live-signal-text {
+    font-size: 11px;
+    color: var(--dim);
+    flex: 1;
+    line-height: 1.4;
+  }
+
+  .live-signal-text strong { color: var(--white); font-weight: 500; }
+
+  .live-signal-time {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  /* ROUND LOG */
+  .round-log {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .round-log-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .round-log-item:last-child { border-bottom: none; }
+
+  .round-log-num {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--muted);
+    line-height: 1;
+  }
+
+  .round-log-num.done { color: var(--punch); }
+  .round-log-num.current { color: var(--white); }
+
+  .round-log-info { }
+  .round-log-drill { font-size: 12px; color: #ccc; }
+  .round-log-detail { font-family: var(--mono); font-size: 9px; color: var(--muted); }
+
+  .round-status {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+  }
+
+  .rs-done { background: rgba(30,122,69,0.12); color: var(--green-bright); }
+  .rs-current { background: rgba(232,49,26,0.12); color: var(--punch); }
+  .rs-next { color: var(--muted); }
+
+  /* ── PROGRESS TAB ── */
+  .progress-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .progress-layout { grid-template-columns: 1fr; }
+  }
+
+  /* TREND CHART */
+  .trend-chart {
+    height: 120px;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    padding: 0 0 8px;
+    border-bottom: 1px solid var(--line2);
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .trend-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+
+  .trend-bar {
+    width: 100%;
+    max-width: 24px;
+    border-radius: 2px 2px 0 0;
+    transition: height 0.5s ease;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .trend-bar:hover::after {
+    content: attr(data-val);
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--white);
+    white-space: nowrap;
+    background: var(--card2);
+    padding: 2px 6px;
+    border-radius: 2px;
+  }
+
+  .trend-bar-label {
+    font-family: var(--mono);
+    font-size: 8px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* METRIC CARDS */
+  .metric-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .metric-mini {
+    background: var(--ink);
+    border: 1px solid var(--line2);
+    padding: 12px;
+    border-radius: 2px;
+    text-align: center;
+  }
+
+  .metric-val {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+
+  .metric-label {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* SIGNAL HISTORY */
+  .history-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .history-item {
+    display: grid;
+    grid-template-columns: 48px 8px 1fr;
+    gap: 12px;
+    align-items: stretch;
+    padding: 0 0 16px;
+  }
+
+  .history-item:last-child { padding-bottom: 0; }
+
+  .history-date {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    text-align: right;
+    padding-top: 2px;
+  }
+
+  .history-line-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .history-node {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .history-connector {
+    flex: 1;
+    width: 1px;
+    background: var(--line2);
+    margin: 3px 0;
+  }
+
+  .history-item:last-child .history-connector { display: none; }
+
+  .history-content {
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .history-item:last-child .history-content { border-bottom: none; padding-bottom: 0; }
+
+  .history-event {
+    font-size: 12px;
+    color: #bbb;
+    line-height: 1.5;
+    margin-bottom: 3px;
+  }
+
+  .history-event strong { color: var(--white); font-weight: 500; }
+
+  .history-meta {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+  }
+
+  /* PATH CARD */
+  .path-phases {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .path-phase {
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .path-phase-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .path-node {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--display);
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    border: 2px solid;
+  }
+
+  .path-node.done { background: var(--punch); border-color: var(--punch); color: var(--white); }
+  .path-node.current { background: transparent; border-color: var(--punch); color: var(--punch); }
+  .path-node.locked { background: transparent; border-color: var(--line2); color: var(--muted); }
+
+  .path-connector {
+    width: 1px;
+    flex: 1;
+    min-height: 20px;
+    margin: 3px 0;
+  }
+
+  .path-connector.done { background: var(--punch); }
+  .path-connector.locked { background: var(--line2); }
+
+  .path-phase-content {
+    padding: 0 0 20px;
+    flex: 1;
+  }
+
+  .path-phase:last-child .path-phase-content { padding-bottom: 0; }
+
+  .path-phase-name {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+
+  .path-phase-name.done { color: var(--punch); }
+  .path-phase-name.current { color: var(--white); }
+  .path-phase-name.locked { color: var(--muted); }
+
+  .path-phase-detail {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+
+  .path-phase-bar {
+    height: 3px;
+    background: var(--line2);
+    border-radius: 2px;
+    overflow: hidden;
+    max-width: 120px;
+  }
+
+  .path-phase-fill {
+    height: 100%;
+    background: var(--punch);
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
+
+  /* ANIMATIONS */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .pulse { animation: pulse 2s ease infinite; }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .slide-in { animation: slideIn 0.3s ease forwards; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">f.me</div>
+
+    <button class="nav-icon active" onclick="switchTab('overview')">
+      ⬡<div class="tooltip">Overview</div>
+    </button>
+    <button class="nav-icon" onclick="switchTab('session')">
+      ▶<div class="tooltip">Live Session</div>
+    </button>
+    <button class="nav-icon" onclick="switchTab('progress')">
+      ↗<div class="tooltip">Progress</div>
+    </button>
+
+    <div class="sidebar-bottom">
+      <div class="avatar-sm">JR</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="breadcrumb">fight<span>.me</span></div>
+        <div style="color:var(--line2);font-size:12px">/</div>
+        <div class="track-pill">Foundation Track</div>
+        <div style="color:var(--line2);font-size:12px">/</div>
+        <div class="breadcrumb">Week <span>3</span> of 4</div>
+      </div>
+      <div class="topbar-right">
+        <div class="signal-dot-top pulse"></div>
+        <div class="topbar-signal-text">1 signal needs attention</div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tab-bar">
+      <button class="tab active" onclick="switchTab('overview')">Overview</button>
+      <button class="tab" onclick="switchTab('session')">Live Session</button>
+      <button class="tab" onclick="switchTab('progress')">Progress</button>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- ── OVERVIEW TAB ── -->
+      <div class="tab-content active" id="tab-overview">
+        <div class="overview-grid">
+
+          <!-- STREAK -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Training Streak</span>
+              <span class="card-badge badge-r">Active</span>
+            </div>
+            <div class="card-body">
+              <div class="streak-big">11</div>
+              <div class="streak-label">Days Consecutive</div>
+              <div class="streak-dots" id="streak-dots"></div>
+            </div>
+          </div>
+
+          <!-- NEXT SESSION -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Today · Monday</span>
+              <span class="card-badge badge-r">Lift A</span>
+            </div>
+            <div class="card-body">
+              <div class="next-session-header">
+                <div class="next-day">Push / Pull / Hinge</div>
+              </div>
+              <div class="session-blocks-list">
+                <div class="session-block-item">
+                  <div class="sbi-left">
+                    <div class="sbi-color" style="background:var(--punch)"></div>
+                    <div><div class="sbi-name">DB Bench + Band</div><div class="sbi-detail">4×8 · 75% · variable resistance</div></div>
+                  </div>
+                </div>
+                <div class="session-block-item">
+                  <div class="sbi-left">
+                    <div class="sbi-color" style="background:var(--amber)"></div>
+                    <div><div class="sbi-name">Single-Arm Row</div><div class="sbi-detail">3×10/side · unilateral</div></div>
+                  </div>
+                </div>
+                <div class="session-block-item">
+                  <div class="sbi-left">
+                    <div class="sbi-color" style="background:var(--green)"></div>
+                    <div><div class="sbi-name">DB RDL + Farmer Carry</div><div class="sbi-detail">3×12 · 3×40sec</div></div>
+                  </div>
+                </div>
+              </div>
+              <button class="start-btn" onclick="switchTab('session')">Start Session →</button>
+            </div>
+          </div>
+
+          <!-- SIGNALS -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Performance Signals</span>
+              <span class="card-badge badge-a">1 Flagged</span>
+            </div>
+            <div class="card-body">
+              <div class="signal-row">
+                <div class="signal-icon si-r">🫁</div>
+                <div class="signal-info">
+                  <div class="signal-name">Aerobic Recovery</div>
+                  <div class="signal-detail">3.2 min avg · sessions 4–6</div>
+                </div>
+                <div class="signal-trend trend-down">↑ slow</div>
+              </div>
+              <div class="signal-row">
+                <div class="signal-icon si-a">✋</div>
+                <div class="signal-info">
+                  <div class="signal-name">Hand Position</div>
+                  <div class="signal-detail">Drops in round 3+</div>
+                </div>
+                <div class="signal-trend trend-same">→ same</div>
+              </div>
+              <div class="signal-row">
+                <div class="signal-icon si-g">👣</div>
+                <div class="signal-info">
+                  <div class="signal-name">Footwork Quality</div>
+                  <div class="signal-detail">Holding under fatigue</div>
+                </div>
+                <div class="signal-trend trend-up">↑ good</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FIT.ME REDIRECT -->
+          <div class="card fitme-card" style="grid-column: 1 / -1">
+            <div class="card-header">
+              <span class="card-title">⚑ System · Routing to fit.me</span>
+              <span class="card-badge badge-r">Action</span>
+            </div>
+            <div class="card-body">
+              <div class="fitme-layout">
+                <div>
+                  <div class="fitme-reason-text">
+                    fight.me has detected a consistent <strong>aerobic recovery gap</strong> across your last three sessions. Recovery averaging 3.2 minutes — above the 90-second target for your Foundation track. More drilling won't fix this. <strong>Your engine needs dedicated work.</strong><br><br>
+                    The programs below run alongside your strength training — 20 minutes, Tuesday and Saturday. You'll come back to fight.me in 3 weeks noticeably different.
+                  </div>
+                  <button class="fitme-cta">Open fit<span style="color:rgba(255,255,255,0.5)">.me</span> →</button>
+                </div>
+                <div class="fitme-programs-mini">
+                  <div class="fitme-prog-mini">
+                    <div class="fpm-icon">🫀</div>
+                    <div>
+                      <div class="fpm-name">Aerobic Base · 3 weeks</div>
+                      <div class="fpm-detail">Zone 2 · Jump rope · Footwork · 20 min sessions</div>
+                    </div>
+                  </div>
+                  <div class="fitme-prog-mini">
+                    <div class="fpm-icon">⚡</div>
+                    <div>
+                      <div class="fpm-name">Foundation Strength · Ongoing</div>
+                      <div class="fpm-detail">6-3 framework · 4 days/week · Builds power transfer</div>
+                    </div>
+                  </div>
+                  <div class="fitme-prog-mini" style="border-color:var(--line2);opacity:0.5">
+                    <div class="fpm-icon">🔒</div>
+                    <div>
+                      <div class="fpm-name">Speed & Power · Locked</div>
+                      <div class="fpm-detail">Unlocks when aerobic base complete</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── SESSION TAB ── -->
+      <div class="tab-content" id="tab-session">
+        <div class="session-layout">
+
+          <div>
+            <div class="timer-card">
+              <div class="timer-header">
+                <div class="timer-session-name">Foundation · Zone 2 Cardio</div>
+                <div class="round-counter">Round <span id="round-display">1</span> of 4</div>
+              </div>
+              <div class="timer-body">
+                <div class="timer-phase-label phase-ready" id="phase-label">GET READY</div>
+                <div class="timer-display ready" id="timer-display">3:00</div>
+                <div class="timer-sub" id="timer-sub">Jump rope · slow single bounce · nose breathe</div>
+
+                <div class="timer-controls">
+                  <button class="timer-btn" onclick="resetTimer()">↺</button>
+                  <button class="timer-btn primary" id="play-btn" onclick="toggleTimer()">▶</button>
+                  <button class="timer-btn" onclick="skipRound()">⏭</button>
+                </div>
+              </div>
+
+              <div class="drill-display">
+                <div class="drill-label">Current Drill</div>
+                <div class="drill-name" id="drill-name">Jump Rope · Zone 2</div>
+                <div class="drill-cue" id="drill-cue">Stay slow. If you're breaking rhythm, you're going too hard. Full sentences. Nose only.</div>
+              </div>
+            </div>
+
+            <!-- LIVE SIGNALS -->
+            <div class="live-signals" id="live-signals">
+              <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Live Signals</div>
+              <div class="live-signal-item" id="ls-recovery">
+                <div class="live-dot ld-ok"></div>
+                <div class="live-signal-text"><strong>Recovery</strong> monitoring — start session to track</div>
+                <div class="live-signal-time">—</div>
+              </div>
+              <div class="live-signal-item" id="ls-intensity">
+                <div class="live-dot ld-ok"></div>
+                <div class="live-signal-text"><strong>Intensity</strong> within zone 2 target</div>
+                <div class="live-signal-time">—</div>
+              </div>
+              <div class="live-signal-item" id="ls-form">
+                <div class="live-dot ld-ok"></div>
+                <div class="live-signal-text"><strong>Form cues</strong> — session not started</div>
+                <div class="live-signal-time">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ROUND LOG -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Session Structure</span>
+              <span class="card-badge badge-a" id="session-status-badge">Ready</span>
+            </div>
+            <div class="round-log" id="round-log">
+              <div class="round-log-item">
+                <div class="round-log-num current">1</div>
+                <div class="round-log-info">
+                  <div class="round-log-drill">Jump Rope · Zone 2</div>
+                  <div class="round-log-detail">3:00 · slow single bounce</div>
+                </div>
+                <span class="round-status rs-current">Current</span>
+              </div>
+              <div class="round-log-item">
+                <div class="round-log-num">R</div>
+                <div class="round-log-info">
+                  <div class="round-log-drill">Active Rest</div>
+                  <div class="round-log-detail">2:00 · walk, breathe</div>
+                </div>
+                <span class="round-status rs-next">Up next</span>
+              </div>
+              <div class="round-log-item">
+                <div class="round-log-num">2</div>
+                <div class="round-log-info">
+                  <div class="round-log-drill">Footwork Patterns</div>
+                  <div class="round-log-detail">3:00 · shuffle, pivot, lateral</div>
+                </div>
+                <span class="round-status rs-next">—</span>
+              </div>
+              <div class="round-log-item">
+                <div class="round-log-num">R</div>
+                <div class="round-log-info">
+                  <div class="round-log-drill">Active Rest</div>
+                  <div class="round-log-detail">2:00 · walk, breathe</div>
+                </div>
+                <span class="round-status rs-next">—</span>
+              </div>
+              <div class="round-log-item">
+                <div class="round-log-num">3</div>
+                <div class="round-log-info">
+                  <div class="round-log-drill">Jump Rope · Zone 2</div>
+                  <div class="round-log-detail">3:00 · increase pace slightly</div>
+                </div>
+                <span class="round-status rs-next">—</span>
+              </div>
+              <div class="round-log-item">
+                <div class="round-log-num">R</div>
+                <div class="round-log-info">
+                  <div class="round-log-drill">Active Rest</div>
+                  <div class="round-log-detail">2:00 · walk, breathe</div>
+                </div>
+                <span class="round-status rs-next">—</span>
+              </div>
+              <div class="round-log-item">
+                <div class="round-log-num">4</div>
+                <div class="round-log-info">
+                  <div class="round-log-drill">Shadow Boxing · Loose</div>
+                  <div class="round-log-detail">3:00 · no intensity, just move</div>
+                </div>
+                <span class="round-status rs-next">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PROGRESS TAB ── -->
+      <div class="tab-content" id="tab-progress">
+        <div class="progress-layout">
+
+          <!-- RECOVERY TREND -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Recovery Time · 6-Session Trend</span>
+              <span class="card-badge badge-a">Improving</span>
+            </div>
+            <div class="card-body">
+              <div class="trend-chart" id="recovery-chart"></div>
+              <div class="metric-row">
+                <div class="metric-mini">
+                  <div class="metric-val" style="color:var(--punch)">3.2</div>
+                  <div class="metric-label">min avg now</div>
+                </div>
+                <div class="metric-mini">
+                  <div class="metric-val" style="color:var(--amber)">1.5</div>
+                  <div class="metric-label">min target</div>
+                </div>
+                <div class="metric-mini">
+                  <div class="metric-val" style="color:var(--green-bright)">↓ 22%</div>
+                  <div class="metric-label">vs week 1</div>
+                </div>
+              </div>
+              <div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:8px">Trending right direction. At this rate, target reached by end of Phase 2.</div>
+            </div>
+          </div>
+
+          <!-- SESSION COUNT -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Weekly Volume · Sessions</span>
+              <span class="card-badge badge-g">On Track</span>
+            </div>
+            <div class="card-body">
+              <div class="trend-chart" id="volume-chart"></div>
+              <div class="metric-row">
+                <div class="metric-mini">
+                  <div class="metric-val" style="color:var(--white)">18</div>
+                  <div class="metric-label">total sessions</div>
+                </div>
+                <div class="metric-mini">
+                  <div class="metric-val" style="color:var(--green-bright)">4.5</div>
+                  <div class="metric-label">avg per week</div>
+                </div>
+                <div class="metric-mini">
+                  <div class="metric-val" style="color:var(--green-bright)">0</div>
+                  <div class="metric-label">missed target</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SIGNAL HISTORY -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Signal History</span>
+            </div>
+            <div class="card-body">
+              <div class="history-timeline">
+                <div class="history-item">
+                  <div class="history-date">Today</div>
+                  <div class="history-line-wrap">
+                    <div class="history-node" style="background:var(--amber)"></div>
+                    <div class="history-connector"></div>
+                  </div>
+                  <div class="history-content">
+                    <div class="history-event"><strong>Aerobic gap confirmed</strong> — routed to fit.me Zone 2 program</div>
+                    <div class="history-meta">Recovery 3.2 min · 3 sessions consecutive</div>
+                  </div>
+                </div>
+                <div class="history-item">
+                  <div class="history-date">Sat</div>
+                  <div class="history-line-wrap">
+                    <div class="history-node" style="background:var(--punch)"></div>
+                    <div class="history-connector"></div>
+                  </div>
+                  <div class="history-content">
+                    <div class="history-event"><strong>Hand drop detected</strong> — rounds 3 and 4</div>
+                    <div class="history-meta">Fatigue-related · monitoring</div>
+                  </div>
+                </div>
+                <div class="history-item">
+                  <div class="history-date">Thu</div>
+                  <div class="history-line-wrap">
+                    <div class="history-node" style="background:var(--green-bright)"></div>
+                    <div class="history-connector"></div>
+                  </div>
+                  <div class="history-content">
+                    <div class="history-event"><strong>Footwork quality improving</strong> — holding under load</div>
+                    <div class="history-meta">Pattern consistency up 18%</div>
+                  </div>
+                </div>
+                <div class="history-item">
+                  <div class="history-date">Mon</div>
+                  <div class="history-line-wrap">
+                    <div class="history-node" style="background:var(--green-bright)"></div>
+                    <div class="history-connector"></div>
+                  </div>
+                  <div class="history-content">
+                    <div class="history-event"><strong>Week 2 complete</strong> — all sessions logged</div>
+                    <div class="history-meta">4 of 4 sessions · no missed days</div>
+                  </div>
+                </div>
+                <div class="history-item">
+                  <div class="history-date">Wk 1</div>
+                  <div class="history-line-wrap">
+                    <div class="history-node" style="background:var(--punch)"></div>
+                    <div class="history-connector"></div>
+                  </div>
+                  <div class="history-content">
+                    <div class="history-event"><strong>Placed · Foundation Track</strong> — assessment complete</div>
+                    <div class="history-meta">Score: 5/18 · Honest starting point</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PATH -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Your Path</span>
+              <span class="card-badge badge-r">Week 3 of 16</span>
+            </div>
+            <div class="card-body">
+              <div class="path-phases">
+                <div class="path-phase">
+                  <div class="path-phase-line">
+                    <div class="path-node current">1</div>
+                    <div class="path-connector done"></div>
+                  </div>
+                  <div class="path-phase-content">
+                    <div class="path-phase-name current">Foundation</div>
+                    <div class="path-phase-detail">Weeks 1–4 · Engine + patterns</div>
+                    <div class="path-phase-bar">
+                      <div class="path-phase-fill" style="width:65%"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="path-phase">
+                  <div class="path-phase-line">
+                    <div class="path-node locked">2</div>
+                    <div class="path-connector locked"></div>
+                  </div>
+                  <div class="path-phase-content">
+                    <div class="path-phase-name locked">Fundamentals</div>
+                    <div class="path-phase-detail">Weeks 5–8 · Boxing basics</div>
+                    <div class="path-phase-bar">
+                      <div class="path-phase-fill" style="width:0%"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="path-phase">
+                  <div class="path-phase-line">
+                    <div class="path-node locked">🥊</div>
+                    <div class="path-connector locked"></div>
+                  </div>
+                  <div class="path-phase-content">
+                    <div class="path-phase-name locked">Glove Work</div>
+                    <div class="path-phase-detail">Weeks 9–12 · Technique</div>
+                    <div class="path-phase-bar">
+                      <div class="path-phase-fill" style="width:0%"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="path-phase">
+                  <div class="path-phase-line">
+                    <div class="path-node locked">⬡</div>
+                    <div class="path-connector locked" style="display:none"></div>
+                  </div>
+                  <div class="path-phase-content">
+                    <div class="path-phase-name locked">Sparring Prep</div>
+                    <div class="path-phase-detail">Weeks 13–16 · In-ring work</div>
+                    <div class="path-phase-bar">
+                      <div class="path-phase-fill" style="width:0%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── TAB SWITCHING ──
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach((t,i) => {
+      const names = ['overview','session','progress'];
+      t.classList.toggle('active', names[i] === name);
+    });
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+
+    document.querySelectorAll('.nav-icon').forEach((n,i) => {
+      const names = ['overview','session','progress'];
+      n.classList.toggle('active', names[i] === name);
+    });
+
+    if (name === 'progress') buildCharts();
+  }
+
+  // ── STREAK DOTS ──
+  const streakContainer = document.getElementById('streak-dots');
+  for (let i = 0; i < 28; i++) {
+    const d = document.createElement('div');
+    d.className = 'streak-dot';
+    if (i < 11) d.classList.add('done');
+    if (i === 10) d.classList.add('today');
+    if ([6, 13, 20].includes(i)) d.classList.add('rest');
+    streakContainer.appendChild(d);
+  }
+
+  // ── TIMER ──
+  let timerInterval = null;
+  let isRunning = false;
+  let timeLeft = 180; // 3:00
+  let isRest = false;
+  let currentRound = 1;
+  let elapsed = 0;
+  let signalsFired = false;
+
+  const rounds = [
+    { name: 'Jump Rope · Zone 2', cue: 'Stay slow. Full sentences. Nose only. If you\'re breaking rhythm, you\'re going too hard.', work: 180, rest: 120 },
+    { name: 'Footwork Patterns', cue: 'Shuffle · pivot · lateral step. Keep weight on balls of feet. Eyes forward.', work: 180, rest: 120 },
+    { name: 'Jump Rope · Zone 2', cue: 'You can push the pace very slightly now. Still conversational. Still nose breathing.', work: 180, rest: 120 },
+    { name: 'Shadow Boxing · Loose', cue: 'No intensity. Just move. Jab · cross · breathe. This is your cooldown.', work: 180, rest: 0 },
+  ];
+
+  function updateTimerDisplay() {
+    const mins = Math.floor(timeLeft / 60);
+    const secs = timeLeft % 60;
+    document.getElementById('timer-display').textContent =
+      `${mins}:${secs.toString().padStart(2,'0')}`;
+  }
+
+  function toggleTimer() {
+    if (isRunning) {
+      clearInterval(timerInterval);
+      isRunning = false;
+      document.getElementById('play-btn').textContent = '▶';
+      document.getElementById('session-status-badge').textContent = 'Paused';
+    } else {
+      isRunning = true;
+      document.getElementById('play-btn').textContent = '⏸';
+      document.getElementById('session-status-badge').textContent = 'In Progress';
+
+      const phase = document.getElementById('phase-label');
+      const display = document.getElementById('timer-display');
+      const sub = document.getElementById('timer-sub');
+
+      if (!isRest) {
+        phase.className = 'timer-phase-label phase-work';
+        phase.textContent = 'WORK';
+        display.className = 'timer-display work';
+        sub.textContent = rounds[currentRound - 1].cue.substring(0, 50) + '...';
+        document.getElementById('drill-name').textContent = rounds[currentRound - 1].name;
+        document.getElementById('drill-cue').textContent = rounds[currentRound - 1].cue;
+      }
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        elapsed++;
+        updateTimerDisplay();
+
+        // fire signals at specific times
+        if (elapsed === 30 && !signalsFired) {
+          fireSignal('ls-intensity', 'warn', '⚡ Intensity', 'Pace looks high for zone 2 — try slowing the bounce', '0:30');
+        }
+        if (elapsed === 60) {
+          fireSignal('ls-recovery', 'ok', '🫁 Recovery', 'Heart rate settling — keep the pace consistent', '1:00');
+        }
+        if (elapsed === 120) {
+          fireSignal('ls-form', 'flag', '⚠ Gas out flag', 'Recovery still elevated from last session — fit.me routing confirmed', '2:00');
+          signalsFired = true;
+        }
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          isRunning = false;
+
+          if (!isRest && rounds[currentRound - 1].rest > 0) {
+            isRest = true;
+            timeLeft = rounds[currentRound - 1].rest;
+            phase.className = 'timer-phase-label phase-rest';
+            phase.textContent = 'REST';
+            display.className = 'timer-display rest';
+            sub.textContent = 'Walk. Breathe. Let heart rate come down.';
+            document.getElementById('play-btn').textContent = '▶';
+            document.getElementById('play-btn').style.background = 'var(--green)';
+          } else {
+            isRest = false;
+            if (currentRound < rounds.length) {
+              currentRound++;
+              timeLeft = rounds[currentRound - 1].work;
+              document.getElementById('round-display').textContent = currentRound;
+              document.getElementById('play-btn').textContent = '▶';
+              document.getElementById('play-btn').style.background = 'var(--punch)';
+              phase.className = 'timer-phase-label phase-ready';
+              phase.textContent = 'ROUND ' + currentRound;
+              display.className = 'timer-display ready';
+              document.getElementById('drill-name').textContent = rounds[currentRound - 1].name;
+              document.getElementById('drill-cue').textContent = rounds[currentRound - 1].cue;
+            } else {
+              phase.textContent = 'COMPLETE';
+              display.className = 'timer-display ready';
+              document.getElementById('play-btn').textContent = '✓';
+              document.getElementById('session-status-badge').textContent = 'Done';
+            }
+          }
+          updateTimerDisplay();
+        }
+      }, 1000);
+    }
+  }
+
+  function fireSignal(id, type, title, text, time) {
+    const el = document.getElementById(id);
+    el.className = 'live-signal-item slide-in ' + (type === 'flag' ? 'flagged' : type === 'warn' ? 'warn' : '');
+    const dot = el.querySelector('.live-dot');
+    dot.className = 'live-dot ' + (type === 'flag' ? 'ld-flag' : type === 'warn' ? 'ld-warn' : 'ld-ok');
+    el.querySelector('.live-signal-text').innerHTML = `<strong>${title}</strong> ${text}`;
+    el.querySelector('.live-signal-time').textContent = time;
+  }
+
+  function resetTimer() {
+    clearInterval(timerInterval);
+    isRunning = false;
+    isRest = false;
+    currentRound = 1;
+    timeLeft = 180;
+    elapsed = 0;
+    signalsFired = false;
+    document.getElementById('play-btn').textContent = '▶';
+    document.getElementById('play-btn').style.background = 'var(--punch)';
+    document.getElementById('round-display').textContent = '1';
+    document.getElementById('phase-label').className = 'timer-phase-label phase-ready';
+    document.getElementById('phase-label').textContent = 'GET READY';
+    document.getElementById('timer-display').className = 'timer-display ready';
+    document.getElementById('drill-name').textContent = 'Jump Rope · Zone 2';
+    document.getElementById('drill-cue').textContent = 'Stay slow. If you\'re breaking rhythm, you\'re going too hard. Full sentences. Nose only.';
+    document.getElementById('session-status-badge').textContent = 'Ready';
+    // reset signals
+    ['ls-recovery','ls-intensity','ls-form'].forEach(id => {
+      const el = document.getElementById(id);
+      el.className = 'live-signal-item';
+      el.querySelector('.live-dot').className = 'live-dot ld-ok';
+    });
+    document.getElementById('ls-recovery').querySelector('.live-signal-text').innerHTML = '<strong>Recovery</strong> monitoring — start session to track';
+    document.getElementById('ls-intensity').querySelector('.live-signal-text').innerHTML = '<strong>Intensity</strong> within zone 2 target';
+    document.getElementById('ls-form').querySelector('.live-signal-text').innerHTML = '<strong>Form cues</strong> — session not started';
+    ['ls-recovery','ls-intensity','ls-form'].forEach(id => {
+      document.getElementById(id).querySelector('.live-signal-time').textContent = '—';
+    });
+    updateTimerDisplay();
+  }
+
+  function skipRound() {
+    clearInterval(timerInterval);
+    isRunning = false;
+    isRest = false;
+    if (currentRound < rounds.length) {
+      currentRound++;
+      timeLeft = rounds[currentRound - 1].work;
+      document.getElementById('round-display').textContent = currentRound;
+      document.getElementById('drill-name').textContent = rounds[currentRound - 1].name;
+      document.getElementById('drill-cue').textContent = rounds[currentRound - 1].cue;
+      document.getElementById('phase-label').className = 'timer-phase-label phase-ready';
+      document.getElementById('phase-label').textContent = 'ROUND ' + currentRound;
+      document.getElementById('timer-display').className = 'timer-display ready';
+      document.getElementById('play-btn').textContent = '▶';
+      document.getElementById('play-btn').style.background = 'var(--punch)';
+    }
+    updateTimerDisplay();
+  }
+
+  // ── CHARTS ──
+  function buildCharts() {
+    buildRecoveryChart();
+    buildVolumeChart();
+  }
+
+  function buildRecoveryChart() {
+    const container = document.getElementById('recovery-chart');
+    if (container.children.length > 0) return;
+    const data = [
+      { label: 'S1', val: 4.1, max: 5 },
+      { label: 'S2', val: 3.9, max: 5 },
+      { label: 'S3', val: 3.7, max: 5 },
+      { label: 'S4', val: 3.5, max: 5 },
+      { label: 'S5', val: 3.3, max: 5 },
+      { label: 'S6', val: 3.2, max: 5 },
+    ];
+    data.forEach((d, i) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'trend-bar-wrap';
+      const pct = (d.val / d.max) * 100;
+      const color = d.val > 3.5 ? 'var(--punch)' : d.val > 2 ? 'var(--amber)' : 'var(--green-bright)';
+      wrap.innerHTML = `
+        <div class="trend-bar" style="height:${pct}%;background:${color}" data-val="${d.val} min"></div>
+        <div class="trend-bar-label">${d.label}</div>
+      `;
+      container.appendChild(wrap);
+    });
+  }
+
+  function buildVolumeChart() {
+    const container = document.getElementById('volume-chart');
+    if (container.children.length > 0) return;
+    const data = [
+      { label: 'W1', val: 4, max: 5 },
+      { label: 'W2', val: 4, max: 5 },
+      { label: 'W3', val: 3, max: 5 },
+    ];
+    data.forEach(d => {
+      const wrap = document.createElement('div');
+      wrap.className = 'trend-bar-wrap';
+      const pct = (d.val / d.max) * 100;
+      wrap.innerHTML = `
+        <div class="trend-bar" style="height:${pct}%;background:var(--green-bright)" data-val="${d.val} sessions"></div>
+        <div class="trend-bar-label">${d.label}</div>
+      `;
+      container.appendChild(wrap);
+    });
+  }
+
+  updateTimerDisplay();
+</script>
+</body>
+</html>

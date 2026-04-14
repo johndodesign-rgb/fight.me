@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#060606">
+<link rel="manifest" href="manifest.json">
+<title>Methodology · .me Training System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,700;0,900;1,700&family=Barlow:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap');
+
+  :root {
+    --black: #060606;
+    --ink: #0c0c0c;
+    --card: #111;
+    --card2: #161616;
+    --line: #1a1a1a;
+    --line2: #242424;
+    --line3: #303030;
+    --white: #edeae4;
+    --dim: #777;
+    --muted: #3a3a3a;
+    --punch: #e8311a;
+    --punch-dim: #4a0f07;
+    --amber: #c97b1a;
+    --green: #28b05a;
+    --blue: #2a7ab8;
+    --purple: #7a2ab8;
+    --mono: 'DM Mono', monospace;
+    --display: 'Barlow Condensed', sans-serif;
+    --body: 'Barlow', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.018;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* NAV */
+  nav {
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(6,6,6,0.95);
+    backdrop-filter: blur(8px);
+    z-index: 50;
+  }
+
+  .nav-logo {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .nav-logo .punch { color: var(--punch); }
+
+  .nav-logo-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    border-left: 1px solid var(--line2);
+    padding-left: 10px;
+  }
+
+  .nav-logo-stack span {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dim);
+    line-height: 1.3;
+    display: block;
+  }
+
+  .nav-back {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .nav-back:hover { color: var(--white); }
+
+  /* HERO */
+  .hero {
+    padding: 64px 32px 48px;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+    max-width: 900px;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    bottom: -80px; right: -80px;
+    width: 400px; height: 300px;
+    background: radial-gradient(ellipse, rgba(232,49,26,0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--punch);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--punch);
+  }
+
+  .hero-title {
+    font-family: var(--display);
+    font-size: clamp(48px, 8vw, 80px);
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+  }
+
+  .hero-title .accent { color: var(--punch); }
+
+  .hero-desc {
+    font-size: 15px;
+    color: var(--dim);
+    line-height: 1.8;
+    max-width: 560px;
+  }
+
+  .hero-desc strong { color: var(--white); font-weight: 500; }
+
+  /* MAIN LAYOUT */
+  .main {
+    max-width: 900px;
+    padding: 0 32px 80px;
+  }
+
+  /* SECTION */
+  .section {
+    padding: 56px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .section:last-child { border-bottom: none; }
+
+  .section-eyebrow {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--punch);
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: var(--display);
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    margin-bottom: 16px;
+  }
+
+  .section-body {
+    font-size: 14px;
+    color: var(--dim);
+    line-height: 1.8;
+    max-width: 620px;
+    margin-bottom: 40px;
+  }
+
+  .section-body strong { color: var(--white); font-weight: 500; }
+  .section-body + .section-body { margin-top: -24px; }
+
+  /* THE 6 PATTERNS GRID */
+  .patterns-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-bottom: 40px;
+  }
+
+  @media (max-width: 600px) {
+    .patterns-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .pattern-card {
+    background: var(--card);
+    border: 1px solid var(--line2);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pattern-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .pc-push::before   { background: var(--punch); }
+  .pc-pull::before   { background: var(--blue); }
+  .pc-squat::before  { background: var(--green); }
+  .pc-hinge::before  { background: var(--amber); }
+  .pc-carry::before  { background: var(--purple); }
+  .pc-rotate::before { background: #e87b1a; }
+
+  .pattern-num {
+    font-family: var(--display);
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--line3);
+    margin-bottom: 8px;
+  }
+
+  .pattern-name {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .pc-push .pattern-name   { color: var(--punch); }
+  .pc-pull .pattern-name   { color: #5aacff; }
+  .pc-squat .pattern-name  { color: var(--green); }
+  .pc-hinge .pattern-name  { color: var(--amber); }
+  .pc-carry .pattern-name  { color: #b87aff; }
+  .pc-rotate .pattern-name { color: #e87b1a; }
+
+  .pattern-desc {
+    font-size: 11px;
+    color: var(--dim);
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+
+  .pattern-examples {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    line-height: 1.7;
+  }
+
+  /* FREQUENCY RULE */
+  .freq-rule {
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-left: 3px solid var(--punch);
+    padding: 24px;
+    margin-bottom: 40px;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .freq-rule-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--punch);
+    margin-bottom: 8px;
+  }
+
+  .freq-rule-text {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .freq-rule-sub {
+    font-size: 13px;
+    color: var(--dim);
+    line-height: 1.6;
+  }
+
+  .freq-rule-sub strong { color: var(--white); font-weight: 500; }
+
+  /* WEEK VISUAL */
+  .week-visual {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 32px;
+  }
+
+  @media (max-width: 600px) {
+    .week-visual { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  .wv-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .wv-day-name {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .wv-day-block {
+    width: 100%;
+    padding: 14px 8px;
+    border-radius: 2px;
+    text-align: center;
+    border: 1px solid;
+  }
+
+  .wv-day-type {
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+
+  .wv-day-detail {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.05em;
+    line-height: 1.4;
+  }
+
+  .wvd-strength { background: rgba(232,49,26,0.08); border-color: rgba(232,49,26,0.3); }
+  .wvd-strength .wv-day-type { color: var(--punch); }
+  .wvd-strength .wv-day-detail { color: rgba(232,49,26,0.6); }
+
+  .wvd-cardio { background: rgba(40,176,90,0.08); border-color: rgba(40,176,90,0.3); }
+  .wvd-cardio .wv-day-type { color: var(--green); }
+  .wvd-cardio .wv-day-detail { color: rgba(40,176,90,0.6); }
+
+  .wvd-combo { background: rgba(201,123,26,0.08); border-color: rgba(201,123,26,0.3); }
+  .wvd-combo .wv-day-type { color: var(--amber); }
+  .wvd-combo .wv-day-detail { color: rgba(201,123,26,0.6); }
+
+  .wvd-mobility { background: rgba(122,42,184,0.08); border-color: rgba(122,42,184,0.3); }
+  .wvd-mobility .wv-day-type { color: #b87aff; }
+  .wvd-mobility .wv-day-detail { color: rgba(122,42,184,0.5); }
+
+  .wvd-rest { background: var(--card); border-color: var(--line2); }
+  .wvd-rest .wv-day-type { color: var(--muted); }
+  .wvd-rest .wv-day-detail { color: var(--muted); }
+
+  /* PATTERN DISTRIBUTION TABLE */
+  .dist-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 32px;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+
+  .dist-table th {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line2);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .dist-table th.day-col { text-align: center; }
+
+  .dist-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--line);
+    color: #aaa;
+    vertical-align: middle;
+  }
+
+  .dist-table tr:last-child td { border-bottom: none; }
+
+  .dist-table td:first-child {
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  .dist-table td.day-col { text-align: center; }
+
+  .dot {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+  }
+
+  .dot-primary { background: rgba(232,49,26,0.2); color: var(--punch); }
+  .dot-secondary { background: rgba(255,255,255,0.06); color: var(--dim); }
+  .dot-empty { color: var(--muted); }
+
+  .pattern-label { display: flex; align-items: center; gap: 8px; }
+  .pattern-pip { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+  /* FREQ SUMMARY */
+  .freq-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  @media (max-width: 500px) { .freq-summary { grid-template-columns: 1fr 1fr; } }
+
+  .freq-card {
+    background: var(--card);
+    border: 1px solid var(--line2);
+    padding: 16px;
+    border-radius: 2px;
+    text-align: center;
+  }
+
+  .freq-num {
+    font-family: var(--display);
+    font-size: 40px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--punch);
+    margin-bottom: 4px;
+  }
+
+  .freq-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* CALLOUT */
+  .callout {
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-left: 3px solid var(--green);
+    padding: 20px 24px;
+    border-radius: 0 2px 2px 0;
+    margin-top: 32px;
+  }
+
+  .callout-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+
+  .callout-text {
+    font-size: 13px;
+    color: var(--dim);
+    line-height: 1.8;
+  }
+
+  .callout-text strong { color: var(--white); font-weight: 500; }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <span><span class="punch">.</span>me</span>
+    <div class="nav-logo-stack">
+      <span>Training</span>
+      <span>System</span>
+    </div>
+  </div>
+  <a class="nav-back" href="fit-me-hub.html">← fit.me</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">Programming Methodology</div>
+  <div class="hero-title">How the<br><span class="accent">program</span><br>is built</div>
+  <p class="hero-desc">
+    The .me system is built on two proven frameworks working together.
+    <strong>6-3</strong> defines what gets trained and how often.
+    <strong>4-2-1</strong> defines how the week is structured.
+    The user sees 4-2-1. The 6-3 runs silently underneath, making sure nothing important gets missed.
+  </p>
+</div>
+
+<div class="main">
+
+  <!-- THE 6 PATTERNS -->
+  <div class="section">
+    <div class="section-eyebrow">The Foundation</div>
+    <div class="section-title">Six Movement Patterns</div>
+    <p class="section-body">
+      Human movement breaks down into six fundamental patterns. Every exercise in the .me system belongs to one of them.
+      Training all six deliberately builds a complete athlete. Skipping any one of them leaves a gap that shows up under pressure.
+    </p>
+
+    <div class="patterns-grid">
+      <div class="pattern-card pc-push">
+        <div class="pattern-num">01</div>
+        <div class="pattern-name">Push</div>
+        <div class="pattern-desc">Horizontal and vertical pressing. Chest, shoulders, triceps. Punch extension power and sustained guard position.</div>
+        <div class="pattern-examples">DB Bench Press · Push-Up<br>Overhead Press · Floor Press</div>
+      </div>
+      <div class="pattern-card pc-pull">
+        <div class="pattern-num">02</div>
+        <div class="pattern-name">Pull</div>
+        <div class="pattern-desc">Horizontal and vertical pulling. Back, biceps, rear deltoids. Punch retraction speed, clinch work, opponent control.</div>
+        <div class="pattern-examples">DB Row · Band Pull-Down<br>Face Pull · Hammer Curl</div>
+      </div>
+      <div class="pattern-card pc-squat">
+        <div class="pattern-num">03</div>
+        <div class="pattern-name">Squat</div>
+        <div class="pattern-desc">Knee-dominant lower body. Quads, glutes. Stance power, level changes, explosive leg drive in footwork.</div>
+        <div class="pattern-examples">Goblet Squat · Split Squat<br>Bulgarian · Lateral Squat</div>
+      </div>
+      <div class="pattern-card pc-hinge">
+        <div class="pattern-num">04</div>
+        <div class="pattern-name">Hinge</div>
+        <div class="pattern-desc">Hip-dominant posterior chain. Hamstrings, glutes, lower back. The engine behind every punch. Most important pattern.</div>
+        <div class="pattern-examples">DB Swing · RDL<br>Single-Leg RDL · Hip Thrust</div>
+      </div>
+      <div class="pattern-card pc-carry">
+        <div class="pattern-num">05</div>
+        <div class="pattern-name">Carry</div>
+        <div class="pattern-desc">Loaded locomotion. Traps, core, grip, full body. Structural integrity, clinch endurance, durability over a full fight.</div>
+        <div class="pattern-examples">Farmer Carry · Suitcase<br>Single-Arm · Overhead</div>
+      </div>
+      <div class="pattern-card pc-rotate">
+        <div class="pattern-num">06</div>
+        <div class="pattern-name">Rotate</div>
+        <div class="pattern-desc">Transverse plane core. Obliques, deep core. The mechanism of every punch — power transfer from hips to hands.</div>
+        <div class="pattern-examples">Pallof Press · Woodchop<br>Anti-Rotation Hold</div>
+      </div>
+    </div>
+
+    <div class="freq-rule">
+      <div class="freq-rule-label">The 6-3 Rule</div>
+      <div class="freq-rule-text">Each pattern trained at least 3× per week.</div>
+      <div class="freq-rule-sub">
+        This is the frequency target that drives adaptation. <strong>Hit a pattern fewer than three times and the training stimulus isn't sufficient for meaningful progress.</strong> The 6-3 rule is not a rigid prescription — it's a minimum effective dose for each movement pattern weekly.
+      </div>
+    </div>
+  </div>
+
+  <!-- THE 4-2-1 WEEK -->
+  <div class="section">
+    <div class="section-eyebrow">The Schedule</div>
+    <div class="section-title">4-2-1 Weekly Structure</div>
+    <p class="section-body">
+      The 4-2-1 is what the user actually sees. Four strength days, two cardio sessions, one mobility session, one full rest.
+      This is a sustainable structure for the adult combat athlete with a real life — consistent enough to drive adaptation, manageable enough to maintain across months.
+    </p>
+
+    <div class="week-visual">
+      <div class="wv-day">
+        <div class="wv-day-name">Mon</div>
+        <div class="wv-day-block wvd-strength">
+          <div class="wv-day-type">Strength</div>
+          <div class="wv-day-detail">Push · Pull<br>Hinge</div>
+        </div>
+      </div>
+      <div class="wv-day">
+        <div class="wv-day-name">Tue</div>
+        <div class="wv-day-block wvd-cardio">
+          <div class="wv-day-type">Cardio</div>
+          <div class="wv-day-detail">Zone 2<br>Rope · Footwork</div>
+        </div>
+      </div>
+      <div class="wv-day">
+        <div class="wv-day-name">Wed</div>
+        <div class="wv-day-block wvd-rest">
+          <div class="wv-day-type">Rest</div>
+          <div class="wv-day-detail">Full<br>recovery</div>
+        </div>
+      </div>
+      <div class="wv-day">
+        <div class="wv-day-name">Thu</div>
+        <div class="wv-day-block wvd-strength">
+          <div class="wv-day-type">Strength</div>
+          <div class="wv-day-detail">Squat · Rotate<br>Unilateral</div>
+        </div>
+      </div>
+      <div class="wv-day">
+        <div class="wv-day-name">Fri</div>
+        <div class="wv-day-block wvd-rest">
+          <div class="wv-day-type">Rest</div>
+          <div class="wv-day-detail">Full<br>recovery</div>
+        </div>
+      </div>
+      <div class="wv-day">
+        <div class="wv-day-name">Sat</div>
+        <div class="wv-day-block wvd-combo">
+          <div class="wv-day-type">Strength</div>
+          <div class="wv-day-detail">Dead stops · Power<br>+ Cardio finisher</div>
+        </div>
+      </div>
+      <div class="wv-day">
+        <div class="wv-day-name">Sun</div>
+        <div class="wv-day-block wvd-mobility">
+          <div class="wv-day-type">Mobility</div>
+          <div class="wv-day-detail">Shoulders · Hips<br>Thoracic</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="freq-summary">
+      <div class="freq-card">
+        <div class="freq-num">4</div>
+        <div class="freq-label">Strength days</div>
+      </div>
+      <div class="freq-card">
+        <div class="freq-num">2</div>
+        <div class="freq-label">Cardio sessions</div>
+      </div>
+      <div class="freq-card">
+        <div class="freq-num">1</div>
+        <div class="freq-label">Mobility day</div>
+      </div>
+    </div>
+
+    <p class="section-body">
+      Saturday counts as both a strength session and a cardio session — the conditioning finisher in Phase 2 and beyond gives you a second cardio touch without adding a dedicated day. Tuesday is the primary zone 2 session. Sunday mobility is not optional — it is training with a specific purpose.
+    </p>
+  </div>
+
+  <!-- THE MAPPING -->
+  <div class="section">
+    <div class="section-eyebrow">How They Work Together</div>
+    <div class="section-title">6-3 Mapped to 4-2-1</div>
+    <p class="section-body">
+      The six patterns are distributed across the four strength days so that each pattern gets hit at least three times per week.
+      Some patterns appear on every strength day. Carry and rotation are present in every session.
+      The table below shows which patterns are primary focus on each day and which appear as supporting work.
+    </p>
+
+    <div class="legend">
+      <div class="legend-item"><div class="dot dot-primary">P</div>Primary focus</div>
+      <div class="legend-item"><div class="dot dot-secondary">s</div>Supporting work</div>
+      <div class="legend-item"><div class="dot dot-empty">—</div>Not this day</div>
+    </div>
+
+    <table class="dist-table">
+      <thead>
+        <tr>
+          <th>Pattern</th>
+          <th class="day-col">Mon</th>
+          <th class="day-col">Thu</th>
+          <th class="day-col">Sat</th>
+          <th class="day-col">Weekly hits</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="pattern-label">
+              <div class="pattern-pip" style="background:var(--punch)"></div>
+              Push
+            </div>
+          </td>
+          <td class="day-col"><div class="dot dot-primary">P</div></td>
+          <td class="day-col"><div class="dot dot-secondary">s</div></td>
+          <td class="day-col"><div class="dot dot-primary">P</div></td>
+          <td class="day-col" style="color:var(--punch);font-weight:700">3×</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="pattern-label">
+              <div class="pattern-pip" style="background:#2a7ab8"></div>
+              Pull
+            </div>
+          </td>
+          <td class="day-col"><div class="dot dot-primary">P</div></td>
+          <td class="day-col"><div class="dot dot-secondary">s</div></td>
+          <td class="day-col"><div class="dot dot-primary">P</div></td>
+          <td class="day-col" style="color:var(--punch);font-weight:700">3×</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="pattern-label">
+              <div class="pattern-pip" style="background:var(--green)"></div>
+              Squat
+            </div>
+          </td>
+          <td class="day-col"><div class="dot dot-secondary">s</div></td>
+          <td class="day-col"><div class="dot dot-primary">P</div></td>
+          <td class="day-col"><div class="dot dot-secondary">s</div></td>
+          <td class="day-col" style="color:var(--punch);font-weight:700">3×</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="pattern-label">
+              <div class="pattern-pip" style="background:var(--amber)"></div>
+              Hinge
+            </div>
+          </td>
+          <td class="day-col"><div class="dot dot-primary">P</div></td>
+          <td class="day-col"><div class="dot dot-secondary">s</div></td>
+          <td class="day-col"><div class="dot dot-primary">P</div></td>
+          <td class="day-col" style="color:var(--punch);font-weight:700">3×</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="pattern-label">
+              <div class="pattern-pip" style="background:#7a2ab8"></div>
+              Carry
+            </div>
+          </td>
+          <td class="day-col"><div class="dot dot-primary">P</div></td>
+          <td class="day-col"><div class="dot dot-secondary">s</div></td>
+          <td class="day-col"><div class="dot dot-primary">P</div></td>
+          <td class="day-col" style="color:var(--punch);font-weight:700">3×</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="pattern-label">
+              <div class="pattern-pip" style="background:#e87b1a"></div>
+              Rotate
+            </div>
+          </td>
+          <td class="day-col"><div class="dot dot-secondary">s</div></td>
+          <td class="day-col"><div class="dot dot-primary">P</div></td>
+          <td class="day-col"><div class="dot dot-secondary">s</div></td>
+          <td class="day-col" style="color:var(--punch);font-weight:700">3×</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <div class="callout-label">The key insight</div>
+      <div class="callout-text">
+        <strong>The user never sees this table.</strong> They see Monday: Push / Pull / Hinge. Thursday: Squat / Rotate / Unilateral. Saturday: Dead stops and power. The 6-3 frequency target is honored automatically — it's baked into the program design. The user just shows up and trains. The system makes sure nothing gets missed.
+      </div>
+    </div>
+  </div>
+
+  <!-- WHY THIS WORKS -->
+  <div class="section">
+    <div class="section-eyebrow">The Provenance</div>
+    <div class="section-title">Nothing here was invented</div>
+    <p class="section-body">
+      The 6-3 movement pattern framework is a clean articulation of what strength and conditioning coaches have understood for decades. The 4-2-1 weekly structure maps almost exactly to what serious boxing trainers have prescribed for non-professional fighters for generations. Zone 2 cardio is foundational exercise physiology — Phil Maffetone was writing about aerobic base building in the 1980s. The mobility work is standard sports medicine protocol.
+    </p>
+    <p class="section-body">
+      <strong>What the .me system does is synthesize these proven frameworks into a coherent architecture</strong> and deliver them through a system that responds to how training is actually going. No single piece of this is new. The way they talk to each other — and the way they adapt to the individual — is what hasn't existed before in one place.
+    </p>
+
+    <div class="callout">
+      <div class="callout-label">For coaches</div>
+      <div class="callout-text">
+        You are not being asked to trust a new theory. You are being asked to trust a new delivery system for things you already believe in. The frameworks are familiar. The integration — and the honest, adaptive engine underneath — is what's new.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

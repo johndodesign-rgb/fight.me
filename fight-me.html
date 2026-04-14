@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>fight.me</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,900;1,700&family=Barlow:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap');
+
+  :root {
+    --black: #080808;
+    --ink: #0f0f0f;
+    --card: #141414;
+    --line: #1e1e1e;
+    --line2: #2a2a2a;
+    --white: #f0ede8;
+    --muted: #555;
+    --punch: #e8311a;
+    --punch-dim: #5a1208;
+    --amber: #c97b1a;
+    --green: #1e7a45;
+    --green-bright: #28a85f;
+    --mono: 'DM Mono', monospace;
+    --display: 'Barlow Condensed', sans-serif;
+    --body: 'Barlow', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  /* SCREENS */
+  .screen {
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+  .screen.active { display: flex; }
+
+  /* ─── INTRO SCREEN ─── */
+  #screen-intro {
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 48px 32px;
+    overflow: hidden;
+  }
+
+  .intro-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 100%, rgba(232,49,26,0.12) 0%, transparent 70%),
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 39px,
+        rgba(255,255,255,0.02) 39px,
+        rgba(255,255,255,0.02) 40px
+      );
+    pointer-events: none;
+  }
+
+  .wordmark {
+    font-family: var(--display);
+    font-size: 96px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 0.85;
+    position: relative;
+    z-index: 1;
+  }
+
+  .wordmark .fight { color: var(--white); }
+  .wordmark .dot-me { color: var(--punch); }
+
+  .tagline {
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 300;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .intro-copy {
+    max-width: 400px;
+    color: #888;
+    font-size: 14px;
+    line-height: 1.8;
+    margin: 40px auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .intro-copy strong { color: var(--white); font-weight: 500; }
+
+  /* BUTTONS */
+  .btn-primary {
+    display: inline-block;
+    background: var(--punch);
+    color: var(--white);
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 16px 48px;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    transition: all 0.15s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+
+  .btn-primary:hover {
+    background: #ff3d20;
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    display: inline-block;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 12px 24px;
+    border: 1px solid var(--line2);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-secondary:hover { color: var(--white); border-color: #444; }
+
+  /* ─── ASSESSMENT SCREEN ─── */
+  #screen-assess {
+    padding: 0;
+  }
+
+  .assess-header {
+    padding: 32px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .assess-logo {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+  }
+
+  .assess-logo span { color: var(--punch); }
+
+  .progress-track {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .progress-pip {
+    width: 24px;
+    height: 3px;
+    background: var(--line2);
+    border-radius: 2px;
+    transition: background 0.3s;
+  }
+
+  .progress-pip.done { background: var(--punch); }
+  .progress-pip.active { background: var(--punch); opacity: 0.5; }
+
+  .assess-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 48px 32px;
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .q-number {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--punch);
+    margin-bottom: 12px;
+  }
+
+  .q-text {
+    font-family: var(--display);
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 8px;
+    letter-spacing: 0.01em;
+  }
+
+  .q-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 40px;
+    font-style: italic;
+  }
+
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option-btn {
+    background: var(--card);
+    border: 1px solid var(--line2);
+    color: var(--white);
+    font-family: var(--body);
+    font-size: 14px;
+    text-align: left;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-radius: 2px;
+  }
+
+  .option-btn:hover {
+    border-color: var(--punch);
+    background: rgba(232,49,26,0.06);
+  }
+
+  .option-btn.selected {
+    border-color: var(--punch);
+    background: rgba(232,49,26,0.12);
+  }
+
+  .option-letter {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    width: 16px;
+    flex-shrink: 0;
+  }
+
+  .option-btn.selected .option-letter { color: var(--punch); }
+
+  .assess-nav {
+    padding: 24px 32px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .skip-link {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    text-transform: uppercase;
+    background: none;
+    border: none;
+  }
+
+  .skip-link:hover { color: var(--white); }
+
+  /* ─── RESULT SCREEN ─── */
+  #screen-result {
+    padding: 48px 32px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .result-glow {
+    position: absolute;
+    top: -100px; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 400px;
+    border-radius: 50%;
+    pointer-events: none;
+    transition: background 0.5s;
+  }
+
+  .result-glow.foundation { background: radial-gradient(ellipse, rgba(232,49,26,0.1) 0%, transparent 70%); }
+  .result-glow.transition { background: radial-gradient(ellipse, rgba(201,123,26,0.1) 0%, transparent 70%); }
+  .result-glow.fighter { background: radial-gradient(ellipse, rgba(30,122,69,0.1) 0%, transparent 70%); }
+
+  .result-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .result-track {
+    font-family: var(--display);
+    font-size: clamp(56px, 12vw, 100px);
+    font-weight: 900;
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 8px;
+  }
+
+  .result-track.foundation { color: var(--punch); }
+  .result-track.transition { color: var(--amber); }
+  .result-track.fighter { color: var(--green-bright); }
+
+  .result-subtitle {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .result-rationale {
+    max-width: 480px;
+    margin: 0 auto 40px;
+    background: var(--card);
+    border: 1px solid var(--line2);
+    padding: 24px;
+    text-align: left;
+    position: relative;
+    z-index: 1;
+    border-radius: 2px;
+  }
+
+  .rationale-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .rationale-text {
+    font-size: 13px;
+    color: #aaa;
+    line-height: 1.8;
+  }
+
+  .rationale-text strong { color: var(--white); font-weight: 500; }
+
+  .result-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── DASHBOARD SCREEN ─── */
+  #screen-dashboard {
+    padding: 0;
+  }
+
+  .dash-header {
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .dash-logo {
+    font-family: var(--display);
+    font-size: 24px;
+    font-weight: 900;
+  }
+
+  .dash-logo span { color: var(--punch); }
+
+  .dash-track-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 2px;
+  }
+
+  .dash-track-badge.foundation { background: rgba(232,49,26,0.15); color: var(--punch); }
+  .dash-track-badge.transition { background: rgba(201,123,26,0.15); color: var(--amber); }
+  .dash-track-badge.fighter { background: rgba(30,122,69,0.15); color: var(--green-bright); }
+
+  .dash-body {
+    padding: 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 900px;
+  }
+
+  @media (max-width: 640px) {
+    .dash-body { grid-template-columns: 1fr; }
+  }
+
+  .dash-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .dash-card-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .dash-card-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .dash-card-body { padding: 20px; }
+
+  /* TODAY CARD */
+  .today-session {
+    margin-bottom: 16px;
+  }
+
+  .today-label {
+    font-family: var(--display);
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .today-desc { font-size: 12px; color: var(--muted); }
+
+  .session-blocks {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .session-block {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--ink);
+    border: 1px solid var(--line2);
+    border-radius: 2px;
+    font-size: 13px;
+  }
+
+  .session-block-name { color: #ccc; }
+  .session-block-detail {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  /* SIGNAL CARD */
+  .signal-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .signal-item {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .signal-item:last-child { border-bottom: none; }
+
+  .signal-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  .signal-dot.ok { background: var(--green-bright); }
+  .signal-dot.warn { background: var(--amber); }
+  .signal-dot.flag { background: var(--punch); }
+
+  .signal-text { font-size: 12px; color: #aaa; line-height: 1.5; }
+  .signal-text strong { color: var(--white); font-weight: 500; display: block; }
+
+  /* UNLOCK CARD */
+  .unlock-track {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .unlock-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    border: 1px solid var(--line2);
+    border-radius: 2px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .unlock-item.done {
+    border-color: var(--green);
+    color: #aaa;
+  }
+
+  .unlock-item.current {
+    border-color: var(--punch);
+    color: var(--white);
+    background: rgba(232,49,26,0.05);
+  }
+
+  .unlock-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+  }
+
+  /* REDIRECT CARD */
+  .redirect-card {
+    background: rgba(232,49,26,0.06);
+    border-color: var(--punch-dim);
+  }
+
+  .redirect-card .dash-card-title { color: var(--punch); }
+
+  .redirect-message {
+    font-size: 13px;
+    color: #aaa;
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+
+  .redirect-message strong { color: var(--white); font-weight: 500; }
+
+  .redirect-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--punch);
+    color: var(--white);
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    border-radius: 2px;
+    transition: background 0.15s;
+    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  }
+
+  .redirect-pill:hover { background: #ff3d20; }
+
+  .redirect-pill .fit-label { color: rgba(255,255,255,0.6); }
+
+  /* FIT.ME SCREEN */
+  #screen-fitme {
+    padding: 48px 32px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .fitme-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(30,122,69,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .fitme-wordmark {
+    font-family: var(--display);
+    font-size: 80px;
+    font-weight: 900;
+    line-height: 0.85;
+    position: relative;
+    z-index: 1;
+  }
+
+  .fitme-wordmark .fit { color: var(--white); }
+  .fitme-wordmark .dot-me2 { color: var(--green-bright); }
+
+  .fitme-reason {
+    max-width: 400px;
+    margin: 32px auto;
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-left: 3px solid var(--green-bright);
+    padding: 20px 24px;
+    text-align: left;
+    position: relative;
+    z-index: 1;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .fitme-reason-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--green-bright);
+    margin-bottom: 8px;
+  }
+
+  .fitme-reason-text {
+    font-size: 13px;
+    color: #aaa;
+    line-height: 1.8;
+  }
+
+  .fitme-reason-text strong { color: var(--white); font-weight: 500; }
+
+  .fitme-programs {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 32px;
+  }
+
+  .fitme-program {
+    background: var(--card);
+    border: 1px solid var(--line2);
+    padding: 20px 24px;
+    text-align: left;
+    border-radius: 2px;
+    width: 200px;
+  }
+
+  .fp-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--green-bright);
+    margin-bottom: 8px;
+  }
+
+  .fp-title {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .fp-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+  /* BACK NAV */
+  .back-nav {
+    position: fixed;
+    top: 24px;
+    left: 32px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    background: none;
+    border: none;
+    z-index: 100;
+    transition: color 0.15s;
+    display: none;
+  }
+
+  .back-nav:hover { color: var(--white); }
+  .back-nav.visible { display: block; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .screen.active > * {
+    animation: fadeUp 0.4s ease forwards;
+  }
+
+  .grain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<button class="back-nav" id="back-btn" onclick="goBack()">← back</button>
+
+<!-- INTRO -->
+<div class="screen active" id="screen-intro">
+  <div class="intro-bg"></div>
+  <div class="wordmark">
+    <div class="fight">fight</div>
+    <div class="dot-me">.me</div>
+  </div>
+  <div class="tagline">Build the fighter. Not just the body.</div>
+  <p class="intro-copy">
+    Most people skip to glove work. <strong>Most people plateau.</strong><br><br>
+    fight.me is an honest system. It meets you where you actually are — not where you think you are — and builds the foundation that makes technique land with real power.
+  </p>
+  <button class="btn-primary" onclick="showScreen('screen-assess')">Take the Assessment</button>
+</div>
+
+<!-- ASSESSMENT -->
+<div class="screen" id="screen-assess">
+  <div class="assess-header">
+    <div class="assess-logo">fight<span>.me</span></div>
+    <div class="progress-track" id="progress-track"></div>
+  </div>
+  <div class="assess-body" id="assess-body">
+    <!-- populated by JS -->
+  </div>
+  <div class="assess-nav">
+    <button class="skip-link" onclick="skipAssess()">Skip → place me in Foundation</button>
+    <button class="btn-primary" id="next-btn" onclick="nextQuestion()" style="display:none">Next →</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="screen-result">
+  <div class="result-glow" id="result-glow"></div>
+  <div class="result-eyebrow">Your honest starting point</div>
+  <div class="result-track" id="result-track-label"></div>
+  <div class="result-subtitle" id="result-subtitle"></div>
+  <div class="result-rationale">
+    <div class="rationale-label">Why we placed you here</div>
+    <div class="rationale-text" id="rationale-text"></div>
+  </div>
+  <div class="result-actions">
+    <button class="btn-primary" onclick="showDashboard()">See Your Program →</button>
+    <button class="btn-secondary" onclick="showScreen('screen-assess'); resetAssess()">Retake</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="screen" id="screen-dashboard">
+  <div class="dash-header">
+    <div class="dash-logo">fight<span>.me</span></div>
+    <div class="dash-track-badge" id="dash-track-badge"></div>
+  </div>
+  <div class="dash-body" id="dash-body">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<!-- FIT.ME REDIRECT -->
+<div class="screen" id="screen-fitme">
+  <div class="fitme-bg"></div>
+  <div class="fitme-wordmark">
+    <div class="fit">fit</div>
+    <div class="dot-me2">.me</div>
+  </div>
+  <div class="fitme-reason">
+    <div class="fitme-reason-label">Why you're here</div>
+    <div class="fitme-reason-text" id="fitme-reason-text"></div>
+  </div>
+  <div class="fitme-programs">
+    <div class="fitme-program">
+      <div class="fp-label">Recommended</div>
+      <div class="fp-title">Aerobic Base</div>
+      <div class="fp-desc">Zone 2 foundation. 4 weeks. Jump rope + footwork. Builds the engine that doesn't gas out.</div>
+    </div>
+    <div class="fitme-program">
+      <div class="fp-label">Paired With</div>
+      <div class="fp-title">Foundation Strength</div>
+      <div class="fp-desc">6-3 framework. 4 days/week. Dumbbells + bands. Builds the power that punching transfers.</div>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="showDashboard()">← Back to fight.me</button>
+</div>
+
+<script>
+  const questions = [
+    {
+      text: "Can you do 3 minutes of jump rope without stopping?",
+      sub: "Be honest. This is where the system starts.",
+      options: [
+        { label: "Not really — I'd break rhythm within a minute", score: 0 },
+        { label: "Maybe — depends on the day", score: 1 },
+        { label: "Yes, but I'd be breathing hard by the end", score: 2 },
+        { label: "Easily. I could go longer.", score: 3 }
+      ]
+    },
+    {
+      text: "After a hard round of shadow boxing, how long to feel recovered?",
+      sub: "Recovery rate is one of your most honest fitness markers.",
+      options: [
+        { label: "More than 3 minutes — I'm really gassing", score: 0 },
+        { label: "2–3 minutes to feel normal", score: 1 },
+        { label: "About 90 seconds", score: 2 },
+        { label: "Under a minute — I recover fast", score: 3 }
+      ]
+    },
+    {
+      text: "What's your honest boxing experience?",
+      sub: "No judgment. Just calibration.",
+      options: [
+        { label: "None — I haven't trained boxing at all", score: 0 },
+        { label: "Some basics — watched a lot, done a little", score: 1 },
+        { label: "Regular training, haven't sparred", score: 2 },
+        { label: "I've sparred / competed", score: 3 }
+      ]
+    },
+    {
+      text: "Can you keep your hands up through a full round when you're tired?",
+      sub: "Hand drop under fatigue is one of the clearest signs of conditioning gaps.",
+      options: [
+        { label: "No — they come down when I'm working hard", score: 0 },
+        { label: "Sometimes — it's a conscious effort", score: 1 },
+        { label: "Mostly — occasional lapses", score: 2 },
+        { label: "Yes — it's automatic even when fatigued", score: 3 }
+      ]
+    },
+    {
+      text: "How's your current strength base?",
+      sub: "Think relative to your bodyweight — not absolute numbers.",
+      options: [
+        { label: "Minimal — I don't train strength regularly", score: 0 },
+        { label: "Some base — occasional lifting", score: 1 },
+        { label: "Solid — I train consistently", score: 2 },
+        { label: "Strong — I've trained seriously for years", score: 3 }
+      ]
+    },
+    {
+      text: "If you threw 10 hard combinations right now, what happens?",
+      sub: "Power endurance tells you where the gaps actually are.",
+      options: [
+        { label: "Arm fatigue kicks in fast — I slow way down", score: 0 },
+        { label: "I'd get through it but feel it", score: 1 },
+        { label: "Fine — I'd want a breath after", score: 2 },
+        { label: "No problem — I could keep going", score: 3 }
+      ]
+    }
+  ];
+
+  let currentQ = 0;
+  let answers = [];
+  let selectedOption = null;
+  let placedTrack = 'foundation';
+  let screenHistory = ['screen-intro'];
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    screenHistory.push(id);
+    const backBtn = document.getElementById('back-btn');
+    backBtn.classList.toggle('visible', screenHistory.length > 1 && id !== 'screen-intro');
+  }
+
+  function goBack() {
+    screenHistory.pop();
+    const prev = screenHistory[screenHistory.length - 1];
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(prev).classList.add('active');
+    const backBtn = document.getElementById('back-btn');
+    backBtn.classList.toggle('visible', screenHistory.length > 1 && prev !== 'screen-intro');
+  }
+
+  function buildProgressPips() {
+    const track = document.getElementById('progress-track');
+    track.innerHTML = '';
+    questions.forEach((_, i) => {
+      const pip = document.createElement('div');
+      pip.className = 'progress-pip';
+      if (i < currentQ) pip.classList.add('done');
+      if (i === currentQ) pip.classList.add('active');
+      track.appendChild(pip);
+    });
+  }
+
+  function renderQuestion() {
+    const q = questions[currentQ];
+    const body = document.getElementById('assess-body');
+    const letters = ['A','B','C','D'];
+    body.innerHTML = `
+      <div class="q-number">Question ${currentQ + 1} of ${questions.length}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="q-sub">${q.sub}</div>
+      <div class="options-list">
+        ${q.options.map((opt, i) => `
+          <button class="option-btn" onclick="selectOption(this, ${opt.score})">
+            <span class="option-letter">${letters[i]}</span>
+            <span>${opt.label}</span>
+          </button>
+        `).join('')}
+      </div>
+    `;
+    selectedOption = null;
+    document.getElementById('next-btn').style.display = 'none';
+    buildProgressPips();
+  }
+
+  function selectOption(btn, score) {
+    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedOption = score;
+    document.getElementById('next-btn').style.display = 'inline-block';
+  }
+
+  function nextQuestion() {
+    if (selectedOption === null) return;
+    answers.push(selectedOption);
+    if (currentQ < questions.length - 1) {
+      currentQ++;
+      renderQuestion();
+    } else {
+      computeResult();
+    }
+  }
+
+  function skipAssess() {
+    placedTrack = 'foundation';
+    showResult();
+  }
+
+  function computeResult() {
+    const total = answers.reduce((a, b) => a + b, 0);
+    const max = questions.length * 3;
+    const pct = total / max;
+    if (pct < 0.35) placedTrack = 'foundation';
+    else if (pct < 0.70) placedTrack = 'transition';
+    else placedTrack = 'fighter';
+    showResult();
+  }
+
+  function showResult() {
+    const tracks = {
+      foundation: {
+        label: 'FOUNDATION',
+        subtitle: 'Track · Build the engine first',
+        glow: 'foundation',
+        rationale: `Your conditioning and/or movement base needs work before glove work will actually stick. <strong>This isn't a demotion — it's the serious track.</strong> The fighters who skip this are the ones who plateau at 6 months. You're building the real thing: aerobic capacity, structural strength, and movement patterns that don't break down under pressure.`
+      },
+      transition: {
+        label: 'TRANSITION',
+        subtitle: 'Track · Almost ready for the ring',
+        glow: 'transition',
+        rationale: `You've got a real base, but there are gaps that will show up under pressure — recovery time, power endurance, or technical breakdown when fatigued. <strong>The Transition track closes those gaps</strong> while introducing actual boxing fundamentals. You'll be sparring-ready within 8–12 weeks if you do this right.`
+      },
+      fighter: {
+        label: 'FIGHTER',
+        subtitle: 'Track · The work gets harder from here',
+        glow: 'fighter',
+        rationale: `You've earned it. The conditioning base is there, you understand your body under pressure, and you have real boxing experience. <strong>The Fighter track is about refinement and performance</strong> — not building from scratch. But fight.me will still catch you if something slips. The system doesn't care about your assessment score. It watches your training.`
+      }
+    };
+
+    const t = tracks[placedTrack];
+    document.getElementById('result-track-label').className = `result-track ${placedTrack}`;
+    document.getElementById('result-track-label').textContent = t.label;
+    document.getElementById('result-subtitle').textContent = t.subtitle;
+    document.getElementById('result-glow').className = `result-glow ${t.glow}`;
+    document.getElementById('rationale-text').innerHTML = t.rationale;
+    showScreen('screen-result');
+  }
+
+  function showDashboard() {
+    const badge = document.getElementById('dash-track-badge');
+    badge.className = `dash-track-badge ${placedTrack}`;
+    badge.textContent = placedTrack.charAt(0).toUpperCase() + placedTrack.slice(1) + ' Track';
+
+    const configs = {
+      foundation: {
+        today: { title: 'Zone 2 + Movement', desc: 'Week 1 · Tuesday · Cardio Day', blocks: [
+          { name: 'Jump rope · slow single-bounce', detail: '3× 10 min / 2 min rest' },
+          { name: 'Footwork pattern drills', detail: '10 min' },
+          { name: 'Shadow boxing · no intensity', detail: '5 min cooldown' }
+        ]},
+        signals: [
+          { status: 'warn', title: 'Recovery rate', text: 'You\'re taking 3+ min between hard efforts. This is the engine we\'re building. Expect improvement by week 4.' },
+          { status: 'flag', title: 'Hand drop detected', text: 'Hands coming down under fatigue. fit.me rotation + unilateral program will address this at the source.' },
+          { status: 'ok', title: 'Movement quality', text: 'Footwork patterns looking clean. Keep building here.' }
+        ],
+        unlocks: [
+          { done: false, current: true, icon: '①', label: 'Foundation · Weeks 1–4 · Current' },
+          { done: false, current: false, icon: '②', label: 'Fundamentals · Unlocks at Week 5' },
+          { done: false, current: false, icon: '🥊', label: 'Glove Work · Unlocks at Week 9' },
+          { done: false, current: false, icon: '⬡', label: 'Sparring Prep · Unlocks at Week 13' }
+        ],
+        showRedirect: true
+      },
+      transition: {
+        today: { title: 'Technical + Conditioning', desc: 'Week 1 · Monday · Boxing Day', blocks: [
+          { name: 'Jab / cross foundation', detail: '3× 3 min rounds' },
+          { name: 'Footwork under fatigue drill', detail: '2× 4 min' },
+          { name: 'HIIT finisher · jump rope', detail: '4× 30 sec all-out' }
+        ]},
+        signals: [
+          { status: 'ok', title: 'Conditioning base', text: 'Aerobic base is solid. Zone 2 work maintaining well.' },
+          { status: 'warn', title: 'Power endurance', text: 'Combination speed dropping after round 2. fit.me strength program recommended to address.' },
+          { status: 'ok', title: 'Recovery rate', text: 'Coming down under 90 sec. Good sign — keep the work going.' }
+        ],
+        unlocks: [
+          { done: true, current: false, icon: '✓', label: 'Foundation · Complete' },
+          { done: false, current: true, icon: '②', label: 'Fundamentals · Week 1–8 · Current' },
+          { done: false, current: false, icon: '🥊', label: 'Glove Work · Unlocks at Week 9' },
+          { done: false, current: false, icon: '⬡', label: 'Sparring Prep · Unlocks at Week 13' }
+        ],
+        showRedirect: true
+      },
+      fighter: {
+        today: { title: 'Sparring Prep + Power', desc: 'Week 1 · Wednesday · Performance Day', blocks: [
+          { name: 'Full combination work', detail: '5× 3 min rounds' },
+          { name: 'Defensive footwork', detail: 'Slip / roll / pivot patterns' },
+          { name: 'Conditioning finisher', detail: '6× 15 sec speed intervals' }
+        ]},
+        signals: [
+          { status: 'ok', title: 'Conditioning', text: 'Engine is there. Focus shifts to power output and fight-specific conditioning.' },
+          { status: 'ok', title: 'Recovery', text: 'Sub-60 second recovery between rounds. Competitive level.' },
+          { status: 'warn', title: 'Right shoulder drop', text: 'Detected in round 3. Likely fatigue-related. fit.me unilateral shoulder program flagged.' }
+        ],
+        unlocks: [
+          { done: true, current: false, icon: '✓', label: 'Foundation · Complete' },
+          { done: true, current: false, icon: '✓', label: 'Fundamentals · Complete' },
+          { done: true, current: false, icon: '✓', label: 'Glove Work · Complete' },
+          { done: false, current: true, icon: '⬡', label: 'Sparring Prep · Current' }
+        ],
+        showRedirect: true
+      }
+    };
+
+    const cfg = configs[placedTrack];
+    const body = document.getElementById('dash-body');
+
+    body.innerHTML = `
+      <div class="dash-card" style="grid-column: 1 / -1;">
+        <div class="dash-card-header">
+          <span class="dash-card-title">Today's Session</span>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">${cfg.today.desc}</span>
+        </div>
+        <div class="dash-card-body">
+          <div class="today-session">
+            <div class="today-label">${cfg.today.title}</div>
+          </div>
+          <div class="session-blocks">
+            ${cfg.today.blocks.map(b => `
+              <div class="session-block">
+                <span class="session-block-name">${b.name}</span>
+                <span class="session-block-detail">${b.detail}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <span class="dash-card-title">Performance Signals</span>
+        </div>
+        <div class="dash-card-body">
+          <div class="signal-list">
+            ${cfg.signals.map(s => `
+              <div class="signal-item">
+                <div class="signal-dot ${s.status}"></div>
+                <div class="signal-text"><strong>${s.title}</strong>${s.text}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <span class="dash-card-title">Your Path</span>
+        </div>
+        <div class="dash-card-body">
+          <div class="unlock-track">
+            ${cfg.unlocks.map(u => `
+              <div class="unlock-item ${u.done ? 'done' : ''} ${u.current ? 'current' : ''}">
+                <span class="unlock-icon">${u.icon}</span>
+                <span>${u.label}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+
+      ${cfg.showRedirect ? `
+      <div class="dash-card redirect-card" style="grid-column: 1 / -1;">
+        <div class="dash-card-header">
+          <span class="dash-card-title">⚑ System Recommendation</span>
+        </div>
+        <div class="dash-card-body">
+          <p class="redirect-message">
+            ${placedTrack === 'foundation'
+              ? `Your <strong>aerobic base</strong> needs dedicated work before glove time will stick. fight.me is routing you to a targeted program in fit.me — it'll run alongside your foundation track and accelerate everything.`
+              : placedTrack === 'transition'
+              ? `Your <strong>power endurance</strong> is dropping in later rounds. A fit.me strength block will close this gap faster than more boxing training will.`
+              : `<strong>Right shoulder fatigue</strong> detected under load. A targeted unilateral shoulder program in fit.me will address this before it becomes a bad habit.`
+            }
+          </p>
+          <button class="redirect-pill" onclick="showFitme()">
+            Go to <span class="fit-label">&nbsp;fit.me&nbsp;</span> →
+          </button>
+        </div>
+      </div>` : ''}
+    `;
+
+    showScreen('screen-dashboard');
+  }
+
+  function showFitme() {
+    const reasons = {
+      foundation: `fight.me detected that your <strong>aerobic base</strong> is the primary limiter right now. More glove time won't fix what zone 2 cardio and a strength foundation will. fit.me has a targeted 4-week program that runs alongside your Foundation track — when it's done, you'll come back to fight.me noticeably different.`,
+      transition: `Your <strong>power endurance drops in round 2.</strong> That's a conditioning and strength gap, not a technique gap. fit.me's strength block will address the root cause. 4–6 weeks, then back to fight.me with more in the tank.`,
+      fighter: `fight.me flagged <strong>right shoulder fatigue under load</strong> in your last session. A unilateral shoulder program in fit.me will isolate and address this before it becomes a compensation pattern that costs you punching power.`
+    };
+    document.getElementById('fitme-reason-text').innerHTML = reasons[placedTrack];
+    showScreen('screen-fitme');
+  }
+
+  function resetAssess() {
+    currentQ = 0;
+    answers = [];
+    selectedOption = null;
+    renderQuestion();
+  }
+
+  // Init
+  renderQuestion();
+</script>
+</body>
+</html>
