@@ -11,6 +11,8 @@ const ASSETS = [
   '/fight.me/90day-plan.html',
   '/fight.me/onboarding.html',
   '/fight.me/dashboard.html',
+  '/fight.me/session-log.html',
+  '/fight.me/program-generator.js',
   '/fight.me/icon-192.svg',
   '/fight.me/icon-512.svg'
 ];

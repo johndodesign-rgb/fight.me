@@ -302,6 +302,30 @@
     letter-spacing: 0.04em;
   }
 
+  .today-log-strip {
+    padding: 0 16px 14px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .log-btn-small {
+    flex: 1;
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--punch);
+    color: var(--white);
+    border: none;
+    padding: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  }
+
+  .log-btn-small:hover { background: #ff3d20; }
+
   .today-cta-arrow {
     font-family: var(--mono);
     font-size: 14px;
@@ -600,7 +624,78 @@
   .fade-up:nth-child(4) { animation-delay: 0.2s; }
   .fade-up:nth-child(5) { animation-delay: 0.25s; }
   .fade-up:nth-child(6) { animation-delay: 0.3s; }
+
+  /* SESSION LOG BUTTON */
+  .log-session-btn {
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--punch);
+    color: var(--white);
+    border: none;
+    padding: 14px;
+    width: 100%;
+    cursor: pointer;
+    margin-top: 14px;
+    transition: background 0.15s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+  .log-session-btn:hover { background: #ff3d20; }
+  .log-session-btn:active { transform: scale(0.99); }
+
+  /* ADJUSTMENT BADGE */
+  .adj-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--amber);
+    background: rgba(201,123,26,0.1);
+    border: 1px solid rgba(201,123,26,0.3);
+    padding: 4px 10px;
+    border-radius: 2px;
+    margin-top: 8px;
+  }
+
+  /* HISTORY STRIP */
+  .history-strip {
+    display: flex;
+    gap: 4px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .history-pip {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    cursor: default;
+    position: relative;
+  }
+
+  .hp-full    { background: var(--punch); }
+  .hp-partial { background: var(--amber); }
+  .hp-no      { background: var(--line2); }
+  .hp-empty   { background: var(--line); border: 1px solid var(--line2); }
+
+  /* EQUIPMENT BADGE */
+  .equipment-badge {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+    background: var(--card);
+    border: 1px solid var(--line2);
+    padding: 4px 10px;
+    border-radius: 2px;
+  }
 </style>
+<script src="program-generator.js"></script>
 </head>
 <body>
 
@@ -956,6 +1051,113 @@
   }
 
   init();
+
+  // ── PROGRAM GENERATOR INTEGRATION ──
+  function initProgram() {
+    const raw = localStorage.getItem('fightme_placement');
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    const track = data.track || 'foundation';
+    const equipment = data.equipment || 'dumbbells';
+    const weekNum = getWeekNumber(data.date);
+
+    // Equipment badge
+    const eqLabels = { bodyweight: 'Bodyweight', bands: 'BW + Bands', dumbbells: 'DBs + Bands', full: 'Full Gym' };
+    const eqBadge = document.getElementById('equipment-badge');
+    if (eqBadge) eqBadge.textContent = eqLabels[equipment] || equipment;
+
+    // Generate this week's program
+    if (typeof PROGRAM_GENERATOR !== 'undefined') {
+      const sessions = JSON.parse(localStorage.getItem('fightme_sessions') || '[]');
+      const week = PROGRAM_GENERATOR.generateWeek(track, equipment, weekNum, sessions);
+
+      // Show adjustment badge if dynamic adjustments were made
+      if (week.hasAdjustments) {
+        const adjBadge = document.createElement('div');
+        adjBadge.className = 'adj-badge';
+        adjBadge.innerHTML = `⚙ Adjusted based on ${week.adjustmentCount} recent session${week.adjustmentCount > 1 ? 's' : ''}`;
+        const todayCard = document.getElementById('today-card');
+        if (todayCard) todayCard.parentNode.insertBefore(adjBadge, todayCard.nextSibling);
+      }
+
+      // Carry note for bodyweight users
+      const carryNote = PROGRAM_GENERATOR.getCarryNote(equipment);
+      if (carryNote) {
+        const noteEl = document.createElement('div');
+        noteEl.style.cssText = 'font-size:11px;color:var(--amber);font-style:italic;margin-top:8px;padding:0 16px 14px;line-height:1.5';
+        noteEl.textContent = '⚑ ' + carryNote;
+        const todayCard = document.getElementById('today-card');
+        if (todayCard) todayCard.appendChild(noteEl);
+      }
+    }
+
+    // Session history strip
+    renderHistoryStrip();
+
+    // Wire log button
+    const logBtn = document.getElementById('log-session-btn');
+    if (logBtn) {
+      const todaySessions = JSON.parse(localStorage.getItem('fightme_sessions') || '[]')
+        .filter(s => new Date(s.date).toDateString() === new Date().toDateString());
+      if (todaySessions.length > 0) {
+        logBtn.textContent = 'Logged ✓';
+        logBtn.style.background = 'var(--green)';
+        logBtn.onclick = null;
+        logBtn.style.cursor = 'default';
+      }
+    }
+  }
+
+  function getWeekNumber(startDateStr) {
+    if (!startDateStr) return 1;
+    const start = new Date(startDateStr);
+    const now = new Date();
+    const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24 * 7));
+    return Math.max(1, Math.min(diff + 1, 12));
+  }
+
+  function renderHistoryStrip() {
+    const sessions = JSON.parse(localStorage.getItem('fightme_sessions') || '[]');
+    const strip = document.getElementById('history-strip');
+    if (!strip) return;
+
+    // Last 14 days
+    const days = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toDateString();
+      const daySession = sessions.filter(s => new Date(s.date).toDateString() === dateStr);
+      if (daySession.length === 0) {
+        days.push('empty');
+      } else {
+        const comp = daySession[daySession.length - 1].completion;
+        days.push(comp);
+      }
+    }
+
+    strip.innerHTML = days.map(d => `<div class="history-pip hp-${d}" title="${d}"></div>`).join('');
+  }
+
+  function logTodaySession(source) {
+    const raw = localStorage.getItem('fightme_placement');
+    const data = raw ? JSON.parse(raw) : {};
+    const week = getWeekNumber(data.date);
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const today = days[new Date().getDay()];
+    const sessionNames = {
+      Monday: 'Push · Pull · Hinge',
+      Tuesday: 'Zone 2 · Cardio',
+      Thursday: 'Squat · Rotate · Unilateral',
+      Saturday: 'Dead Stops · Power',
+      Sunday: 'Mobility',
+    };
+    const session = sessionNames[today] || 'Training Session';
+    window.location.href = `session-log.html?source=${source}&session=${encodeURIComponent(session)}&day=${today}&week=${week}`;
+  }
+
+  // Call program integration after main init
+  setTimeout(initProgram, 100);
 </script>
 </body>
 </html>

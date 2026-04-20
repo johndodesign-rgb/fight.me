@@ -466,7 +466,7 @@
   </div>
 
   <button class="btn-begin" onclick="showScreen('screen-quiz')">Begin Assessment</button>
-  <div class="welcome-note">6 questions · ~2 minutes · no flattery</div>
+  <div class="welcome-note">7 questions · ~2 minutes · no flattery</div>
 </div>
 
 <!-- QUIZ -->
@@ -563,6 +563,17 @@
         { text: "Fine — I'd want a breath after", score: 2 },
         { text: "No problem — I could keep going", score: 3 }
       ]
+    },
+    {
+      text: "What equipment do you have access to?",
+      sub: "Your program will be built around what you actually have.",
+      isEquipment: true,
+      options: [
+        { text: "Bodyweight only — no equipment", score: 0, equipment: 'bodyweight' },
+        { text: "Bodyweight + resistance bands", score: 0, equipment: 'bands' },
+        { text: "Dumbbells, bands, and a bench", score: 0, equipment: 'dumbbells' },
+        { text: "Full gym access", score: 0, equipment: 'full' }
+      ]
     }
   ];
 
@@ -594,6 +605,7 @@
   let currentQ = 0;
   let answers = [];
   let selectedScore = null;
+  let selectedEquipment = null;
   let placedTrack = null;
 
   const keys = ['A','B','C','D'];
@@ -628,16 +640,18 @@
     btn.textContent = currentQ < questions.length - 1 ? 'Next →' : 'See My Results →';
   }
 
-  function selectOption(el, score) {
+  function selectOption(el, score, equipment) {
     document.querySelectorAll('.quiz-option').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
     selectedScore = score;
+    if (equipment) selectedEquipment = equipment;
     document.getElementById('btn-next').classList.add('enabled');
   }
 
   function nextQuestion() {
     if (selectedScore === null) return;
-    answers.push(selectedScore);
+    const q = questions[currentQ];
+    if (!q.isEquipment) answers.push(selectedScore);
 
     if (currentQ < questions.length - 1) {
       currentQ++;
@@ -654,7 +668,8 @@
 
   function computeResult() {
     const total = answers.reduce((a, b) => a + b, 0);
-    const max = questions.length * 3;
+    const scoredQuestions = questions.filter(q => !q.isEquipment).length;
+    const max = scoredQuestions * 3;
     const pct = total / max;
     if (pct < 0.35) placedTrack = 'foundation';
     else if (pct < 0.70) placedTrack = 'transition';
@@ -666,6 +681,7 @@
     // Save to localStorage
     const data = {
       track: placedTrack,
+      equipment: selectedEquipment || 'dumbbells',
       score: answers.reduce((a, b) => a + b, 0),
       date: new Date().toISOString(),
       answers: [...answers]
@@ -678,6 +694,9 @@
     trackEl.textContent = t.label;
     trackEl.className = 'result-track ' + t.colorClass;
     document.getElementById('result-subtitle').textContent = t.subtitle;
+    // Show equipment on result screen if element exists
+    const eqEl = document.getElementById('result-equipment');
+    if (eqEl) eqEl.textContent = getEquipmentLabel(selectedEquipment || 'dumbbells');
     document.getElementById('result-glow').className = 'result-glow ' + t.glowClass;
     document.getElementById('rationale-body').innerHTML = t.rationale;
 
@@ -689,6 +708,16 @@
 
   function goToDashboard() {
     window.location.href = 'dashboard.html';
+  }
+
+  function getEquipmentLabel(tier) {
+    const labels = {
+      bodyweight: 'Bodyweight only',
+      bands: 'Bodyweight + bands',
+      dumbbells: 'Dumbbells + bands',
+      full: 'Full gym'
+    };
+    return labels[tier] || 'Dumbbells + bands';
   }
 
   // ── SCREENS ──

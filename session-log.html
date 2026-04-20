@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#060606">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<title>Log Session · .me</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,700;0,900;1,700&family=Barlow:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap');
+
+  :root {
+    --black: #060606;
+    --ink: #0c0c0c;
+    --card: #111;
+    --line: #1a1a1a;
+    --line2: #242424;
+    --line3: #303030;
+    --white: #edeae4;
+    --dim: #777;
+    --muted: #3a3a3a;
+    --punch: #e8311a;
+    --punch-dim: #4a0f07;
+    --amber: #c97b1a;
+    --green: #28b05a;
+    --mono: 'DM Mono', monospace;
+    --display: 'Barlow Condensed', sans-serif;
+    --body: 'Barlow', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--body);
+    overflow: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.02;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* SCREENS */
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* ── LOG SCREEN ── */
+  #screen-log {
+    padding: 0;
+  }
+
+  .log-header {
+    padding: 48px 24px 20px;
+    border-bottom: 1px solid var(--line);
+    background: var(--ink);
+  }
+
+  .log-source {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .log-source.fight { color: var(--punch); }
+  .log-source.fit   { color: var(--green); }
+
+  .log-session-name {
+    font-family: var(--display);
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .log-session-meta {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+  }
+
+  .log-body {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* STEP */
+  .log-step {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .log-step-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .log-step-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line2);
+  }
+
+  /* COMPLETION BUTTONS */
+  .completion-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .completion-btn {
+    padding: 16px 8px;
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .completion-btn:active { transform: scale(0.97); }
+
+  .completion-btn.selected-full     { border-color: var(--green);  background: rgba(40,176,90,0.1); }
+  .completion-btn.selected-partial  { border-color: var(--amber);  background: rgba(201,123,26,0.1); }
+  .completion-btn.selected-no       { border-color: var(--punch);  background: rgba(232,49,26,0.1); }
+
+  .completion-icon { font-size: 22px; }
+  .completion-label {
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .completion-sub {
+    font-family: var(--mono);
+    font-size: 8px;
+    color: var(--dim);
+    letter-spacing: 0.05em;
+  }
+
+  /* FEEL SLIDER */
+  .feel-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .feel-btn {
+    padding: 18px 8px;
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .feel-btn:active { transform: scale(0.97); }
+
+  .feel-btn.selected-easy { border-color: var(--green);  background: rgba(40,176,90,0.1); }
+  .feel-btn.selected-right { border-color: var(--punch);  background: rgba(232,49,26,0.1); }
+  .feel-btn.selected-hard { border-color: var(--amber);  background: rgba(201,123,26,0.1); }
+
+  .feel-icon { font-size: 28px; }
+  .feel-label {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .feel-sub {
+    font-family: var(--mono);
+    font-size: 8px;
+    color: var(--dim);
+    letter-spacing: 0.05em;
+    line-height: 1.4;
+    text-align: center;
+  }
+
+  /* FLAGS */
+  .flags-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .flag-btn {
+    padding: 12px 14px;
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.15s;
+  }
+
+  .flag-btn.selected {
+    border-color: var(--amber);
+    background: rgba(201,123,26,0.08);
+  }
+
+  .flag-btn:active { transform: scale(0.98); }
+
+  .flag-check {
+    width: 18px; height: 18px;
+    border-radius: 3px;
+    border: 1px solid var(--line3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 10px;
+    transition: all 0.15s;
+  }
+
+  .flag-btn.selected .flag-check {
+    background: var(--amber);
+    border-color: var(--amber);
+    color: var(--white);
+  }
+
+  .flag-text {
+    font-size: 12px;
+    color: #bbb;
+    line-height: 1.3;
+  }
+
+  /* PATTERN FLAGS (fight.me specific) */
+  .pattern-flags {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .pattern-flag-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-radius: 3px;
+  }
+
+  .pattern-pip {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .pattern-name-text {
+    font-size: 12px;
+    color: #ccc;
+    flex: 1;
+  }
+
+  .pattern-feel-mini {
+    display: flex;
+    gap: 4px;
+  }
+
+  .pfm-btn {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.05em;
+    padding: 4px 8px;
+    background: var(--ink);
+    border: 1px solid var(--line2);
+    border-radius: 2px;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+
+  .pfm-btn.selected-easy  { background: rgba(40,176,90,0.15);  border-color: rgba(40,176,90,0.4);  color: var(--green); }
+  .pfm-btn.selected-right { background: rgba(232,49,26,0.1);   border-color: rgba(232,49,26,0.3);  color: var(--punch); }
+  .pfm-btn.selected-hard  { background: rgba(201,123,26,0.15); border-color: rgba(201,123,26,0.4); color: var(--amber); }
+
+  /* NOTES */
+  .notes-input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-radius: 3px;
+    color: var(--white);
+    font-family: var(--body);
+    font-size: 13px;
+    padding: 14px 16px;
+    outline: none;
+    resize: none;
+    transition: border-color 0.15s;
+    min-height: 80px;
+  }
+
+  .notes-input::placeholder { color: var(--muted); }
+  .notes-input:focus { border-color: var(--line3); }
+
+  /* SUBMIT */
+  .log-footer {
+    padding: 16px 24px 40px;
+    border-top: 1px solid var(--line);
+    background: var(--ink);
+  }
+
+  .submit-btn {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--punch);
+    color: var(--white);
+    border: none;
+    padding: 18px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.15s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .submit-btn.enabled {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .submit-btn.enabled:hover { background: #ff3d20; }
+  .submit-btn.enabled:active { transform: scale(0.98); }
+
+  /* ── CONFIRM SCREEN ── */
+  #screen-confirm {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 48px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .confirm-glow {
+    position: absolute;
+    top: -100px; left: 50%;
+    transform: translateX(-50%);
+    width: 500px; height: 400px;
+    pointer-events: none;
+  }
+
+  .confirm-icon {
+    font-size: 56px;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .confirm-title {
+    font-family: var(--display);
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .confirm-sub {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .confirm-signals {
+    max-width: 320px;
+    margin: 0 auto 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .confirm-signal {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-radius: 3px;
+    text-align: left;
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.4;
+  }
+
+  .confirm-signal strong { color: var(--white); font-weight: 500; display: block; }
+
+  .confirm-signal-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .csd-ok   { background: var(--green); }
+  .csd-warn { background: var(--amber); }
+  .csd-flag { background: var(--punch); box-shadow: 0 0 6px rgba(232,49,26,0.6); }
+
+  .confirm-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .btn-primary {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--punch);
+    color: var(--white);
+    border: none;
+    padding: 16px;
+    cursor: pointer;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    transition: background 0.15s;
+  }
+
+  .btn-primary:hover { background: #ff3d20; }
+
+  .btn-secondary {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    background: none;
+    border: 1px solid var(--line2);
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 2px;
+  }
+
+  .btn-secondary:hover { color: var(--white); border-color: var(--line3); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-up { animation: fadeUp 0.4s ease forwards; }
+</style>
+</head>
+<body>
+
+<!-- LOG SCREEN -->
+<div class="screen active" id="screen-log">
+  <div class="log-header">
+    <div class="log-source" id="log-source">fit.me</div>
+    <div class="log-session-name" id="log-session-name">Loading...</div>
+    <div class="log-session-meta" id="log-session-meta">—</div>
+  </div>
+
+  <div class="log-body">
+
+    <!-- STEP 1: COMPLETION -->
+    <div class="log-step">
+      <div class="log-step-label">Did you complete it?</div>
+      <div class="completion-row">
+        <button class="completion-btn" onclick="setCompletion('full', this)">
+          <div class="completion-icon">✓</div>
+          <div class="completion-label">Full</div>
+          <div class="completion-sub">Completed as written</div>
+        </button>
+        <button class="completion-btn" onclick="setCompletion('partial', this)">
+          <div class="completion-icon">◑</div>
+          <div class="completion-label">Partial</div>
+          <div class="completion-sub">Modified or shortened</div>
+        </button>
+        <button class="completion-btn" onclick="setCompletion('no', this)">
+          <div class="completion-icon">✗</div>
+          <div class="completion-label">No</div>
+          <div class="completion-sub">Didn't happen</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 2: FEEL -->
+    <div class="log-step" id="step-feel" style="opacity:0.3;pointer-events:none">
+      <div class="log-step-label">How did it feel?</div>
+      <div class="feel-row">
+        <button class="feel-btn" onclick="setFeel('easy', this)">
+          <div class="feel-icon">😤</div>
+          <div class="feel-label">Too Easy</div>
+          <div class="feel-sub">Could have done more · not challenged</div>
+        </button>
+        <button class="feel-btn" onclick="setFeel('right', this)">
+          <div class="feel-icon">🎯</div>
+          <div class="feel-label">Right</div>
+          <div class="feel-sub">Hard but manageable · in the zone</div>
+        </button>
+        <button class="feel-btn" onclick="setFeel('hard', this)">
+          <div class="feel-icon">🥵</div>
+          <div class="feel-label">Too Hard</div>
+          <div class="feel-sub">Struggled · form broke down</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 3: PATTERN FEEL (fit.me only) -->
+    <div class="log-step" id="step-patterns" style="display:none">
+      <div class="log-step-label">Anything stand out by pattern?</div>
+      <div class="pattern-flags" id="pattern-flags">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- STEP 3b: SIGNALS (fight.me only) -->
+    <div class="log-step" id="step-signals" style="display:none">
+      <div class="log-step-label">Any signals to flag?</div>
+      <div class="flags-grid" id="fight-flags">
+        <button class="flag-btn" onclick="toggleFlag(this, 'gassed_out')">
+          <div class="flag-check">✓</div>
+          <div class="flag-text">Gassed out early</div>
+        </button>
+        <button class="flag-btn" onclick="toggleFlag(this, 'hands_dropped')">
+          <div class="flag-check">✓</div>
+          <div class="flag-text">Hands dropping</div>
+        </button>
+        <button class="flag-btn" onclick="toggleFlag(this, 'felt_strong')">
+          <div class="flag-check">✓</div>
+          <div class="flag-text">Felt strong</div>
+        </button>
+        <button class="flag-btn" onclick="toggleFlag(this, 'power_there')">
+          <div class="flag-check">✓</div>
+          <div class="flag-text">Power was there</div>
+        </button>
+        <button class="flag-btn" onclick="toggleFlag(this, 'form_broke')">
+          <div class="flag-check">✓</div>
+          <div class="flag-text">Form broke down</div>
+        </button>
+        <button class="flag-btn" onclick="toggleFlag(this, 'something_hurt')">
+          <div class="flag-check">✓</div>
+          <div class="flag-text">Something hurt</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 4: GENERAL FLAGS -->
+    <div class="log-step" id="step-flags" style="opacity:0.3;pointer-events:none">
+      <div class="log-step-label">Anything else? <span style="color:var(--muted)">(optional)</span></div>
+      <div class="flags-grid">
+        <button class="flag-btn" onclick="toggleFlag(this, 'modified')">
+          <div class="flag-check">✓</div>
+          <div class="flag-text">Modified an exercise</div>
+        </button>
+        <button class="flag-btn" onclick="toggleFlag(this, 'skipped')">
+          <div class="flag-check">✓</div>
+          <div class="flag-text">Skipped something</div>
+        </button>
+        <button class="flag-btn" onclick="toggleFlag(this, 'extra_energy')">
+          <div class="flag-check">✓</div>
+          <div class="flag-text">Had extra energy</div>
+        </button>
+        <button class="flag-btn" onclick="toggleFlag(this, 'fatigued')">
+          <div class="flag-check">✓</div>
+          <div class="flag-text">Already fatigued</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 5: NOTES -->
+    <div class="log-step" id="step-notes" style="opacity:0.3;pointer-events:none">
+      <div class="log-step-label">Note anything specific <span style="color:var(--muted)">(optional)</span></div>
+      <textarea class="notes-input" id="notes-input" placeholder="Anything the system should know..."></textarea>
+    </div>
+
+  </div>
+
+  <div class="log-footer">
+    <button class="submit-btn" id="submit-btn" onclick="submitLog()">Log Session →</button>
+  </div>
+</div>
+
+<!-- CONFIRM SCREEN -->
+<div class="screen" id="screen-confirm">
+  <div class="confirm-glow" id="confirm-glow"></div>
+  <div class="confirm-icon" id="confirm-icon">✓</div>
+  <div class="confirm-title" id="confirm-title">Logged</div>
+  <div class="confirm-sub" id="confirm-sub">Session recorded</div>
+
+  <div class="confirm-signals" id="confirm-signals">
+    <!-- populated by JS -->
+  </div>
+
+  <div class="confirm-actions">
+    <button class="btn-primary" id="confirm-primary" onclick="goHome()">Back to Dashboard</button>
+    <button class="btn-secondary" onclick="goHome()">Done</button>
+  </div>
+</div>
+
+<script>
+  // ── STATE ──
+  const params   = new URLSearchParams(window.location.search);
+  const source   = params.get('source') || 'fit'; // 'fit' or 'fight'
+  const session  = params.get('session') || 'Strength A';
+  const day      = params.get('day') || 'Monday';
+  const week     = parseInt(params.get('week') || '1');
+
+  const placement = JSON.parse(localStorage.getItem('fightme_placement') || '{}');
+  const track     = placement.track || 'foundation';
+  const equipment = placement.equipment || 'dumbbells';
+
+  let completion     = null;
+  let feel           = null;
+  let flags          = new Set();
+  let patternFeel    = {};
+
+  // ── PATTERNS ──
+  const PATTERNS = [
+    { key: 'push',   label: 'Push',   color: '#e8311a' },
+    { key: 'pull',   label: 'Pull',   color: '#5aacff' },
+    { key: 'squat',  label: 'Squat',  color: '#28b05a' },
+    { key: 'hinge',  label: 'Hinge',  color: '#c97b1a' },
+    { key: 'carry',  label: 'Carry',  color: '#b87aff' },
+    { key: 'rotate', label: 'Rotate', color: '#e87b1a' },
+  ];
+
+  // ── INIT ──
+  function init() {
+    // Source badge
+    const srcEl = document.getElementById('log-source');
+    srcEl.textContent = source === 'fight' ? 'fight.me' : 'fit.me';
+    srcEl.className = `log-source ${source}`;
+
+    // Session name
+    document.getElementById('log-session-name').textContent = session;
+    document.getElementById('log-session-meta').textContent =
+      `${day} · Week ${week} · ${track.charAt(0).toUpperCase() + track.slice(1)} Track`;
+
+    // Show source-specific steps
+    if (source === 'fit') {
+      document.getElementById('step-patterns').style.display = 'flex';
+      buildPatternFlags();
+    } else {
+      document.getElementById('step-signals').style.display = 'flex';
+    }
+  }
+
+  function buildPatternFlags() {
+    const container = document.getElementById('pattern-flags');
+    PATTERNS.forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'pattern-flag-row';
+      row.innerHTML = `
+        <div class="pattern-pip" style="background:${p.color}"></div>
+        <div class="pattern-name-text">${p.label}</div>
+        <div class="pattern-feel-mini">
+          <button class="pfm-btn" onclick="setPatternFeel('${p.key}', 'easy', this)">Easy</button>
+          <button class="pfm-btn" onclick="setPatternFeel('${p.key}', 'right', this)">Right</button>
+          <button class="pfm-btn" onclick="setPatternFeel('${p.key}', 'hard', this)">Hard</button>
+        </div>
+      `;
+      container.appendChild(row);
+    });
+  }
+
+  // ── INTERACTIONS ──
+  function setCompletion(value, btn) {
+    completion = value;
+    document.querySelectorAll('.completion-btn').forEach(b => {
+      b.className = 'completion-btn';
+    });
+    btn.classList.add(`selected-${value}`);
+
+    if (value !== 'no') {
+      // Enable feel step
+      const feelStep = document.getElementById('step-feel');
+      feelStep.style.opacity = '1';
+      feelStep.style.pointerEvents = 'all';
+    } else {
+      // Skip to submit for no-show
+      feel = 0;
+      enableFlagSteps();
+      checkSubmit();
+    }
+  }
+
+  function setFeel(value, btn) {
+    const feelMap = { easy: 3, right: 2, hard: 1 };
+    feel = feelMap[value];
+
+    document.querySelectorAll('.feel-btn').forEach(b => b.className = 'feel-btn');
+    btn.classList.add(`selected-${value}`);
+
+    enableFlagSteps();
+    checkSubmit();
+  }
+
+  function enableFlagSteps() {
+    ['step-flags', 'step-notes'].forEach(id => {
+      const el = document.getElementById(id);
+      el.style.opacity = '1';
+      el.style.pointerEvents = 'all';
+    });
+  }
+
+  function setPatternFeel(pattern, value, btn) {
+    const feelMap = { easy: 3, right: 2, hard: 1 };
+    patternFeel[pattern] = feelMap[value];
+
+    // Clear siblings
+    btn.closest('.pattern-feel-mini')
+       .querySelectorAll('.pfm-btn')
+       .forEach(b => b.className = 'pfm-btn');
+    btn.classList.add(`selected-${value}`);
+  }
+
+  function toggleFlag(btn, flag) {
+    if (flags.has(flag)) {
+      flags.delete(flag);
+      btn.classList.remove('selected');
+    } else {
+      flags.add(flag);
+      btn.classList.add('selected');
+    }
+  }
+
+  function checkSubmit() {
+    const btn = document.getElementById('submit-btn');
+    if (completion && feel !== null) {
+      btn.classList.add('enabled');
+    }
+  }
+
+  // ── SUBMIT ──
+  function submitLog() {
+    const entry = {
+      id: Date.now(),
+      date: new Date().toISOString(),
+      source,
+      session,
+      day,
+      week,
+      track,
+      equipment,
+      completion,
+      feel,
+      flags: [...flags],
+      patternFeel: source === 'fit' ? patternFeel : {},
+      notes: document.getElementById('notes-input').value.trim(),
+    };
+
+    // Save to localStorage
+    const existing = JSON.parse(localStorage.getItem('fightme_sessions') || '[]');
+    existing.push(entry);
+    localStorage.setItem('fightme_sessions', JSON.stringify(existing));
+
+    showConfirm(entry);
+  }
+
+  // ── CONFIRM ──
+  function showConfirm(entry) {
+    // Generate signals based on entry
+    const signals = generateSignals(entry);
+
+    // Glow color
+    const glowColors = {
+      2: 'rgba(40,176,90,0.1)',
+      1: 'rgba(201,123,26,0.1)',
+      0: 'rgba(232,49,26,0.08)'
+    };
+    document.getElementById('confirm-glow').style.background =
+      `radial-gradient(ellipse, ${glowColors[entry.feel] || glowColors[1]} 0%, transparent 60%)`;
+
+    // Icon and title
+    const icons = { 2: '✓', 1: '→', 0: '○' };
+    const feelLabels = { full: { 2: 'Solid', 1: 'Logged', 0: 'Noted' }, partial: { 2: 'Partial · Good', 1: 'Partial', 0: 'Partial · Tough' }, no: { 2: 'Rest Logged', 1: 'Rest Logged', 0: 'Rest Logged' } };
+    document.getElementById('confirm-icon').textContent = icons[entry.feel] || '✓';
+    document.getElementById('confirm-title').textContent = feelLabels[entry.completion]?.[entry.feel] || 'Logged';
+    document.getElementById('confirm-sub').textContent = `${entry.session} · ${entry.day} · Week ${entry.week}`;
+
+    // Signals
+    const sigContainer = document.getElementById('confirm-signals');
+    sigContainer.innerHTML = '';
+    signals.forEach(sig => {
+      const el = document.createElement('div');
+      el.className = 'confirm-signal';
+      el.innerHTML = `
+        <div class="confirm-signal-dot ${sig.dotClass}"></div>
+        <div><strong>${sig.title}</strong>${sig.body}</div>
+      `;
+      sigContainer.appendChild(el);
+    });
+
+    showScreen('screen-confirm');
+  }
+
+  function generateSignals(entry) {
+    const signals = [];
+    const sessions = JSON.parse(localStorage.getItem('fightme_sessions') || '[]');
+
+    // Streak signal
+    const streak = sessions.filter(s => s.completion !== 'no').length + (entry.completion !== 'no' ? 1 : 0);
+    if (streak > 0) {
+      signals.push({ dotClass: 'csd-ok', title: `${streak} sessions complete`, body: ' — consistency is the foundation of adaptation' });
+    }
+
+    // Feel signal
+    const recentFeel = sessions.slice(-5).map(s => s.feel);
+    const avgFeel = recentFeel.length > 0 ? recentFeel.reduce((a,b)=>a+b,0)/recentFeel.length : entry.feel;
+
+    if (entry.feel === 3) {
+      signals.push({ dotClass: 'csd-ok', title: 'Session felt easy', body: ' — the system will adjust your program upward' });
+    } else if (entry.feel === 1) {
+      signals.push({ dotClass: 'csd-warn', title: 'Session felt hard', body: ' — monitoring pattern. If this continues the system will adjust down' });
+    }
+
+    // Flag signals
+    if (entry.flags.includes('gassed_out') || entry.flags.includes('something_hurt')) {
+      signals.push({ dotClass: 'csd-flag', title: 'Flag noted', body: ' — fight.me is routing a fit.me recommendation based on this signal' });
+    }
+
+    if (entry.flags.includes('felt_strong') || entry.flags.includes('power_there')) {
+      signals.push({ dotClass: 'csd-ok', title: 'Strong session', body: ' — positive signal logged' });
+    }
+
+    // Pattern-specific signals (fit.me)
+    const easyPatterns = Object.entries(entry.patternFeel || {}).filter(([,v]) => v === 3).map(([k]) => k);
+    const hardPatterns = Object.entries(entry.patternFeel || {}).filter(([,v]) => v === 1).map(([k]) => k);
+
+    if (easyPatterns.length > 0) {
+      signals.push({ dotClass: 'csd-ok', title: `${easyPatterns.join(', ')} pattern: too easy`, body: ' — rep range will adjust next session' });
+    }
+    if (hardPatterns.length > 0) {
+      signals.push({ dotClass: 'csd-warn', title: `${hardPatterns.join(', ')} pattern: too hard`, body: ' — monitoring. Regression available if this continues' });
+    }
+
+    if (signals.length === 0) {
+      signals.push({ dotClass: 'csd-ok', title: 'Session logged', body: ' — data added to your training history' });
+    }
+
+    return signals.slice(0, 3);
+  }
+
+  function goHome() {
+    window.location.href = 'dashboard.html';
+  }
+
+  // ── SCREEN NAV ──
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  // ── BOOT ──
+  init();
+</script>
+</body>
+</html>
