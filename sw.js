@@ -13,6 +13,7 @@ const ASSETS = [
   '/fight.me/dashboard.html',
   '/fight.me/session-log.html',
   '/fight.me/program-generator.js',
+  '/fight.me/my-program.html',
   '/fight.me/icon-192.svg',
   '/fight.me/icon-512.svg'
 ];

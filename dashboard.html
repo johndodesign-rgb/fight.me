@@ -1158,6 +1158,88 @@
 
   // Call program integration after main init
   setTimeout(initProgram, 100);
+
+  // ── UPDATE TODAY CARD WITH REAL EXERCISES ──
+  function updateTodayCard() {
+    const raw = localStorage.getItem('fightme_placement');
+    if (!raw || typeof PROGRAM_GENERATOR === 'undefined') return;
+
+    const data     = JSON.parse(raw);
+    const track    = data.track || 'foundation';
+    const equip    = data.equipment || 'dumbbells';
+    const weekNum  = getWeekNumber(data.date);
+    const sessions = JSON.parse(localStorage.getItem('fightme_sessions') || '[]');
+
+    const week = PROGRAM_GENERATOR.generateWeek(track, equip, weekNum, sessions);
+
+    const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+    const todayKey = dayNames[new Date().getDay()];
+    const session  = week.sessions[todayKey];
+
+    if (!session) return;
+
+    // Update session name
+    const nameEl = document.getElementById('today-session-name');
+    if (nameEl) nameEl.textContent = session.name;
+
+    // Update desc
+    const descEl = document.getElementById('today-session-desc');
+    if (descEl) descEl.textContent = `${session.day} · Week ${weekNum} · ${track.charAt(0).toUpperCase()+track.slice(1)} Track`;
+
+    // Update blocks with real exercises
+    const blocksEl = document.getElementById('today-blocks');
+    if (blocksEl && session.exercises && session.exercises.length > 0) {
+      const PATTERN_COLORS = {
+        push:'#e8311a', pull:'#5aacff', squat:'#28b05a',
+        hinge:'#c97b1a', carry:'#b87aff', rotate:'#e87b1a',
+        cardio:'#28b05a', mobility:'#b87aff'
+      };
+      blocksEl.innerHTML = session.exercises.slice(0, 4).map(ex => {
+        if (!ex) return '';
+        const color = PATTERN_COLORS[ex.pattern] || '#666';
+        const adjDot = ex.adjusted ? ' <span style="color:var(--amber);font-size:9px">⚙</span>' : '';
+        return `
+          <div class="today-block">
+            <span class="tb-name" style="display:flex;align-items:center;gap:6px">
+              <span style="width:6px;height:6px;border-radius:1px;background:${color};flex-shrink:0"></span>
+              ${ex.name}${adjDot}
+            </span>
+            <span class="tb-detail">${ex.sets}×${ex.repRange}</span>
+          </div>`;
+      }).join('');
+
+      if (session.exercises.length > 4) {
+        blocksEl.innerHTML += `<div style="font-family:var(--mono);font-size:9px;color:var(--muted);padding:6px 0;letter-spacing:0.08em">+ ${session.exercises.length - 4} more · <a href="my-program.html" style="color:var(--dim);text-decoration:none">View full program →</a></div>`;
+      }
+    }
+
+    // Update log button
+    const logBtn = document.getElementById('log-session-btn');
+    if (logBtn) {
+      const today = new Date().toDateString();
+      const logged = sessions.some(s =>
+        new Date(s.date).toDateString() === today && s.day === session.day
+      );
+      if (logged) {
+        logBtn.textContent = 'Logged ✓';
+        logBtn.style.background = 'var(--green)';
+        logBtn.style.cursor = 'default';
+        logBtn.onclick = null;
+      } else {
+        logBtn.onclick = () => {
+          const params = new URLSearchParams({
+            source: 'fit',
+            session: session.name,
+            day: session.day,
+            week: weekNum
+          });
+          window.location.href = `session-log.html?${params.toString()}`;
+        };
+      }
+    }
+  }
+
+  setTimeout(updateTodayCard, 150);
 </script>
 </body>
 </html>
