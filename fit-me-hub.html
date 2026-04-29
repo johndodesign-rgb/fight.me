@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="manifest" href="manifest.json">
 <title>fit.me</title>
-<script src="program-generator.js"></script>
+<script src="program-generator.js" defer></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,700;0,900;1,900&family=Barlow:wght@300;400&family=DM+Mono:wght@300;400&display=swap');
 
@@ -571,7 +571,16 @@
     }, 100);
   }
 
-  renderProgramCard();
+  function waitForGenerator(cb, attempts) {
+    attempts = attempts || 0;
+    if (typeof PROGRAM_GENERATOR !== 'undefined') {
+      cb();
+    } else if (attempts < 30) {
+      setTimeout(() => waitForGenerator(cb, attempts + 1), 100);
+    }
+  }
+
+  waitForGenerator(renderProgramCard);
 </script>
 
 </body>

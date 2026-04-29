@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
 <title>My Program · fit.me</title>
-<script src="program-generator.js"></script>
+<script src="program-generator.js" defer></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,700;0,900;1,700&family=Barlow:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap');
 
@@ -747,12 +747,23 @@
   }
 
   // ── INIT ──
+  function waitForGenerator(cb, attempts) {
+    attempts = attempts || 0;
+    if (typeof PROGRAM_GENERATOR !== 'undefined') {
+      cb();
+    } else if (attempts < 30) {
+      setTimeout(() => waitForGenerator(cb, attempts + 1), 100);
+    }
+  }
+
   setToday();
-  renderHeader();
-  renderNotices();
-  renderWeekStrip();
-  renderTabs();
-  renderDayContent(currentDay);
+  waitForGenerator(() => {
+    renderHeader();
+    renderNotices();
+    renderWeekStrip();
+    renderTabs();
+    renderDayContent(currentDay);
+  });
 </script>
 </body>
 </html>

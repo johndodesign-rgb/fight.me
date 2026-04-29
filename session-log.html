@@ -856,14 +856,23 @@
     const avgFeel = recentFeel.length > 0 ? recentFeel.reduce((a,b)=>a+b,0)/recentFeel.length : entry.feel;
 
     if (entry.feel === 3) {
-      signals.push({ dotClass: 'csd-ok', title: 'Session felt easy', body: ' — the system will adjust your program upward' });
+      const easyBody = source === 'fit'
+        ? ' — rep range will adjust upward next session'
+        : ' — the system will adjust your program upward';
+      signals.push({ dotClass: 'csd-ok', title: 'Session felt easy', body: easyBody });
     } else if (entry.feel === 1) {
-      signals.push({ dotClass: 'csd-warn', title: 'Session felt hard', body: ' — monitoring pattern. If this continues the system will adjust down' });
+      const hardBody = source === 'fit'
+        ? ' — monitoring. If this continues, a regression or tempo adjustment will apply'
+        : ' — monitoring pattern. If this continues the system will adjust down';
+      signals.push({ dotClass: 'csd-warn', title: 'Session felt hard', body: hardBody });
     }
 
     // Flag signals
     if (entry.flags.includes('gassed_out') || entry.flags.includes('something_hurt')) {
-      signals.push({ dotClass: 'csd-flag', title: 'Flag noted', body: ' — fight.me is routing a fit.me recommendation based on this signal' });
+      const flagBody = source === 'fight'
+        ? ' — fight.me is routing a fit.me recommendation based on this signal'
+        : ' — flagged for monitoring. Program may adjust based on this signal';
+      signals.push({ dotClass: 'csd-flag', title: 'Flag noted', body: flagBody });
     }
 
     if (entry.flags.includes('felt_strong') || entry.flags.includes('power_there')) {

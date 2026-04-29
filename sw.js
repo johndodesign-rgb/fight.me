@@ -1,4 +1,4 @@
-const CACHE = 'fightfit-v1';
+const CACHE = 'fightfit-v2';
 const ASSETS = [
   '/fight.me/',
   '/fight.me/index.html',
