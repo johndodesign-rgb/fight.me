@@ -14,6 +14,149 @@ const PROGRAM_GENERATOR = (() => {
     full:          ['Bodyweight', 'Band', 'Dumbbells', 'Dumbbell', 'Dumbbells, Bench', 'Dumbbell, Bench', 'Barbell', 'Cable', 'Dumbbell or Band', 'Dumbbells or Bodyweight', 'Foam Roller', 'Doorframe', 'Wall']
   };
 
+
+  // ── SESSION NAME MATRIX ──
+  // track × session type × phase — picked randomly for personality
+  const SESSION_NAMES = {
+    foundation: {
+      A: [
+        "First Things First",
+        "The Foundation Holds",
+        "Build Before You Break",
+        "Earn the Right to Train",
+        "Roots Before Branches",
+        "The Work Nobody Sees",
+      ],
+      B: [
+        "Balance the Load",
+        "The Other Side",
+        "Legs Don't Lie",
+        "Rotation Starts Here",
+        "The Engine Has Two Sides",
+        "Unilateral Truth",
+      ],
+      C: [
+        "Dead Stop. Full Send.",
+        "From Nothing, Something",
+        "Off the Floor",
+        "Force Meets Ground",
+        "No Momentum. Just Strength.",
+        "The Hard Reset",
+      ],
+      cardio: [
+        "Earn the Engine",
+        "Slow Is Smooth",
+        "The Long Game",
+        "This Is the Work",
+        "Nose Only",
+        "Conversations at Pace",
+        "Zone 2 or Zone Out",
+      ],
+      mobility: [
+        "Stay in the Fight",
+        "The Quiet Work",
+        "Range Is Power",
+        "Maintenance Day",
+        "The Work Between the Work",
+        "Open Everything",
+        "Longevity Over Ego",
+      ],
+    },
+    transition: {
+      A: [
+        "Load the Weapon",
+        "Gaps Are Getting Closed",
+        "The Middle Ground",
+        "Heavy Enough",
+        "Progress Has a Weight",
+        "Earned Load",
+      ],
+      B: [
+        "One Side at a Time",
+        "The Imbalance Ends Here",
+        "Rotate or Stagnate",
+        "Unilateral and Unbothered",
+        "The Weak Side Gets Fixed",
+        "Close the Gap",
+      ],
+      C: [
+        "Power Has a Price",
+        "Explosive. Then Rest.",
+        "Stop. Generate. Go.",
+        "The Transition Is Working",
+        "Almost Ready",
+        "Finish Strong",
+      ],
+      cardio: [
+        "The Engine Responds",
+        "Push the Ceiling",
+        "Conditioning Is Honest",
+        "Your Lungs Know",
+        "Two Minutes Tells the Truth",
+        "The Work Rate Rises",
+      ],
+      mobility: [
+        "Range Unlocks Power",
+        "Shoulders Stay Healthy",
+        "Hip Rotation Is the Punch",
+        "Keep the Machine Running",
+        "Maintenance Wins Fights",
+        "The Hinge Needs Oil",
+      ],
+    },
+    fighter: {
+      A: [
+        "No Shortcuts Left",
+        "Sharpen the Weapon",
+        "This Is What It Costs",
+        "The Hard Sets",
+        "Champions Train Like This",
+        "Refinement Not Rebuilding",
+      ],
+      B: [
+        "The Fighter's Arsenal",
+        "Power Through the Chain",
+        "One Side. Full Output.",
+        "The Rotation Is Loaded",
+        "Weapon Maintenance",
+        "Nothing Wasted",
+      ],
+      C: [
+        "Peak Output",
+        "The Final Form",
+        "Condition or Quit",
+        "Five More Rounds",
+        "The Finishing Work",
+        "This Is the Difference",
+      ],
+      cardio: [
+        "Champions Run Alone",
+        "Five More Rounds",
+        "The Conditioning Never Lies",
+        "Earn the Rounds",
+        "Fit to Fight",
+        "The Last One Standing",
+      ],
+      mobility: [
+        "Weapons Stay Sharp",
+        "The Long Career",
+        "Shoulder Check",
+        "Hip Health Is Fight Health",
+        "Stay Available",
+        "The Work That Keeps You Fighting",
+      ],
+    },
+  };
+
+  function getSessionName(track, sessionType, weekNum) {
+    const pool = SESSION_NAMES[track]?.[sessionType];
+    if (!pool || pool.length === 0) return null;
+    // Seed with week number for consistency within a week
+    // but variety across weeks
+    const idx = (weekNum * 7 + sessionType.length) % pool.length;
+    return pool[idx];
+  }
+
   // ── EXERCISE LIBRARY ──
   // Condensed from fitme-exercise-library.xlsx
   // Fields: name, pattern, equipment, minTrack, complexity, bilateral, ballistic, repRange, setRange, tempo, regression, progression, combatValue
@@ -188,8 +331,9 @@ const PROGRAM_GENERATOR = (() => {
         const iso1  = pickForPattern('push',  track, equipmentTier, true,  false, 2)[1]; // isolation push
         const iso2  = pickForPattern('pull',  track, equipmentTier, true,  false, 2)[1]; // isolation pull
 
+        const nameA = getSessionName(track, 'A', weekNum) || 'Push · Pull · Hinge';
         return {
-          name: 'Push · Pull · Hinge',
+          name: nameA,
           type: 'strength',
           day: 'Monday',
           phase,
@@ -213,8 +357,9 @@ const PROGRAM_GENERATOR = (() => {
         const rotate = pickForPattern('rotate', track, equipmentTier, false, null,  1)[0];
         const iso1   = pickForPattern('squat',  track, equipmentTier, null,  null,  2)[1];
 
+        const nameB = getSessionName(track, 'B', weekNum) || 'Squat · Rotate · Unilateral';
         return {
-          name: 'Squat · Rotate · Unilateral',
+          name: nameB,
           type: 'strength',
           day: 'Thursday',
           phase,
@@ -249,8 +394,9 @@ const PROGRAM_GENERATOR = (() => {
           adjusted: false
         } : null;
 
+        const nameC = getSessionName(track, 'C', weekNum) || 'Dead Stops · Power · Conditioning';
         return {
-          name: 'Dead Stops · Power · Conditioning',
+          name: nameC,
           type: 'strength-cardio',
           day: 'Saturday',
           phase,
@@ -266,7 +412,7 @@ const PROGRAM_GENERATOR = (() => {
 
       // Tuesday: Cardio
       cardio: () => ({
-        name: 'Zone 2 · Cardio',
+        name: getSessionName(track, 'cardio', weekNum) || 'Zone 2 · Cardio',
         type: 'cardio',
         day: 'Tuesday',
         phase: weekNum <= 4 ? 1 : weekNum <= 8 ? 2 : 3,
@@ -279,7 +425,7 @@ const PROGRAM_GENERATOR = (() => {
 
       // Sunday: Mobility
       mobility: () => ({
-        name: 'Mobility',
+        name: getSessionName(track, 'mobility', weekNum) || 'Mobility',
         type: 'mobility',
         day: 'Sunday',
         phase: 1,
@@ -339,6 +485,7 @@ const PROGRAM_GENERATOR = (() => {
     generateSession,
     filterLibrary,
     getCarryNote,
+    getSessionName,
     LIBRARY,
     EQUIPMENT,
   };

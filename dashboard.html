@@ -763,7 +763,7 @@
     <div class="section-title">fit.me · Active Program</div>
     <a class="section-link" href="fit-me-hub.html">All →</a>
   </div>
-  <a class="fitme-card" href="90day-plan.html" id="fitme-card">
+  <a class="fitme-card" href="my-program.html" id="fitme-card">
     <div class="fitme-card-header">
       <span class="fitme-card-label">⚙ Generated from your track placement</span>
       <span class="fitme-card-label" id="fitme-weeks">—</span>
@@ -844,30 +844,11 @@
       colorClass: 'color-foundation',
       trackClass: 'track-foundation',
       desc: '<strong>Build the engine first.</strong> Conditioning and movement before glove work.',
-      today: {
-        day: getDayLabel(),
-        badge: 'Zone 2 · Cardio',
-        badgeClass: 'badge-foundation',
-        session: 'Zone 2 + Movement',
-        desc: 'Week 1 · Tuesday · Foundation Track',
-        blocks: [
-          { name: 'Jump rope · slow single-bounce', detail: '3× 10 min / 2 min rest' },
-          { name: 'Footwork pattern drills', detail: '10 min' },
-          { name: 'Shadow boxing · no intensity', detail: '5 min cooldown' }
-        ],
-        cta: 'Start Session'
-      },
       signals: [
         { dot: 'sd-warn', name: 'Aerobic Recovery', detail: 'Target: under 90 sec · Building baseline', trend: '→ monitoring', trendClass: 'trend-same' },
         { dot: 'sd-ok', name: 'Footwork Quality', detail: 'Movement patterns tracking clean', trend: '↑ good', trendClass: 'trend-up' },
         { dot: 'sd-ok', name: 'Session Consistency', detail: 'All sessions logged this week', trend: '↑ solid', trendClass: 'trend-up' }
       ],
-      fitme: {
-        name: 'Strong as F*** &\nConditioned as Hell',
-        meta: '90 days · 4 days/week · Dumbbells + Bands + Bench',
-        desc: 'Built around the 6-3 framework — six movement patterns, three times a week. <strong>This is your foundation.</strong> The strength base that makes everything in the ring work.',
-        weeks: 'Week 1 of 12'
-      },
       path: [
         { node: 'pn-current', label: 'Foundation', detail: 'Weeks 1–4 · Current', progress: 25 },
         { node: 'pn-locked', label: 'Fundamentals', detail: 'Weeks 5–8 · Locked', progress: 0 },
@@ -881,30 +862,11 @@
       colorClass: 'color-transition',
       trackClass: 'track-transition',
       desc: '<strong>Almost ring-ready.</strong> Closing the gaps before glove work.',
-      today: {
-        day: getDayLabel(),
-        badge: 'Technical + Conditioning',
-        badgeClass: 'badge-transition',
-        session: 'Jab / Cross Fundamentals',
-        desc: 'Week 1 · Monday · Transition Track',
-        blocks: [
-          { name: 'Jab / cross foundation', detail: '3× 3 min rounds' },
-          { name: 'Footwork under fatigue', detail: '2× 4 min' },
-          { name: 'HIIT finisher · jump rope', detail: '4× 30 sec' }
-        ],
-        cta: 'Start Session'
-      },
       signals: [
         { dot: 'sd-ok', name: 'Aerobic Base', detail: 'Zone 2 base solid · Recovery under 90 sec', trend: '↑ good', trendClass: 'trend-up' },
         { dot: 'sd-warn', name: 'Power Endurance', detail: 'Combination speed dropping in round 3+', trend: '↓ watch', trendClass: 'trend-down' },
         { dot: 'sd-ok', name: 'Technical Consistency', detail: 'Jab / cross mechanics holding', trend: '→ stable', trendClass: 'trend-same' }
       ],
-      fitme: {
-        name: 'Strong as F*** &\nConditioned as Hell',
-        meta: '90 days · 4 days/week · Dumbbells + Bands + Bench',
-        desc: 'Phase 2 is active — loading the patterns you built in Foundation. <strong>Power endurance work</strong> is directly addressing the late-round drop you\'re seeing.',
-        weeks: 'Week 5 of 12'
-      },
       path: [
         { node: 'pn-done', label: 'Foundation', detail: 'Complete', progress: 100 },
         { node: 'pn-current', label: 'Transition', detail: 'Weeks 5–8 · Current', progress: 40 },
@@ -918,30 +880,11 @@
       colorClass: 'color-fighter',
       trackClass: 'track-fighter',
       desc: '<strong>The work gets harder.</strong> Refinement, performance, sparring prep.',
-      today: {
-        day: getDayLabel(),
-        badge: 'Sparring Prep',
-        badgeClass: 'badge-fighter',
-        session: 'Full Combination Work',
-        desc: 'Week 1 · Wednesday · Fighter Track',
-        blocks: [
-          { name: 'Full combination rounds', detail: '5× 3 min rounds' },
-          { name: 'Defensive footwork', detail: 'Slip / roll / pivot' },
-          { name: 'Speed intervals', detail: '6× 15 sec max effort' }
-        ],
-        cta: 'Start Session'
-      },
       signals: [
         { dot: 'sd-ok', name: 'Conditioning', detail: 'Engine solid · Sub-60 sec recovery', trend: '↑ strong', trendClass: 'trend-up' },
         { dot: 'sd-ok', name: 'Recovery', detail: 'Competitive level between rounds', trend: '↑ good', trendClass: 'trend-up' },
         { dot: 'sd-warn', name: 'Right Shoulder', detail: 'Fatigue-related drop detected in round 3', trend: '↓ watch', trendClass: 'trend-down' }
       ],
-      fitme: {
-        name: 'Strong as F*** &\nConditioned as Hell',
-        meta: '90 days · 4 days/week · Dumbbells + Bands + Bench',
-        desc: 'Phase 3 — peak loading. Hard sets driving strength. <strong>Unilateral shoulder work</strong> flagged by fight.me is in this week\'s program.',
-        weeks: 'Week 9 of 12'
-      },
       path: [
         { node: 'pn-done', label: 'Foundation', detail: 'Complete', progress: 100 },
         { node: 'pn-done', label: 'Transition', detail: 'Complete', progress: 100 },
@@ -982,22 +925,10 @@
     trackBig.className = 'placement-track-big ' + cfg.colorClass;
     document.getElementById('placement-desc').innerHTML = cfg.desc;
 
-    // Today card
-    document.getElementById('today-day').textContent = cfg.today.day;
-    const todayBadge = document.getElementById('today-badge');
-    todayBadge.textContent = cfg.today.badge;
-    todayBadge.className = 'today-badge ' + cfg.today.badgeClass;
-    document.getElementById('today-session-name').textContent = cfg.today.session;
-    document.getElementById('today-session-desc').textContent = cfg.today.desc;
-    document.getElementById('today-cta-text').textContent = cfg.today.cta;
-
-    const blocksEl = document.getElementById('today-blocks');
-    cfg.today.blocks.forEach(b => {
-      const el = document.createElement('div');
-      el.className = 'today-block';
-      el.innerHTML = `<span class="tb-name">${b.name}</span><span class="tb-detail">${b.detail}</span>`;
-      blocksEl.appendChild(el);
-    });
+    // Today card — populated by updateTodayCard() via program generator
+    document.getElementById('today-day').textContent = getDayLabel();
+    document.getElementById('today-session-name').textContent = 'Loading...';
+    document.getElementById('today-session-desc').textContent = track.charAt(0).toUpperCase() + track.slice(1) + ' Track';
 
     // Signals
     const signalCard = document.getElementById('signal-card');
@@ -1016,10 +947,7 @@
     });
 
     // fit.me card
-    document.getElementById('fitme-program-name').textContent = cfg.fitme.name;
-    document.getElementById('fitme-program-meta').textContent = cfg.fitme.meta;
-    document.getElementById('fitme-program-desc').innerHTML = cfg.fitme.desc;
-    document.getElementById('fitme-weeks').textContent = cfg.fitme.weeks;
+    // fit.me card populated dynamically by updateFitmeCard()
 
     // Path
     const pathEl = document.getElementById('path-steps');
@@ -1178,9 +1106,30 @@
 
     if (!session) return;
 
-    // Update session name
+    // Update session name — personality name prominent, pattern as subtitle
     const nameEl = document.getElementById('today-session-name');
     if (nameEl) nameEl.textContent = session.name;
+
+    // Add pattern label as subtitle if not already there
+    const descEl = document.getElementById('today-session-desc');
+    if (descEl) {
+      const patternNames = {
+        A: 'Push · Pull · Hinge',
+        B: 'Squat · Rotate · Unilateral',
+        C: 'Dead Stops · Power',
+        cardio: 'Zone 2 Cardio',
+        mobility: 'Mobility'
+      };
+      const sessionTypeMap = {
+        'monday': 'A', 'thursday': 'B', 'saturday': 'C',
+        'tuesday': 'cardio', 'sunday': 'mobility'
+      };
+      const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+      const todayKey2 = dayNames[new Date().getDay()];
+      const sessionType = sessionTypeMap[todayKey2] || 'A';
+      const patternLabel = patternNames[sessionType] || '';
+      descEl.textContent = `${patternLabel} · Week ${weekNum} · ${track.charAt(0).toUpperCase()+track.slice(1)} Track`;
+    }
 
     // Update desc
     const descEl = document.getElementById('today-session-desc');
@@ -1240,6 +1189,75 @@
   }
 
   setTimeout(updateTodayCard, 150);
+  setTimeout(updateFitmeCard, 200);
+
+  // ── UPDATE FIT.ME CARD DYNAMICALLY ──
+  function updateFitmeCard() {
+    const raw = localStorage.getItem('fightme_placement');
+    if (!raw) return;
+
+    const data     = JSON.parse(raw);
+    const track    = data.track || 'foundation';
+    const equip    = data.equipment || 'dumbbells';
+    const weekNum  = getWeekNumber(data.date);
+    const sessions = JSON.parse(localStorage.getItem('fightme_sessions') || '[]');
+
+    const equipLabels = {
+      bodyweight: 'Bodyweight only',
+      bands: 'Bodyweight + bands',
+      dumbbells: 'Dumbbells + bands',
+      full: 'Full gym'
+    };
+
+    const trackDescs = {
+      foundation: 'Your Foundation track program — movement quality, tempo work, aerobic base. <strong>Build the engine first.</strong> The strength base that makes everything in the ring work.',
+      transition:  'Your Transition track program — loading the patterns, adding unilateral work, variable resistance. <strong>Intensity is rising.</strong> Conditioning gaps being addressed directly.',
+      fighter:     'Your Fighter track program — hard sets at 80%+, power emphasis, full conditioning protocol. <strong>Refinement and performance.</strong> The foundation is already there.'
+    };
+
+    const trackNames = { foundation: 'Foundation', transition: 'Transition', fighter: 'Fighter' };
+    const trackColors = { foundation: 'var(--punch)', transition: 'var(--amber)', fighter: 'var(--green-bright)' };
+
+    // Check for adjustments
+    let adjText = '';
+    try {
+      if (typeof PROGRAM_GENERATOR !== 'undefined' && sessions.length >= 3) {
+        const week = PROGRAM_GENERATOR.generateWeek(track, equip, weekNum, sessions);
+        if (week.hasAdjustments) {
+          adjText = `<span style="font-family:var(--mono);font-size:9px;color:var(--amber)">⚙ ${week.adjustmentCount} exercise${week.adjustmentCount>1?'s':''} adjusted</span>`;
+        }
+      }
+    } catch(e) {}
+
+    const nameEl = document.getElementById('fitme-program-name');
+    const metaEl = document.getElementById('fitme-program-meta');
+    const descEl = document.getElementById('fitme-program-desc');
+    const weeksEl = document.getElementById('fitme-weeks');
+    const cardEl  = document.getElementById('fitme-card');
+    const openEl  = document.querySelector('.fitme-open');
+
+    if (nameEl) nameEl.textContent = `Week ${weekNum} · ${trackNames[track]} Program`;
+    if (metaEl) metaEl.textContent = `4-2-1 · ${equipLabels[equip]} · ${sessions.length} sessions logged`;
+    if (descEl) descEl.innerHTML = (trackDescs[track] || '') + (adjText ? '<br><br>' + adjText : '');
+    if (weeksEl) {
+      weeksEl.textContent = `Week ${weekNum} of 12`;
+      weeksEl.style.color = trackColors[track] || 'var(--green-bright)';
+    }
+    if (openEl) {
+      openEl.textContent = 'View My Program';
+      openEl.style.color = trackColors[track] || 'var(--green-bright)';
+    }
+
+    // Update header label
+    const labelEl = document.querySelector('.fitme-card-label');
+    if (labelEl) {
+      labelEl.textContent = `⚙ Generated · ${trackNames[track]} Track · ${equipLabels[equip]}`;
+    }
+
+    // Arrow color
+    const arrowEl = document.querySelector('.fitme-arrow');
+    if (arrowEl) arrowEl.style.color = trackColors[track] || 'var(--green-bright)';
+  }
 </script>
 </body>
 </html>
