@@ -710,6 +710,38 @@ const PROGRAM_GENERATOR = (() => {
   // ── TRACK LEVELS ──
   const TRACK_LEVEL = { foundation: 0, transition: 1, fighter: 2 };
 
+  // ── ISOLATION EXERCISE MAP ──
+  // Keyed by muscle group, filtered by equipment
+  const ISOLATION_MAP = {
+    bicep: [
+      { name: 'DB Curl',        equipment: ['Dumbbells'], repRange: '10–15', sets: '2', tempo: 'Full range, squeeze at top', combatValue: 'Bicep endurance — sustained guard and hook power' },
+      { name: 'Hammer Curl',    equipment: ['Dumbbells'], repRange: '10–15', sets: '2', tempo: 'Neutral grip, controlled',   combatValue: 'Brachialis — wrist stability when punching' },
+      { name: 'Band Curl',      equipment: ['Band'],      repRange: '12–15', sets: '2', tempo: 'Full range',                 combatValue: 'Bicep endurance — band option' },
+    ],
+    tricep: [
+      { name: 'Tricep Kickback',     equipment: ['Dumbbells'], repRange: '12–15', sets: '2', tempo: 'Full extension',         combatValue: 'Tricep endurance — sustained punching output' },
+      { name: 'Band Tricep Pushdown',equipment: ['Band'],      repRange: '15–20', sets: '2', tempo: 'Full extension',         combatValue: 'High-rep tricep endurance — punch extension speed' },
+      { name: 'Tricep Dip',          equipment: ['Bodyweight'],repRange: '8–15',  sets: '2', tempo: 'Controlled',             combatValue: 'Tricep strength — bodyweight option' },
+    ],
+    shoulder: [
+      { name: 'Lateral Raise',   equipment: ['Dumbbells'], repRange: '12–15', sets: '2', tempo: 'Controlled arc',    combatValue: 'Medial deltoid — lateral guard endurance' },
+      { name: 'DB Shrug',        equipment: ['Dumbbells'], repRange: '12–15', sets: '2', tempo: 'Hold 1 sec at top', combatValue: 'Trap and neck — taking punches, clinch' },
+    ],
+    hamstring: [
+      { name: 'Band Leg Curl',   equipment: ['Band'],      repRange: '12–15', sets: '2', tempo: 'Full range',        combatValue: 'Hamstring isolation — posterior knee stability' },
+      { name: 'Glute Bridge',    equipment: ['Bodyweight'],repRange: '15–20', sets: '2', tempo: 'Hold 2 sec top',    combatValue: 'Glute activation — foundational hip extension' },
+    ],
+  };
+
+  function pickIsolation(muscleGroup, equipmentTier) {
+    const allowed = EQUIPMENT[equipmentTier] || EQUIPMENT.dumbbells;
+    const pool = (ISOLATION_MAP[muscleGroup] || []).filter(ex =>
+      ex.equipment.some(e => allowed.some(a => a.toLowerCase() === e.toLowerCase()))
+    );
+    if (pool.length === 0) return null;
+    return { ...pool[0], pattern: 'pull', role: 'Isolation', adjusted: false };
+  }
+
   // ── EQUIPMENT FILTER ──
   function equipmentAllowed(exercise, tier) {
     const allowed = EQUIPMENT[tier] || EQUIPMENT.dumbbells;
@@ -798,8 +830,8 @@ const PROGRAM_GENERATOR = (() => {
         const pull  = pickForPattern('pull',  track, equipmentTier, true,  false, 1)[0];
         const hinge = pickForPattern('hinge', track, equipmentTier, true,  false, 1)[0];
         const carry = pickForPattern('carry', track, equipmentTier, null,  null,  1)[0];
-        const iso1  = pickForPattern('push',  track, equipmentTier, true,  false, 2)[1]; // isolation push
-        const iso2  = pickForPattern('pull',  track, equipmentTier, true,  false, 2)[1]; // isolation pull
+        const iso1  = pickIsolation('tricep', equipmentTier); // tricep after push day
+        const iso2  = pickIsolation('bicep',  equipmentTier); // bicep after pull day
 
         const nameA = getSessionName(track, 'A', weekNum) || 'Push · Pull · Hinge';
         return {
@@ -812,8 +844,8 @@ const PROGRAM_GENERATOR = (() => {
             pull  && { ...applyAdjustments(pull,  sessionLogs, 'pull'),  role: 'Primary',   sets: phase === 1 ? '3' : '4', tempo: phase === 1 ? '3-1-1' : '2-1-1' },
             hinge && { ...applyAdjustments(hinge, sessionLogs, 'hinge'), role: 'Primary',   sets: phase === 1 ? '3' : '4', tempo: phase === 1 ? '3-1-1' : '2-1-1' },
             carry && { ...carry, role: 'Carry', sets: '3', repRange: '40 sec' },
-            iso1  && { ...iso1,  role: 'Isolation', sets: '2', repRange: `${iso1.repRange} · failure` },
-            iso2  && { ...iso2,  role: 'Isolation', sets: '2', repRange: `${iso2.repRange} · failure` },
+            iso1  && { ...iso1, role: 'Isolation', sets: '2', repRange: `${iso1.repRange} · to failure` },
+            iso2  && { ...iso2, role: 'Isolation', sets: '2', repRange: `${iso2.repRange} · to failure` },
           ].filter(Boolean)
         };
       },
@@ -825,7 +857,8 @@ const PROGRAM_GENERATOR = (() => {
         const push   = pickForPattern('push',   track, equipmentTier, false, false, 1)[0]; // unilateral push
         const pull   = pickForPattern('pull',   track, equipmentTier, false, false, 1)[0]; // unilateral pull
         const rotate = pickForPattern('rotate', track, equipmentTier, false, null,  1)[0];
-        const iso1   = pickForPattern('squat',  track, equipmentTier, null,  null,  2)[1];
+        const iso1   = pickIsolation('shoulder',  equipmentTier); // shoulder after push/pull unilateral
+        const iso2b  = pickIsolation('hamstring', equipmentTier); // hamstring after squat/hinge
 
         const nameB = getSessionName(track, 'B', weekNum) || 'Squat · Rotate · Unilateral';
         return {
@@ -838,7 +871,8 @@ const PROGRAM_GENERATOR = (() => {
             push   && { ...applyAdjustments(push,   sessionLogs, 'push'),   role: 'Unilateral', sets: '3', tempo: 'Controlled' },
             pull   && { ...applyAdjustments(pull,   sessionLogs, 'pull'),   role: 'Unilateral', sets: '3', tempo: '2-1-1' },
             rotate && { ...applyAdjustments(rotate, sessionLogs, 'rotate'), role: 'Rotation',   sets: '3', tempo: 'Slow' },
-            iso1   && { ...iso1, role: 'Isolation', sets: '2', repRange: `${iso1?.repRange || '12–15'} · failure` },
+            iso1   && { ...iso1,  role: 'Isolation', sets: '2', repRange: `${iso1.repRange} · to failure` },
+            iso2b  && { ...iso2b, role: 'Isolation', sets: '2', repRange: `${iso2b.repRange} · to failure` },
           ].filter(Boolean)
         };
       },
@@ -875,6 +909,7 @@ const PROGRAM_GENERATOR = (() => {
             push  && { ...applyAdjustments(push,  sessionLogs, 'push'),  role: 'Power Push',  sets: '4', tempo: 'Dead stop + explosive' },
             pull  && { ...applyAdjustments(pull,  sessionLogs, 'pull'),  role: 'Tempo Pull',  sets: '3', tempo: '3-1-1' },
             carry && { ...carry, role: 'Carry', sets: '3', repRange: '40 sec' },
+            pickIsolation('bicep',  equipmentTier) && { ...pickIsolation('bicep',  equipmentTier), role: 'Isolation', sets: '2', repRange: `${pickIsolation('bicep', equipmentTier)?.repRange} · to failure` },
             hiit,
           ].filter(Boolean)
         };
@@ -963,8 +998,6 @@ const PROGRAM_GENERATOR = (() => {
 })();
 
 // Export for use in other files
-if (typeof module !== 'undefined') module.exports = PROGRAM_GENERATOR;
-
 </script>
 <script>
   function getWeekNum(startDateStr) {
