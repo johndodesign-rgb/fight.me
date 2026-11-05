@@ -1,6 +1,6 @@
 // ─────────────────────────────────────────────
 // .me Training System · Program Generator
-// Takes: track, week, equipment, sessionLogs
+// Takes: track, week, equipment, { levels, deload }
 // Returns: personalized weekly program
 // ─────────────────────────────────────────────
 
@@ -307,50 +307,53 @@ const PROGRAM_GENERATOR = (() => {
     return pool.slice(0, count);
   }
 
-  // ── DYNAMIC ADJUSTMENTS ──
-  // Apply lever adjustments based on session log signals
-  function applyAdjustments(exercise, sessionLogs, pattern) {
-    const patternLogs = (sessionLogs || [])
-      .filter(log => log.pattern === pattern)
-      .slice(-6); // last 6 sessions of this pattern
+  // ── LEVEL ADJUSTMENTS ──
+  // Each movement pattern carries a level, set once a week by training.js
+  // from how that pattern was rated the week before.
+  //  -1 = easier variation (regression)   0 = as written
+  //  +1 = more reps / time                +2 = harder variation (progression)
+  function bumpReps(range, steps) {
+    if (!range || !steps) return range;
+    let m = String(range).match(/^(\d+)\s*[–-]\s*(\d+)(.*)$/);
+    if (m) return `${+m[1] + 2 * steps}–${+m[2] + 2 * steps}${m[3]}`;
+    m = String(range).match(/^(\d+)\s*sec(.*)$/);
+    if (m) return `${+m[1] + 10 * steps} sec${m[2]}`;
+    return null;
+  }
 
-    if (patternLogs.length < 3) return exercise; // not enough data
+  function findAllowed(name, equipmentTier) {
+    if (!name) return null;
+    const ex = LIBRARY.find(e => e.name === name);
+    return ex && equipmentAllowed(ex, equipmentTier) ? ex : null;
+  }
 
-    const avgFeel = patternLogs.reduce((a, b) => a + b.feel, 0) / patternLogs.length;
+  function applyLevel(exercise, ctx, pattern, equipmentTier) {
+    const level = (ctx && ctx.levels && ctx.levels[pattern]) || 0;
+    const base = { ...exercise, adjusted: false, adjustNote: null, level };
+    if (level === 0) return base;
 
-    let adjusted = { ...exercise, adjusted: false, adjustmentNote: null };
-
-    if (avgFeel < 1.5) {
-      // Too hard — apply regression lever
-      if (exercise.regression) {
-        const regression = LIBRARY.find(e => e.name === exercise.regression);
-        if (regression) {
-          adjusted = { ...regression, adjusted: true, adjustmentNote: `Adjusted from ${exercise.name} — building up` };
-        }
-      }
-    } else if (avgFeel > 2.5) {
-      // Too easy — apply progression levers
-      // Lever 1: bump rep range first
-      const [low, high] = exercise.repRange.replace('/side','').split('–').map(Number);
-      if (!isNaN(low) && !isNaN(high) && high < 20) {
-        adjusted.repRange = `${low + 2}–${high + 3}`;
-        adjusted.adjusted = true;
-        adjusted.adjustmentNote = 'Rep range increased — keep progressing';
-      } else if (exercise.progression) {
-        // Lever 3: swap to progression exercise
-        const progression = LIBRARY.find(e => e.name === exercise.progression);
-        if (progression) {
-          adjusted = { ...progression, adjusted: true, adjustmentNote: `Progressed from ${exercise.name} — ready for more` };
-        }
-      }
+    if (level < 0) {
+      const reg = findAllowed(exercise.regression, equipmentTier);
+      if (reg) return { ...reg, adjusted: true, level, adjustNote: `Easier variation (was ${exercise.name})` };
+      return { ...base, adjusted: true, adjustNote: 'Lighter load this week, around 20% less' };
     }
 
-    return adjusted;
+    if (level >= 2) {
+      const prog = findAllowed(exercise.progression, equipmentTier);
+      if (prog) return { ...prog, adjusted: true, level, adjustNote: `Harder variation (was ${exercise.name})` };
+    }
+
+    const reps = bumpReps(exercise.repRange, Math.min(level, 2));
+    if (reps) return { ...base, repRange: reps, adjusted: true, adjustNote: level >= 2 ? 'More reps again, or go up in weight' : 'More reps this week' };
+    return { ...base, adjusted: true, adjustNote: 'Go up in weight this week' };
   }
+
+  // Keep the old name so anything still calling it doesn't break
+  function applyAdjustments(exercise) { return exercise; }
 
   // ── GENERATE SESSION ──
   // Generates one of three session types
-  function generateSession(type, track, equipmentTier, weekNum, sessionLogs) {
+  function generateSession(type, track, equipmentTier, weekNum, ctx) {
     const sessions = {
 
       // Monday: Push / Pull / Hinge — bilateral primary
@@ -370,10 +373,10 @@ const PROGRAM_GENERATOR = (() => {
           day: 'Monday',
           phase,
           exercises: [
-            push  && { ...applyAdjustments(push,  sessionLogs, 'push'),  role: 'Primary',   sets: phase === 1 ? '3' : phase === 2 ? '4' : '4', tempo: phase === 1 ? '3-1-1' : '2-1-1' },
-            pull  && { ...applyAdjustments(pull,  sessionLogs, 'pull'),  role: 'Primary',   sets: phase === 1 ? '3' : '4', tempo: phase === 1 ? '3-1-1' : '2-1-1' },
-            hinge && { ...applyAdjustments(hinge, sessionLogs, 'hinge'), role: 'Primary',   sets: phase === 1 ? '3' : '4', tempo: phase === 1 ? '3-1-1' : '2-1-1' },
-            carry && { ...carry, role: 'Carry', sets: '3', repRange: '40 sec' },
+            push  && { ...applyLevel(push, ctx, 'push', equipmentTier),  role: 'Primary',   sets: phase === 1 ? '3' : phase === 2 ? '4' : '4', tempo: phase === 1 ? '3-1-1' : '2-1-1' },
+            pull  && { ...applyLevel(pull, ctx, 'pull', equipmentTier),  role: 'Primary',   sets: phase === 1 ? '3' : '4', tempo: phase === 1 ? '3-1-1' : '2-1-1' },
+            hinge && { ...applyLevel(hinge, ctx, 'hinge', equipmentTier), role: 'Primary',   sets: phase === 1 ? '3' : '4', tempo: phase === 1 ? '3-1-1' : '2-1-1' },
+            carry && { ...applyLevel({ ...carry, repRange: '40 sec' }, ctx, 'carry', equipmentTier), role: 'Carry', sets: '3' },
             iso1  && { ...iso1, role: 'Isolation', sets: '2', repRange: `${iso1.repRange} · to failure` },
             iso2  && { ...iso2, role: 'Isolation', sets: '2', repRange: `${iso2.repRange} · to failure` },
           ].filter(Boolean)
@@ -397,10 +400,10 @@ const PROGRAM_GENERATOR = (() => {
           day: 'Thursday',
           phase,
           exercises: [
-            squat  && { ...applyAdjustments(squat,  sessionLogs, 'squat'),  role: 'Primary',   sets: phase === 1 ? '3' : '4', tempo: '3-1-1' },
-            push   && { ...applyAdjustments(push,   sessionLogs, 'push'),   role: 'Unilateral', sets: '3', tempo: 'Controlled' },
-            pull   && { ...applyAdjustments(pull,   sessionLogs, 'pull'),   role: 'Unilateral', sets: '3', tempo: '2-1-1' },
-            rotate && { ...applyAdjustments(rotate, sessionLogs, 'rotate'), role: 'Rotation',   sets: '3', tempo: 'Slow' },
+            squat  && { ...applyLevel(squat, ctx, 'squat', equipmentTier),  role: 'Primary',   sets: phase === 1 ? '3' : '4', tempo: '3-1-1' },
+            push   && { ...applyLevel(push, ctx, 'push', equipmentTier),   role: 'Unilateral', sets: '3', tempo: 'Controlled' },
+            pull   && { ...applyLevel(pull, ctx, 'pull', equipmentTier),   role: 'Unilateral', sets: '3', tempo: '2-1-1' },
+            rotate && { ...applyLevel(rotate, ctx, 'rotate', equipmentTier), role: 'Rotation',   sets: '3', tempo: 'Slow' },
             iso1   && { ...iso1,  role: 'Isolation', sets: '2', repRange: `${iso1.repRange} · to failure` },
             iso2b  && { ...iso2b, role: 'Isolation', sets: '2', repRange: `${iso2b.repRange} · to failure` },
           ].filter(Boolean)
@@ -435,10 +438,10 @@ const PROGRAM_GENERATOR = (() => {
           day: 'Saturday',
           phase,
           exercises: [
-            hinge && { ...applyAdjustments(hinge, sessionLogs, 'hinge'), role: 'Power Hinge', sets: phase === 1 ? '3' : '4', tempo: 'Dead stop + explosive' },
-            push  && { ...applyAdjustments(push,  sessionLogs, 'push'),  role: 'Power Push',  sets: '4', tempo: 'Dead stop + explosive' },
-            pull  && { ...applyAdjustments(pull,  sessionLogs, 'pull'),  role: 'Tempo Pull',  sets: '3', tempo: '3-1-1' },
-            carry && { ...carry, role: 'Carry', sets: '3', repRange: '40 sec' },
+            hinge && { ...applyLevel(hinge, ctx, 'hinge', equipmentTier), role: 'Power Hinge', sets: phase === 1 ? '3' : '4', tempo: 'Dead stop + explosive' },
+            push  && { ...applyLevel(push, ctx, 'push', equipmentTier),  role: 'Power Push',  sets: '4', tempo: 'Dead stop + explosive' },
+            pull  && { ...applyLevel(pull, ctx, 'pull', equipmentTier),  role: 'Tempo Pull',  sets: '3', tempo: '3-1-1' },
+            carry && { ...applyLevel({ ...carry, repRange: '40 sec' }, ctx, 'carry', equipmentTier), role: 'Carry', sets: '3' },
             pickIsolation('bicep',  equipmentTier) && { ...pickIsolation('bicep',  equipmentTier), role: 'Isolation', sets: '2', repRange: `${pickIsolation('bicep', equipmentTier)?.repRange} · to failure` },
             hiit,
           ].filter(Boolean)
@@ -477,24 +480,31 @@ const PROGRAM_GENERATOR = (() => {
   }
 
   // ── GENERATE FULL WEEK ──
-  function generateWeek(track, equipmentTier, weekNum, sessionLogs) {
+  // ctx: { levels: {push:0,...}, deload: bool }
+  // (an array of logs from older pages is accepted and treated as "no adjustments")
+  function generateWeek(track, equipmentTier, weekNum, ctx) {
+    if (!ctx || Array.isArray(ctx)) {
+      ctx = (typeof TRAINING !== 'undefined') ? TRAINING.planContext() : { levels: {} };
+    }
+    const gen = t => generateSession(t, track, equipmentTier, weekNum, ctx);
     const week = {
       weekNum,
       track,
       equipmentTier,
-      generated: new Date().toISOString(),
+      deload: !!ctx.deload,
       sessions: {
-        monday:    generateSession('A',       track, equipmentTier, weekNum, sessionLogs),
-        tuesday:   generateSession('cardio',  track, equipmentTier, weekNum, sessionLogs),
+        monday:    gen('A'),
+        tuesday:   gen('cardio'),
         wednesday: null, // rest
-        thursday:  generateSession('B',       track, equipmentTier, weekNum, sessionLogs),
+        thursday:  gen('B'),
         friday:    null, // rest
-        saturday:  generateSession('C',       track, equipmentTier, weekNum, sessionLogs),
-        sunday:    generateSession('mobility',track, equipmentTier, weekNum, sessionLogs),
+        saturday:  gen('C'),
+        sunday:    gen('mobility'),
       }
     };
 
-    // Check for adjustments
+    if (ctx.deload) Object.values(week.sessions).filter(Boolean).forEach(toDeload);
+
     const adjusted = Object.values(week.sessions)
       .filter(Boolean)
       .flatMap(s => s.exercises || [])
@@ -502,8 +512,30 @@ const PROGRAM_GENERATOR = (() => {
 
     week.hasAdjustments = adjusted.length > 0;
     week.adjustmentCount = adjusted.length;
-
     return week;
+  }
+
+  // ── DELOAD ──
+  // Same movements, about half the sets, nothing to failure, no finisher.
+  function toDeload(session) {
+    session.deload = true;
+    if (session.type === 'cardio') {
+      session.exercises = session.exercises.map(ex => ex.role === 'Zone 2'
+        ? { ...ex, sets: '1', repRange: '20 min easy', tempo: 'Fully conversational' } : ex);
+      return;
+    }
+    if (session.type === 'mobility') return;
+    session.exercises = session.exercises
+      .filter(ex => ex.role !== 'Finisher')
+      .map(ex => {
+        const n = parseInt(ex.sets, 10);
+        return {
+          ...ex,
+          sets: isNaN(n) ? ex.sets : String(Math.max(1, Math.ceil(n / 2))),
+          repRange: String(ex.repRange || '').replace(/\s*·\s*to failure/, ' · stop well short'),
+          tempo: ex.tempo,
+        };
+      });
   }
 
   // ── BODYWEIGHT CARRY NOTE ──
@@ -518,6 +550,7 @@ const PROGRAM_GENERATOR = (() => {
   return {
     generateWeek,
     generateSession,
+    bumpReps,
     filterLibrary,
     getCarryNote,
     getSessionName,

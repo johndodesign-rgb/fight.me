@@ -18,8 +18,8 @@
     --line: #1a1a1a;
     --line2: #242424;
     --white: #edeae4;
-    --dim: #666;
-    --muted: #333;
+    --dim: #b3aea6;
+    --muted: #8a857e;
     --punch: #e8311a;
     --green: #28b05a;
     --green-dim: #0a2e1a;
@@ -74,7 +74,7 @@
 
   .nav-back {
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: 12px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--dim);
@@ -105,7 +105,7 @@
 
   .hero-eyebrow {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 12px;
     letter-spacing: 0.25em;
     text-transform: uppercase;
     color: var(--green);
@@ -160,7 +160,7 @@
 
   .sg-text {
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: 12px;
     letter-spacing: 0.1em;
     color: var(--green);
   }
@@ -172,7 +172,7 @@
 
   .section-label {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 12px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--dim);
@@ -202,7 +202,7 @@
 
   .plan-generated-by {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 12px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--green);
@@ -222,7 +222,7 @@
 
   .plan-meta {
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: 12px;
     color: var(--dim);
     letter-spacing: 0.05em;
   }
@@ -251,7 +251,7 @@
 
   .plan-stat-label {
     font-family: var(--mono);
-    font-size: 8px;
+    font-size: 12px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--dim);
@@ -274,7 +274,7 @@
 
   .phase-row-name {
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: 12px;
     letter-spacing: 0.08em;
     color: var(--dim);
     width: 80px;
@@ -298,7 +298,7 @@
 
   .phase-row-weeks {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 12px;
     color: var(--muted);
     width: 40px;
     text-align: right;
@@ -360,14 +360,14 @@
   }
 
   .cs-desc {
-    font-size: 11px;
+    font-size: 13px;
     color: var(--muted);
     line-height: 1.5;
   }
 
   .cs-badge {
     font-family: var(--mono);
-    font-size: 8px;
+    font-size: 12px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--muted);
@@ -385,7 +385,7 @@
 
   .footer-text {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 12px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--muted);
@@ -393,7 +393,7 @@
 
   .footer-link {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 12px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--dim);
@@ -428,7 +428,7 @@
   <div class="section-label">Your Active Program</div>
   <div id="program-card-container">
     <!-- populated by JS -->
-    <div style="padding:24px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.1em">Loading your program...</div>
+    <div style="padding:24px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:0.1em">Loading your program...</div>
   </div>
 </div>
 
@@ -1015,7 +1015,7 @@ const PROGRAM_GENERATOR = (() => {
     if (!raw) {
       container.innerHTML = `
         <div style="padding:24px;background:var(--card);border:1px solid var(--line2);border-radius:3px;text-align:center">
-          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.12em;margin-bottom:12px">NO ASSESSMENT TAKEN</div>
+          <div style="font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:0.12em;margin-bottom:12px">NO ASSESSMENT TAKEN</div>
           <a href="onboarding.html" style="font-family:var(--display);font-size:16px;font-weight:700;color:var(--green);text-decoration:none;letter-spacing:0.05em">Take Assessment →</a>
         </div>`;
       return;
@@ -1049,10 +1049,10 @@ const PROGRAM_GENERATOR = (() => {
       } catch(e) { console.warn('Generator error:', e); }
     }
 
-    const adjBadge = hasAdj ? `<div style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--amber);background:rgba(201,123,26,0.1);border:1px solid rgba(201,123,26,0.3);padding:4px 10px;border-radius:2px;margin-top:10px">⚙ Program adjusted based on your sessions</div>` : '';
+    const adjBadge = hasAdj ? `<div style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--amber);background:rgba(201,123,26,0.1);border:1px solid rgba(201,123,26,0.3);padding:4px 10px;border-radius:2px;margin-top:10px">⚙ Program adjusted based on your sessions</div>` : '';
 
     const carryNote = typeof PROGRAM_GENERATOR !== 'undefined' ? PROGRAM_GENERATOR.getCarryNote(equipment) : null;
-    const carryHtml = carryNote ? `<div style="padding:12px 16px;border-top:1px solid var(--line);font-size:11px;color:var(--amber);line-height:1.6;font-style:italic">⚑ ${carryNote}</div>` : '';
+    const carryHtml = carryNote ? `<div style="padding:12px 16px;border-top:1px solid var(--line);font-size:13px;color:var(--amber);line-height:1.6;font-style:italic">⚑ ${carryNote}</div>` : '';
 
     container.innerHTML = `
       <a class="plan-card" href="my-program.html" style="border-top:3px solid ${trackColors[track]}">
@@ -1120,7 +1120,7 @@ const PROGRAM_GENERATOR = (() => {
     const raw = localStorage.getItem('fightme_placement');
     const container = document.getElementById('program-card-container');
     if (!raw) {
-      container.innerHTML = '<div style="padding:20px;font-family:var(--mono);font-size:10px;color:var(--muted)">No assessment found. <a href="onboarding.html" style="color:var(--green)">Take it now →</a></div>';
+      container.innerHTML = '<div style="padding:20px;font-family:var(--mono);font-size:12px;color:var(--muted)">No assessment found. <a href="onboarding.html" style="color:var(--green)">Take it now →</a></div>';
       return;
     }
     const data = JSON.parse(raw);

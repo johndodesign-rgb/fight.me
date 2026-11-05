@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#060606">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<title>Training · fit.me</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #060606;
+    --card: #131313;
+    --card2: #1b1b1b;
+    --line: #262626;
+    --line2: #333;
+    --white: #f0ede7;
+    --dim: #b3aea6;      /* secondary text — 8:1 on black */
+    --faint: #8a857e;    /* tertiary text — 5:1 on black */
+    --punch: #ff4a2e;
+    --amber: #e39a3b;
+    --green: #3cc76e;
+    --blue: #5aacff;
+    --mono: 'DM Mono', ui-monospace, monospace;
+    --display: 'Barlow Condensed', sans-serif;
+    --body: 'Barlow', system-ui, sans-serif;
+    --nav-h: 68px;
+    --safe-b: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { background: var(--black); color: var(--white); font-family: var(--body); font-size: 17px; line-height: 1.45; }
+  body { min-height: 100vh; }
+  button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+  a { color: inherit; }
+
+  .wrap { max-width: 560px; margin: 0 auto; padding: 0 16px; }
+
+  /* ── HEADER ── */
+  header { padding: calc(env(safe-area-inset-top, 0px) + 20px) 0 12px; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .brand { font-family: var(--display); font-weight: 800; font-size: 26px; letter-spacing: 0.02em; }
+  .brand span { color: var(--green); }
+  .icon-btn { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; color: var(--dim); border: 1px solid var(--line); }
+  .icon-btn svg { width: 22px; height: 22px; }
+
+  .blockbar { margin-top: 14px; }
+  .blockbar-label { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 15px; color: var(--dim); }
+  .blockbar-label strong { color: var(--white); font-weight: 600; }
+  .segs { display: grid; grid-template-columns: repeat(13, 1fr); gap: 3px; margin-top: 8px; }
+  .seg { height: 6px; border-radius: 2px; background: var(--line2); }
+  .seg.done { background: var(--green); }
+  .seg.now { background: var(--white); }
+  .seg.deload { background: #3d2c14; }
+  .seg.deload.done, .seg.deload.now { background: var(--amber); }
+
+  main { padding-bottom: calc(var(--nav-h) + var(--safe-b) + 96px); }
+
+  /* ── GENERIC ── */
+  .h-date { font-family: var(--display); font-weight: 700; font-size: 32px; line-height: 1.05; margin: 18px 0 4px; }
+  .sub { color: var(--dim); font-size: 15px; }
+  .label { font-family: var(--mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-top: 16px; }
+  .banner { border-radius: 14px; padding: 14px 16px; margin-top: 16px; font-size: 16px; border: 1px solid; }
+  .banner b { display: block; font-weight: 600; margin-bottom: 2px; }
+  .banner.amber { border-color: #5a3d17; background: #1d1408; }
+  .banner.amber b { color: var(--amber); }
+  .banner.green { border-color: #1d4d2e; background: #0b1a10; }
+  .banner.green b { color: var(--green); }
+  .banner ul { list-style: none; margin-top: 6px; }
+  .banner li { padding: 4px 0; color: var(--dim); }
+  .banner li strong { color: var(--white); font-weight: 600; }
+
+  .btn { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 56px; border-radius: 14px; font-weight: 600; font-size: 18px; padding: 0 18px; text-decoration: none; }
+  .btn-primary { background: var(--green); color: #04130a; }
+  .btn-secondary { border: 1px solid var(--line2); color: var(--white); }
+  .btn-quiet { min-height: 48px; color: var(--dim); font-size: 16px; text-decoration: underline; text-underline-offset: 3px; }
+  .btn + .btn { margin-top: 10px; }
+
+  /* ── SESSION ── */
+  .session-name { font-family: var(--display); font-weight: 700; font-size: 26px; line-height: 1.1; }
+  .session-type { margin-top: 4px; }
+  .ex { border-top: 1px solid var(--line); padding: 14px 0; }
+  .ex:first-of-type { margin-top: 12px; }
+  .ex-head { display: flex; gap: 12px; align-items: flex-start; width: 100%; text-align: left; }
+  .ex-dot { width: 10px; height: 10px; border-radius: 3px; margin-top: 8px; flex-shrink: 0; }
+  .ex-main { flex: 1; min-width: 0; }
+  .ex-name { font-size: 18px; font-weight: 600; }
+  .ex-rx { font-size: 16px; color: var(--dim); margin-top: 2px; }
+  .ex-rx b { color: var(--white); font-weight: 600; }
+  .ex-note { font-size: 15px; color: var(--amber); margin-top: 4px; }
+  .ex-more { font-size: 15px; color: var(--dim); margin-top: 8px; display: none; }
+  .ex.open .ex-more { display: block; }
+  .chev { color: var(--faint); font-size: 18px; transition: transform .15s; margin-top: 2px; }
+  .ex.open .chev { transform: rotate(90deg); }
+
+  .logged { display: flex; gap: 14px; align-items: center; }
+  .logged-check { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: #0f2a18; color: var(--green); font-size: 22px; flex-shrink: 0; }
+  .logged-check.partial { background: #2a1d0b; color: var(--amber); }
+  .logged-check.no { background: #2a0f0b; color: var(--punch); }
+  .logged-title { font-weight: 600; font-size: 18px; }
+  .logged-notes { margin-top: 10px; color: var(--dim); font-size: 16px; white-space: pre-wrap; }
+  .logged .edit { margin-left: auto; color: var(--blue); font-size: 16px; min-height: 44px; padding: 0 6px; }
+
+  /* ── ACTION BAR ── */
+  .actionbar { position: fixed; left: 0; right: 0; bottom: calc(var(--nav-h) + var(--safe-b)); padding: 12px 16px; background: linear-gradient(to top, var(--black) 70%, transparent); z-index: 20; }
+  .actionbar .btn { max-width: 528px; margin: 0 auto; }
+
+  /* ── NAV ── */
+  nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; height: calc(var(--nav-h) + var(--safe-b)); padding-bottom: var(--safe-b); background: #0b0b0b; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(3, 1fr); z-index: 30; }
+  nav.tabs button { font-size: 15px; font-weight: 600; color: var(--faint); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+  nav.tabs button svg { width: 24px; height: 24px; }
+  nav.tabs button.active { color: var(--white); }
+  nav.tabs button.active svg { color: var(--green); }
+
+  /* ── WEEK ── */
+  .weeknav { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; }
+  .weeknav .icon-btn:disabled { opacity: .3; }
+  .weeknav-title { text-align: center; }
+  .weeknav-title .h { font-family: var(--display); font-weight: 700; font-size: 28px; }
+  .day-row { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; padding: 14px 4px; border-bottom: 1px solid var(--line); min-height: 72px; }
+  .day-date { width: 52px; flex-shrink: 0; text-align: center; }
+  .day-date .dow { font-family: var(--mono); font-size: 13px; color: var(--faint); text-transform: uppercase; }
+  .day-date .num { font-family: var(--display); font-weight: 700; font-size: 26px; line-height: 1; }
+  .day-row.is-today .num { color: var(--green); }
+  .day-info { flex: 1; min-width: 0; }
+  .day-info .n { font-weight: 600; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .day-info .t { color: var(--dim); font-size: 15px; }
+  .chip { font-size: 14px; font-weight: 600; padding: 5px 10px; border-radius: 999px; white-space: nowrap; border: 1px solid var(--line2); color: var(--dim); }
+  .chip.full { background: #0f2a18; border-color: #1d4d2e; color: var(--green); }
+  .chip.partial { background: #2a1d0b; border-color: #5a3d17; color: var(--amber); }
+  .chip.no, .chip.missed { background: #230d09; border-color: #4d1a12; color: #ff8a75; }
+  .chip.today { border-color: var(--white); color: var(--white); }
+  .chip.rest { border-color: transparent; color: var(--faint); }
+
+  /* ── HISTORY ── */
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+  .stat { background: var(--card2); border-radius: 12px; padding: 12px; }
+  .stat .v { font-family: var(--display); font-weight: 700; font-size: 30px; line-height: 1; }
+  .stat .k { font-size: 14px; color: var(--dim); margin-top: 4px; }
+  .levels { display: grid; grid-template-columns: 1fr; gap: 6px; margin-top: 12px; }
+  .lvl { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--card2); border-radius: 10px; padding: 10px 12px; font-size: 16px; }
+  .lvl span:last-child { color: var(--dim); font-size: 15px; }
+  .lvl.up span:last-child { color: var(--green); }
+  .lvl.down span:last-child { color: var(--amber); }
+  .changes { list-style: none; margin-top: 10px; }
+  .changes li { padding: 8px 0; border-top: 1px solid var(--line); font-size: 16px; color: var(--dim); }
+  .changes li strong { color: var(--white); font-weight: 600; }
+  .hist-item { display: block; width: 100%; text-align: left; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .hist-top { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+  .hist-name { font-weight: 600; font-size: 17px; }
+  .hist-date { color: var(--dim); font-size: 15px; }
+  .hist-notes { color: var(--dim); font-size: 15px; margin-top: 4px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .empty { color: var(--dim); text-align: center; padding: 28px 8px; }
+
+  /* ── SHEET ── */
+  .sheet { position: fixed; inset: 0; background: var(--black); z-index: 50; display: none; flex-direction: column; }
+  .sheet.open { display: flex; }
+  .sheet-head { display: flex; align-items: center; gap: 12px; padding: calc(env(safe-area-inset-top, 0px) + 14px) 16px 12px; border-bottom: 1px solid var(--line); }
+  .sheet-head h2 { font-family: var(--display); font-weight: 700; font-size: 24px; flex: 1; line-height: 1.1; }
+  .sheet-body { flex: 1; overflow-y: auto; padding: 4px 16px 24px; }
+  .sheet-body .inner { max-width: 528px; margin: 0 auto; }
+  .sheet-foot { padding: 12px 16px calc(12px + var(--safe-b)); border-top: 1px solid var(--line); }
+  .sheet-foot .inner { max-width: 528px; margin: 0 auto; }
+  .q { margin-top: 24px; }
+  .q > .qt { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
+  .q > .qt small { font-weight: 400; color: var(--dim); font-size: 15px; }
+  .seg-choice { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .opt { min-height: 56px; border-radius: 12px; border: 1px solid var(--line2); font-size: 16px; font-weight: 600; padding: 6px; line-height: 1.15; }
+  .opt[aria-pressed="true"] { border-color: var(--white); background: var(--card2); }
+  .opt.g[aria-pressed="true"] { border-color: var(--green); background: #0f2a18; color: var(--green); }
+  .opt.a[aria-pressed="true"] { border-color: var(--amber); background: #2a1d0b; color: var(--amber); }
+  .opt.r[aria-pressed="true"] { border-color: #ff8a75; background: #230d09; color: #ff8a75; }
+  .pat-row { display: grid; grid-template-columns: 76px repeat(3, 1fr); gap: 6px; align-items: center; margin-top: 8px; }
+  .pat-row .pn { font-weight: 600; font-size: 16px; }
+  .pat-row .opt { min-height: 48px; font-size: 15px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tog { min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line2); font-size: 16px; }
+  .tog[aria-pressed="true"] { border-color: var(--white); background: var(--card2); }
+  textarea, input[type=date], select { width: 100%; background: var(--card); border: 1px solid var(--line2); border-radius: 12px; color: var(--white); font: inherit; font-size: 17px; padding: 12px 14px; }
+  textarea { min-height: 96px; resize: vertical; }
+  input[type=date] { min-height: 52px; color-scheme: dark; }
+  select { min-height: 52px; }
+  .hint { color: var(--dim); font-size: 15px; margin-top: 6px; }
+  .danger { color: #ff8a75; }
+  .muted-off { opacity: .35; pointer-events: none; }
+
+  .toast { position: fixed; left: 50%; bottom: calc(var(--nav-h) + var(--safe-b) + 90px); transform: translateX(-50%); background: var(--white); color: var(--black); font-weight: 600; padding: 12px 20px; border-radius: 999px; z-index: 60; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+
+  .review-opt { display: block; width: 100%; text-align: left; border: 1px solid var(--line2); border-radius: 14px; padding: 16px; margin-top: 10px; }
+  .review-opt[aria-pressed="true"] { border-color: var(--green); background: #0b1a10; }
+  .review-opt .t { font-weight: 600; font-size: 18px; }
+  .review-opt .d { color: var(--dim); font-size: 15px; margin-top: 2px; }
+  .badge { display: inline-block; font-size: 13px; font-weight: 600; color: #04130a; background: var(--green); border-radius: 999px; padding: 2px 8px; margin-left: 6px; vertical-align: middle; }
+  .links a { display: flex; justify-content: space-between; align-items: center; min-height: 52px; border-bottom: 1px solid var(--line); text-decoration: none; font-size: 17px; }
+  .links a span { color: var(--faint); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="top">
+      <div class="brand">fit<span>.me</span></div>
+      <button class="icon-btn" onclick="openSettings()" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+    <div class="blockbar" id="blockbar"></div>
+  </header>
+  <main id="view"></main>
+</div>
+
+<div class="actionbar" id="actionbar" hidden></div>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="today" onclick="go('today')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/></svg>Today</button>
+  <button data-tab="week" onclick="go('week')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Week</button>
+  <button data-tab="history" onclick="go('history')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 3"/></svg>History</button>
+</nav>
+
+<!-- LOG SHEET -->
+<div class="sheet" id="log-sheet" role="dialog" aria-modal="true" aria-labelledby="log-title">
+  <div class="sheet-head">
+    <button class="icon-btn" onclick="closeSheet('log-sheet')" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <h2 id="log-title">Log session</h2>
+  </div>
+  <div class="sheet-body"><div class="inner" id="log-body"></div></div>
+  <div class="sheet-foot"><div class="inner"><button class="btn btn-primary" id="log-save" onclick="saveLogForm()">Save</button></div></div>
+</div>
+
+<!-- SETTINGS SHEET -->
+<div class="sheet" id="settings-sheet" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+  <div class="sheet-head">
+    <button class="icon-btn" onclick="closeSheet('settings-sheet')" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <h2 id="settings-title">Settings</h2>
+  </div>
+  <div class="sheet-body"><div class="inner" id="settings-body"></div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="import-file" accept="application/json,.json" hidden>
+
+<script src="program-generator.js"></script>
+<script src="training.js"></script>
+<script>
+  const T = TRAINING;
+  const COLORS = { push: '#ff4a2e', pull: '#5aacff', squat: '#3cc76e', hinge: '#e39a3b', carry: '#b87aff', rotate: '#ff8a3d', cardio: '#3cc76e', mobility: '#b87aff' };
+  const TYPE_LABEL = { strength: 'Strength', 'strength-cardio': 'Strength + conditioning', cardio: 'Cardio', mobility: 'Mobility' };
+  const COMPLETION = { full: 'Done', partial: 'Partial', no: 'Skipped' };
+  const FEEL = { 3: 'Too easy', 2: 'About right', 1: 'Too hard' };
+  const FIT_FLAGS = [['something_hurt', 'Something hurt'], ['fatigued', 'Already tired'], ['modified', 'Changed an exercise'], ['extra_energy', 'Had extra energy']];
+  const FIGHT_FLAGS = [['gassed_out', 'Gassed out'], ['hands_dropped', 'Hands dropping'], ['form_broke', 'Form broke down'], ['power_there', 'Power was there'], ['felt_strong', 'Felt strong'], ['something_hurt', 'Something hurt']];
+  const LEVEL_TEXT = { '-1': 'Easier version', 0: 'As written', 1: 'More reps', 2: 'Harder version' };
+
+  let tab = 'today';
+  let dayKey = null;       // date shown on the Today tab (null = today)
+  let weekShown = null;    // week number shown on the Week tab
+  let form = null;         // log form state
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fmt = (k, opts) => T.fromKey(k).toLocaleDateString(undefined, opts || { weekday: 'long', month: 'short', day: 'numeric' });
+
+  function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1800); }
+
+  // ── ROUTING ──
+  function go(t, opts = {}) {
+    tab = t;
+    if (t === 'today') dayKey = opts.dayKey || null;
+    if (t === 'week') weekShown = opts.week || weekShown;
+    document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  function render() {
+    const st = T.state();
+    renderBlockbar(st);
+    $('actionbar').hidden = true;
+    if (tab === 'today') renderDay(st, dayKey || st.today);
+    else if (tab === 'week') renderWeek(st);
+    else renderHistory(st);
+  }
+
+  // ── BLOCK BAR ──
+  function renderBlockbar(st) {
+    const b = st.block;
+    const w = Math.min(st.week, T.DELOAD_WEEK);
+    let label = st.phase === 'review' ? 'Block complete' : st.phase === 'deload' ? 'Deload week' : `Week ${w} of ${T.TRAINING_WEEKS}`;
+    let segs = '';
+    for (let i = 1; i <= T.DELOAD_WEEK; i++) {
+      const cls = ['seg'];
+      if (i === T.DELOAD_WEEK) cls.push('deload');
+      if (i < st.week) cls.push('done'); else if (i === st.week) cls.push('now');
+      segs += `<div class="${cls.join(' ')}"></div>`;
+    }
+    $('blockbar').innerHTML = `
+      <div class="blockbar-label"><span><strong>${T.TRACK_LABELS[b.track]}</strong> · Block ${b.id}</span><span>${label}</span></div>
+      <div class="segs" aria-hidden="true">${segs}</div>`;
+  }
+
+  // ── DAY (Today tab) ──
+  function renderDay(st, k) {
+    const isToday = k === st.today;
+    const isFuture = k > st.today;
+    const w = T.weekOf(k);
+    let h = '';
+
+    if (!isToday) h += `<button class="btn-quiet" style="margin-top:8px" onclick="go('week',{week:${Math.max(1, w)}})">‹ Back to week</button>`;
+    h += `<div class="h-date">${isToday ? 'Today' : esc(fmt(k, { weekday: 'long' }))}</div>
+          <div class="sub">${esc(fmt(k, { month: 'long', day: 'numeric' }))}${w >= 1 && w <= T.DELOAD_WEEK ? ` · Week ${w}` : ''}</div>`;
+
+    // Block finished → review
+    if (isToday && st.phase === 'review') { $('view').innerHTML = h + reviewHTML(); return; }
+
+    if (w === T.DELOAD_WEEK) {
+      h += `<div class="banner amber"><b>Deload week</b>Same movements, about half the sets, nothing to failure. Aim to finish each session feeling fresher than when you started. Your block review opens after Sunday.</div>`;
+    }
+
+    // This week's changes
+    if (w >= 2 && w <= T.TRAINING_WEEKS) {
+      const ch = T.levelsFor(w).changes.filter(c => c.week === w);
+      if (ch.length) {
+        h += `<div class="banner green"><b>Adjusted this week</b><ul>${ch.map(c =>
+          `<li><strong>${T.PATTERN_LABELS[c.pattern]}:</strong> ${c.to > c.from ? 'up' : 'down'} to “${LEVEL_TEXT[c.to].toLowerCase()}” — ${esc(c.reason)}</li>`).join('')}</ul></div>`;
+      }
+    }
+
+    const session = w >= 1 ? T.sessionOn(k) : null;
+    const plog = T.programLogOn(k);
+    const others = T.logsOn(k).filter(l => l !== plog && l.id !== (plog && plog.id));
+
+    if (w < 1) {
+      h += `<div class="card"><div class="sub">This date is before your current block started.</div></div>`;
+    } else if (session) {
+      h += `<div class="card">
+        <div class="label">${esc(TYPE_LABEL[session.type] || '')}${session.deload ? ' · Deload' : ''}</div>
+        <div class="session-name" style="margin-top:4px">${esc(session.name)}</div>
+        ${session.exercises.map((ex, i) => exHTML(ex, i)).join('')}
+      </div>`;
+    } else {
+      h += `<div class="card"><div class="session-name">Rest day</div><div class="sub" style="margin-top:6px">Recovery is part of the program.</div></div>`;
+    }
+
+    if (plog) h += loggedHTML(plog);
+    others.forEach(l => { h += loggedHTML(l); });
+
+    if (!isFuture && w >= 1) {
+      h += `<div style="margin-top:14px">`;
+      if (!session && !plog) h += `<button class="btn btn-secondary" onclick="openLog({dateKey:'${k}',kind:'extra'})">Log a workout anyway</button>`;
+      h += `<button class="btn btn-secondary" onclick="openLog({dateKey:'${k}',source:'fight'})">Log a boxing session</button></div>`;
+    }
+
+    $('view').innerHTML = h;
+
+    if (session && !plog && !isFuture) {
+      $('actionbar').hidden = false;
+      $('actionbar').innerHTML = `<button class="btn btn-primary" onclick="openLog({dateKey:'${k}'})">Log ${isToday ? 'today’s' : 'this'} session</button>`;
+    }
+  }
+
+  function exHTML(ex, i) {
+    const parts = [];
+    if (ex.sets && ex.repRange) parts.push(`<b>${esc(ex.sets)} × ${esc(ex.repRange)}</b>`);
+    else if (ex.repRange) parts.push(`<b>${esc(ex.repRange)}</b>`);
+    if (ex.tempo) parts.push(esc(ex.tempo));
+    const more = [ex.role, ex.combatValue].filter(Boolean).map(esc).join(' · ');
+    return `<div class="ex" id="ex-${i}">
+      <button class="ex-head" onclick="this.parentNode.classList.toggle('open')" ${more ? '' : 'disabled'}>
+        <span class="ex-dot" style="background:${COLORS[ex.pattern] || '#666'}"></span>
+        <span class="ex-main">
+          <div class="ex-name">${esc(ex.name)}</div>
+          <div class="ex-rx">${parts.join(' · ')}</div>
+          ${ex.adjustNote ? `<div class="ex-note">${esc(ex.adjustNote)}</div>` : ''}
+          ${more ? `<div class="ex-more">${more}</div>` : ''}
+        </span>
+        ${more ? '<span class="chev">›</span>' : ''}
+      </button>
+    </div>`;
+  }
+
+  function loggedHTML(l) {
+    const icon = l.completion === 'no' ? '✕' : l.completion === 'partial' ? '◐' : '✓';
+    const title = l.source === 'fight' ? 'Boxing session' : l.kind === 'extra' ? (l.session || 'Extra workout') : 'Logged';
+    const bits = [COMPLETION[l.completion]];
+    if (l.completion !== 'no' && FEEL[l.feel]) bits.push(FEEL[l.feel]);
+    return `<div class="card">
+      <div class="logged">
+        <div class="logged-check ${l.completion}">${icon}</div>
+        <div><div class="logged-title">${esc(title)}</div><div class="sub">${bits.map(esc).join(' · ')}</div></div>
+        <button class="edit" onclick="openLog({id:${l.id}})">Edit</button>
+      </div>
+      ${l.notes ? `<div class="logged-notes">${esc(l.notes)}</div>` : ''}
+    </div>`;
+  }
+
+  // ── WEEK ──
+  function renderWeek(st) {
+    const maxWeek = Math.min(st.week, T.DELOAD_WEEK);
+    const w = Math.max(1, Math.min(weekShown || maxWeek, T.DELOAD_WEEK));
+    weekShown = w;
+    const start = T.weekStart(w);
+    const end = T.addDays(start, 6);
+    const p = T.plan(w);
+    let done = 0, planned = 0;
+
+    const rows = T.WEEK_ORDER.map((dk, i) => {
+      const k = T.addDays(start, i);
+      const s = p.sessions[dk];
+      const log = T.programLogOn(k);
+      const boxing = T.logsOn(k, 'fight').length;
+      if (s) planned++;
+      if (log && log.completion !== 'no') done++;
+      let chip;
+      if (log) chip = `<span class="chip ${log.completion}">${COMPLETION[log.completion]}</span>`;
+      else if (!s) chip = `<span class="chip rest">Rest</span>`;
+      else if (k < st.today) chip = `<span class="chip missed">Not logged</span>`;
+      else if (k === st.today) chip = `<span class="chip today">Today</span>`;
+      else chip = '';
+      const sub = s ? (TYPE_LABEL[s.type] || '') : (log ? 'Extra workout' : '');
+      return `<button class="day-row ${k === st.today ? 'is-today' : ''}" onclick="go('today',{dayKey:'${k}'})">
+        <div class="day-date"><div class="dow">${esc(fmt(k, { weekday: 'short' }))}</div><div class="num">${T.fromKey(k).getDate()}</div></div>
+        <div class="day-info"><div class="n">${esc(s ? s.name : log ? (log.session || 'Workout') : 'Rest')}</div><div class="t">${esc(sub)}${boxing ? ' · + boxing' : ''}</div></div>
+        ${chip}
+      </button>`;
+    }).join('');
+
+    $('view').innerHTML = `
+      <div class="weeknav">
+        <button class="icon-btn" aria-label="Previous week" onclick="go('week',{week:${w - 1}})" ${w <= 1 ? 'disabled' : ''}>‹</button>
+        <div class="weeknav-title"><div class="h">${w === T.DELOAD_WEEK ? 'Deload week' : `Week ${w}`}</div>
+          <div class="sub">${esc(fmt(start, { month: 'short', day: 'numeric' }))} – ${esc(fmt(end, { month: 'short', day: 'numeric' }))}</div></div>
+        <button class="icon-btn" aria-label="Next week" onclick="go('week',{week:${w + 1}})" ${w >= maxWeek ? 'disabled' : ''}>›</button>
+      </div>
+      <div class="sub" style="margin:10px 0 4px;text-align:center">${done} of ${planned} sessions done</div>
+      <div>${rows}</div>
+      <div class="hint" style="margin-top:12px">Tap any day to see the workout or log it for that date.</div>`;
+  }
+
+  // ── HISTORY ──
+  function renderHistory(st) {
+    const b = st.block;
+    const s = T.summary(b);
+    const { levels, changes } = T.levelsFor(Math.min(st.week, T.DELOAD_WEEK));
+    const all = T.logs().slice().reverse();
+    const thisBlock = all.filter(l => l.dateKey >= b.start && l.source === 'fit' && l.kind !== 'extra');
+    const doneCount = thisBlock.filter(l => l.completion !== 'no').length;
+
+    let h = `<div class="h-date">History</div>
+      <div class="card">
+        <div class="label">This block · since ${esc(fmt(b.start, { month: 'short', day: 'numeric' }))}</div>
+        <div class="stat-row">
+          <div class="stat"><div class="v">${doneCount}</div><div class="k">sessions done</div></div>
+          <div class="stat"><div class="v">${all.filter(l => l.dateKey >= b.start && l.source === 'fight').length}</div><div class="k">boxing</div></div>
+          <div class="stat"><div class="v">${s.avgFeel === null ? '—' : s.avgFeel >= 2.5 ? 'Easy' : s.avgFeel >= 1.5 ? 'Right' : 'Hard'}</div><div class="k">${s.avgFeel === null ? 'no ratings yet' : 'usual feel'}</div></div>
+        </div>
+        <div class="label" style="margin-top:18px">Where each pattern is now</div>
+        <div class="levels">${T.PATTERNS.map(p => `<div class="lvl ${levels[p] > 0 ? 'up' : levels[p] < 0 ? 'down' : ''}"><span>${T.PATTERN_LABELS[p]}</span><span>${LEVEL_TEXT[levels[p]]}</span></div>`).join('')}</div>
+        <div class="hint">Patterns move up or down at the start of each week, based on how you rated them the week before.</div>
+        ${changes.length ? `<div class="label" style="margin-top:18px">Changes so far</div><ul class="changes">${changes.slice().reverse().map(c =>
+          `<li><strong>Week ${c.week} · ${T.PATTERN_LABELS[c.pattern]}</strong> → ${LEVEL_TEXT[c.to].toLowerCase()} (${esc(c.reason)})</li>`).join('')}</ul>` : ''}
+      </div>
+      <div class="label" style="margin-top:24px">All logs</div>`;
+
+    if (!all.length) h += `<div class="empty">Nothing logged yet.</div>`;
+    else h += all.map(l => {
+      const name = l.source === 'fight' ? 'Boxing session' : (l.session || 'Workout');
+      return `<button class="hist-item" onclick="openLog({id:${l.id}})">
+        <div class="hist-top"><span class="hist-name">${esc(name)}</span><span class="chip ${l.completion}">${COMPLETION[l.completion] || '—'}</span></div>
+        <div class="hist-date">${esc(fmt(l.dateKey, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }))}${l.completion !== 'no' && FEEL[l.feel] ? ' · ' + FEEL[l.feel] : ''}</div>
+        ${l.notes ? `<div class="hist-notes">${esc(l.notes)}</div>` : ''}
+      </button>`;
+    }).join('');
+
+    $('view').innerHTML = h;
+  }
+
+  // ── LOG FORM ──
+  function openLog(opts) {
+    if (opts.id) {
+      const l = T.logs().find(x => x.id === opts.id);
+      if (!l) return;
+      form = JSON.parse(JSON.stringify(l));
+    } else {
+      const source = opts.source || 'fit';
+      form = { id: Date.now(), source, kind: opts.kind || 'program', dateKey: opts.dateKey || T.todayKey(),
+               completion: null, feel: null, patternFeel: {}, flags: [], notes: '' };
+      if (source === 'fit') {
+        // If this day already has a program log, edit that instead of making a duplicate
+        const existing = form.kind === 'program' && T.programLogOn(form.dateKey);
+        if (existing) { form = JSON.parse(JSON.stringify(existing)); }
+        else attachSession(form);
+      } else {
+        form.session = 'Boxing session';
+        form.patterns = [];
+      }
+    }
+    renderLogForm();
+    $('log-sheet').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function attachSession(f) {
+    const s = f.kind === 'program' ? T.sessionOn(f.dateKey) : null;
+    if (s) {
+      f.session = s.name;
+      f.sessionType = T.SCHEDULE[T.dayKeyOf(f.dateKey)]?.type;
+      f.patterns = T.SCHEDULE[T.dayKeyOf(f.dateKey)]?.patterns || [];
+      f.week = T.weekOf(f.dateKey);
+    } else {
+      if (f.kind !== 'extra' || !f.session) f.session = 'Extra workout';
+      f.kind = 'extra';
+      f.patterns = [];
+      f.week = T.weekOf(f.dateKey);
+    }
+    f.dayKey = T.dayKeyOf(f.dateKey);
+  }
+
+  function renderLogForm() {
+    const f = form;
+    const isFit = f.source === 'fit';
+    const existing = T.logs().some(l => l.id === f.id);
+    $('log-title').textContent = isFit ? (f.kind === 'extra' ? 'Extra workout' : f.session) : 'Boxing session';
+    const skipped = f.completion === 'no';
+    const opt = (group, val, label, cls) => `<button class="opt ${cls || ''}" aria-pressed="${String(f[group]) === String(val)}" onclick="setField('${group}', ${typeof val === 'number' ? val : `'${val}'`})">${label}</button>`;
+
+    let h = `<div class="q"><div class="qt">Date</div>
+      <input type="date" id="f-date" value="${f.dateKey}" max="${T.todayKey()}" onchange="setDate(this.value)">
+      ${isFit && f.kind === 'program' && f.week >= 1 ? `<div class="hint">Week ${f.week} · ${esc(fmt(f.dateKey, { weekday: 'long' }))}’s session</div>` : ''}
+    </div>`;
+
+    h += `<div class="q"><div class="qt">Did you do it?</div><div class="seg-choice">
+      ${opt('completion', 'full', 'Done', 'g')}${opt('completion', 'partial', 'Partly', 'a')}${opt('completion', 'no', 'Skipped', 'r')}</div></div>`;
+
+    h += `<div class="${skipped || !f.completion ? 'muted-off' : ''}">`;
+    h += `<div class="q"><div class="qt">How did it feel overall?</div><div class="seg-choice">
+      ${opt('feel', 3, 'Too easy', 'g')}${opt('feel', 2, 'About right')}${opt('feel', 1, 'Too hard', 'r')}</div></div>`;
+
+    if (isFit && f.patterns && f.patterns.length) {
+      h += `<div class="q"><div class="qt">Any movement different? <small>(optional)</small></div>
+        <div class="hint" style="margin:-4px 0 6px">Leave blank and it uses your overall rating.</div>
+        ${f.patterns.map(p => `<div class="pat-row"><span class="pn">${T.PATTERN_LABELS[p]}</span>
+          ${[3, 2, 1].map(v => `<button class="opt ${v === 3 ? 'g' : v === 1 ? 'r' : ''}" aria-pressed="${f.patternFeel[p] === v}" onclick="setPattern('${p}', ${v})">${v === 3 ? 'Easy' : v === 2 ? 'Right' : 'Hard'}</button>`).join('')}
+        </div>`).join('')}</div>`;
+    }
+
+    const flags = isFit ? FIT_FLAGS : FIGHT_FLAGS;
+    h += `<div class="q"><div class="qt">Anything to note? <small>(optional)</small></div><div class="chips">
+      ${flags.map(([k, label]) => `<button class="tog" aria-pressed="${f.flags.includes(k)}" onclick="toggleFlag('${k}')">${label}</button>`).join('')}</div></div>`;
+    h += `</div>`;
+
+    h += `<div class="q"><div class="qt">Notes <small>(optional)</small></div>
+      <textarea id="f-notes" placeholder="Weights used, what felt off, anything worth remembering" oninput="setNotes(this.value)">${esc(f.notes)}</textarea></div>`;
+
+    if (existing) h += `<button class="btn btn-quiet danger" style="margin-top:20px" onclick="removeLog()">Delete this log</button>`;
+
+    $('log-body').innerHTML = h;
+    const ready = f.completion && (f.completion === 'no' || f.feel);
+    $('log-save').disabled = !ready;
+    $('log-save').style.opacity = ready ? 1 : 0.4;
+    $('log-save').textContent = existing ? 'Save changes' : 'Save';
+  }
+
+  function setNotes(v) { if (form) form.notes = v; }
+  function keepNotes() { const n = $('f-notes'); if (n) form.notes = n.value; }
+  function setField(k, v) { keepNotes(); form[k] = form[k] === v && k !== 'completion' ? null : v; renderLogForm(); }
+  function setPattern(p, v) { keepNotes(); if (form.patternFeel[p] === v) delete form.patternFeel[p]; else form.patternFeel[p] = v; renderLogForm(); }
+  function toggleFlag(k) { keepNotes(); const i = form.flags.indexOf(k); if (i >= 0) form.flags.splice(i, 1); else form.flags.push(k); renderLogForm(); }
+  function setDate(v) {
+    if (!v) return;
+    keepNotes();
+    form.dateKey = v > T.todayKey() ? T.todayKey() : v;
+    if (form.source === 'fit') {
+      if (form.kind === 'extra' && T.sessionOn(form.dateKey)) form.kind = 'program';
+      attachSession(form);
+    }
+    renderLogForm();
+  }
+
+  function saveLogForm() {
+    keepNotes();
+    const f = form;
+    if (!f.completion || (f.completion !== 'no' && !f.feel)) return;
+    if (f.completion === 'no') { f.feel = null; f.patternFeel = {}; }
+    // Only one program log per day: if another exists on the new date, replace it
+    if (f.source === 'fit' && f.kind === 'program') {
+      const clash = T.programLogOn(f.dateKey);
+      if (clash && clash.id !== f.id) T.deleteLog(clash.id);
+    }
+    f.date = T.fromKey(f.dateKey).toISOString();
+    f.day = T.fromKey(f.dateKey).toLocaleDateString('en-US', { weekday: 'long' });
+    const saved = T.saveLog(f);
+    if (!saved) { toast('Couldn’t save — storage is full or blocked'); return; }
+    closeSheet('log-sheet');
+    toast('Saved');
+    if (tab === 'today') dayKey = f.dateKey === T.todayKey() ? null : f.dateKey;
+    render();
+  }
+
+  function removeLog() {
+    if (!confirm('Delete this log? This can’t be undone.')) return;
+    T.deleteLog(form.id);
+    closeSheet('log-sheet');
+    toast('Deleted');
+    render();
+  }
+
+  function closeSheet(id) { $(id).classList.remove('open'); document.body.style.overflow = ''; }
+
+  // ── REVIEW ──
+  let reviewChoice = null, reviewStart = 'this';
+  function reviewHTML() {
+    const s = T.summary();
+    const b = T.block();
+    reviewChoice = reviewChoice || (s.readyToMoveUp ? 'next' : 'repeat');
+    const pct = Math.round(s.completionRate * 100);
+    const thisMon = T.mondayOf(T.todayKey()), nextMon = T.addDays(thisMon, 7);
+    const ups = T.PATTERNS.filter(p => s.levels[p] > 0).map(p => T.PATTERN_LABELS[p]);
+    return `<div class="card">
+        <div class="label">Block ${b.id} complete</div>
+        <div class="session-name" style="margin-top:4px">${T.TRACK_LABELS[b.track]} · 12 weeks + deload</div>
+        <div class="stat-row">
+          <div class="stat"><div class="v">${s.done}</div><div class="k">done</div></div>
+          <div class="stat"><div class="v">${s.partial}</div><div class="k">partial</div></div>
+          <div class="stat"><div class="v">${pct}%</div><div class="k">of ${s.planned} planned</div></div>
+        </div>
+        ${ups.length ? `<div class="hint" style="margin-top:12px">Moved up: ${ups.join(', ')}.</div>` : ''}
+      </div>
+      <div class="q"><div class="qt">What’s next?</div>
+        ${s.nextTrack ? `<button class="review-opt" aria-pressed="${reviewChoice === 'next'}" onclick="pickReview('next')">
+          <div class="t">Move up to ${T.TRACK_LABELS[s.nextTrack]}${s.readyToMoveUp ? '<span class="badge">Suggested</span>' : ''}</div>
+          <div class="d">New exercises and heavier work. Every movement starts back at “as written”.</div></button>` : ''}
+        <button class="review-opt" aria-pressed="${reviewChoice === 'repeat'}" onclick="pickReview('repeat')">
+          <div class="t">Run ${T.TRACK_LABELS[b.track]} again${!s.readyToMoveUp ? '<span class="badge">Suggested</span>' : ''}</div>
+          <div class="d">Keeps the progress you earned. Anything that was made easier goes back to normal.</div></button>
+        ${!s.readyToMoveUp && s.nextTrack ? `<div class="hint">Suggested because ${s.completionRate < 0.7 ? `you completed ${pct}% of sessions (moving up is suggested at 70%)` : 'most sessions felt hard'}. It’s your call.</div>` : ''}
+      </div>
+      <div class="q"><div class="qt">Start</div><div class="seg-choice" style="grid-template-columns:1fr 1fr">
+        <button class="opt" aria-pressed="${reviewStart === 'this'}" onclick="pickStart('this')">This week<br><span class="sub">Mon ${esc(fmt(thisMon, { month: 'short', day: 'numeric' }))}</span></button>
+        <button class="opt" aria-pressed="${reviewStart === 'next'}" onclick="pickStart('next')">Next week<br><span class="sub">Mon ${esc(fmt(nextMon, { month: 'short', day: 'numeric' }))}</span></button>
+      </div></div>
+      <button class="btn btn-primary" style="margin-top:24px" onclick="startNext()">Start block ${b.id + 1}</button>`;
+  }
+  function pickReview(v) { reviewChoice = v; render(); }
+  function pickStart(v) { reviewStart = v; render(); }
+  function startNext() {
+    const thisMon = T.mondayOf(T.todayKey());
+    const start = reviewStart === 'next' ? T.addDays(thisMon, 7) : thisMon;
+    T.startNextBlock(reviewChoice, start);
+    reviewChoice = null;
+    toast('New block started');
+    go('today');
+  }
+
+  // ── SETTINGS ──
+  function openSettings() {
+    const b = T.block();
+    const eq = { bodyweight: 'Bodyweight only', bands: 'Bodyweight + bands', dumbbells: 'Dumbbells + bands', full: 'Full gym' };
+    $('settings-body').innerHTML = `
+      <div class="q"><div class="qt">This block started</div>
+        <input type="date" value="${b.start}" onchange="changeStart(this.value)">
+        <div class="hint">Moves to the Monday of that week. Changing it moves which week you’re in; your logs stay on their dates.</div></div>
+      <div class="q"><div class="qt">Track</div>
+        <select onchange="T.updateBlock({track:this.value}); render(); toast('Track updated')">
+          ${T.TRACKS.map(t => `<option value="${t}" ${t === b.track ? 'selected' : ''}>${T.TRACK_LABELS[t]}</option>`).join('')}</select></div>
+      <div class="q"><div class="qt">Equipment</div>
+        <select onchange="T.updateBlock({equipment:this.value}); render(); toast('Equipment updated')">
+          ${Object.entries(eq).map(([k, v]) => `<option value="${k}" ${k === b.equipment ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
+      <div class="q"><div class="qt">Back up your logs</div>
+        <div class="hint" style="margin:-4px 0 10px">Logs live only on this phone, in this browser. Clearing site data or switching phones loses them, so save a backup now and then.</div>
+        <button class="btn btn-secondary" onclick="exportLogs()">Save backup file</button>
+        <button class="btn btn-secondary" onclick="$('import-file').click()">Restore from backup</button></div>
+      <div class="q"><div class="qt">More</div><div class="links">
+        <a href="fight-me-hub.html">fight.me tools <span>›</span></a>
+        <a href="dashboard.html">Full dashboard <span>›</span></a>
+        <a href="methodology.html">How the program works <span>›</span></a>
+        <a href="index.html?reset">Retake the assessment <span>›</span></a>
+      </div></div>`;
+    $('settings-sheet').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function changeStart(v) { if (!v) return; T.updateBlock({ start: v }); weekShown = null; render(); toast('Block start updated'); openSettings(); }
+  function exportLogs() {
+    const blob = new Blob([T.exportData()], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `fitme-backup-${T.todayKey()}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+  $('import-file').addEventListener('change', e => {
+    const file = e.target.files[0]; if (!file) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        if (!confirm('Replace the logs on this phone with the backup?')) return;
+        T.importData(r.result); closeSheet('settings-sheet'); render(); toast('Backup restored');
+      } catch (err) { alert('That file didn’t look like a fit.me backup.'); }
+      e.target.value = '';
+    };
+    r.readAsText(file);
+  });
+
+  // ── INIT ──
+  (function init() {
+    if (!T.placement()) { location.replace('onboarding.html'); return; }
+    const q = new URLSearchParams(location.search);
+    const start = (location.hash || '').replace('#', '') || q.get('tab') || 'today';
+    go(['today', 'week', 'history'].includes(start) ? start : 'today');
+    if (q.get('log') === 'fight') openLog({ source: 'fight' });
+    else if (q.get('log')) openLog({ dateKey: T.todayKey() });
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  })();
+</script>
+</body>
+</html>

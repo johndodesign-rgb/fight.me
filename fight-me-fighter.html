@@ -16,8 +16,8 @@
     --line2: #222222;
     --line3: #2e2e2e;
     --white: #edeae4;
-    --dim: #888880;
-    --muted: #444;
+    --dim: #b3aea6;
+    --muted: #8a857e;
     --punch: #e8311a;
     --punch-dim: #4a0f07;
     --punch-mid: #7a1a0a;
@@ -115,7 +115,7 @@
     border: 1px solid var(--line2);
     color: var(--white);
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: 12px;
     letter-spacing: 0.08em;
     padding: 6px 10px;
     white-space: nowrap;
@@ -180,7 +180,7 @@
 
   .breadcrumb {
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: 12px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--muted);
@@ -190,7 +190,7 @@
 
   .track-pill {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 12px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     padding: 4px 10px;
@@ -199,6 +199,7 @@
     color: var(--punch);
   }
 
+  .topbar-right { min-width: 0; }
   .topbar-right {
     display: flex;
     align-items: center;
@@ -214,12 +215,14 @@
 
   .topbar-signal-text {
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: 12px;
     color: var(--amber);
     letter-spacing: 0.05em;
+    min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
 
   /* TABS */
+  .tab-bar { overflow-x: auto; scrollbar-width: none; }
   .tab-bar {
     display: flex;
     border-bottom: 1px solid var(--line);
@@ -228,11 +231,12 @@
 
   .tab {
     font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.12em;
+    font-size: 12px;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--muted);
-    padding: 12px 20px;
+    padding: 12px 12px;
+    white-space: nowrap;
     cursor: pointer;
     border-bottom: 2px solid transparent;
     background: none;
@@ -285,7 +289,7 @@
 
   .card-title {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 12px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--muted);
@@ -293,7 +297,7 @@
 
   .card-badge {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 12px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     padding: 3px 8px;
@@ -318,7 +322,7 @@
 
   .streak-label {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 12px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--muted);
@@ -369,7 +373,7 @@
 
   .phase-bar-label {
     font-family: var(--mono);
-    font-size: 8px;
+    font-size: 12px;
     color: var(--muted);
     letter-spacing: 0.05em;
   }
@@ -409,13 +413,13 @@
 
   .signal-detail {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 12px;
     color: var(--muted);
   }
 
   .signal-trend {
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .trend-up { color: var(--green-bright); }
@@ -439,7 +443,7 @@
 
   .next-type {
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: 12px;
     color: var(--muted);
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -475,7 +479,7 @@
   }
 
   .sbi-name { font-size: 12px; color: #ccc; }
-  .sbi-detail { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+  .sbi-detail { font-family: var(--mono); font-size: 12px; color: var(--muted); }
 
   .start-btn {
     font-family: var(--display);
@@ -542,7 +546,7 @@
   }
 
   .fpm-name { font-size: 12px; color: var(--white); margin-bottom: 1px; }
-  .fpm-detail { font-family: var(--mono); font-size: 9px; color: var(--muted); }
+  .fpm-detail { font-family: var(--mono); font-size: 12px; color: var(--muted); }
 
   .fitme-cta {
     font-family: var(--display);
@@ -598,7 +602,7 @@
 
   .round-counter {
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: 12px;
     letter-spacing: 0.15em;
     color: var(--muted);
   }
@@ -613,7 +617,7 @@
 
   .timer-phase-label {
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: 12px;
     letter-spacing: 0.25em;
     text-transform: uppercase;
     margin-bottom: 8px;
@@ -641,7 +645,7 @@
 
   .timer-sub {
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: 13px;
     color: var(--muted);
     letter-spacing: 0.1em;
     margin-bottom: 32px;
@@ -703,7 +707,7 @@
 
   .drill-label {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 12px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--muted);
@@ -770,7 +774,7 @@
   .ld-flag { background: var(--punch); box-shadow: 0 0 6px var(--punch); }
 
   .live-signal-text {
-    font-size: 11px;
+    font-size: 13px;
     color: var(--dim);
     flex: 1;
     line-height: 1.4;
@@ -780,7 +784,7 @@
 
   .live-signal-time {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 12px;
     color: var(--muted);
     flex-shrink: 0;
   }
@@ -816,11 +820,11 @@
 
   .round-log-info { }
   .round-log-drill { font-size: 12px; color: #ccc; }
-  .round-log-detail { font-family: var(--mono); font-size: 9px; color: var(--muted); }
+  .round-log-detail { font-family: var(--mono); font-size: 12px; color: var(--muted); }
 
   .round-status {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 12px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     padding: 3px 8px;
@@ -880,7 +884,7 @@
     left: 50%;
     transform: translateX(-50%);
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 12px;
     color: var(--white);
     white-space: nowrap;
     background: var(--card2);
@@ -890,7 +894,7 @@
 
   .trend-bar-label {
     font-family: var(--mono);
-    font-size: 8px;
+    font-size: 12px;
     color: var(--muted);
     text-align: center;
   }
@@ -921,7 +925,7 @@
 
   .metric-label {
     font-family: var(--mono);
-    font-size: 8px;
+    font-size: 12px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--muted);
@@ -946,7 +950,7 @@
 
   .history-date {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 12px;
     color: var(--muted);
     letter-spacing: 0.05em;
     text-align: right;
@@ -994,7 +998,7 @@
 
   .history-meta {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 12px;
     color: var(--muted);
   }
 
@@ -1025,7 +1029,7 @@
     align-items: center;
     justify-content: center;
     font-family: var(--display);
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
     flex-shrink: 0;
     border: 2px solid;
@@ -1066,7 +1070,7 @@
 
   .path-phase-detail {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 12px;
     color: var(--muted);
     letter-spacing: 0.08em;
     margin-bottom: 6px;
@@ -1315,7 +1319,7 @@
 
             <!-- LIVE SIGNALS -->
             <div class="live-signals" id="live-signals">
-              <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Live Signals</div>
+              <div style="font-family:var(--mono);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Live Signals</div>
               <div class="live-signal-item" id="ls-recovery">
                 <div class="live-dot ld-ok"></div>
                 <div class="live-signal-text"><strong>Recovery</strong> monitoring — start session to track</div>
@@ -1428,7 +1432,7 @@
                   <div class="metric-label">vs week 1</div>
                 </div>
               </div>
-              <div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:8px">Trending right direction. At this rate, target reached by end of Phase 2.</div>
+              <div style="font-size:13px;color:var(--muted);font-style:italic;margin-top:8px">Trending right direction. At this rate, target reached by end of Phase 2.</div>
             </div>
           </div>
 

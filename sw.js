@@ -1,49 +1,37 @@
-const CACHE = 'fightfit-v2';
+// Network first, so updates show up as soon as they're pushed.
+// The cache is only a fallback for when you're offline.
+const CACHE = 'fightfit-v3';
 const ASSETS = [
-  '/fight.me/',
-  '/fight.me/index.html',
-  '/fight.me/fight-me-hub.html',
-  '/fight.me/fit-me-hub.html',
-  '/fight.me/fight-me.html',
-  '/fight.me/fight-me-coaches.html',
-  '/fight.me/fight-me-fighter.html',
-  '/fight.me/fight-me-analyzer.html',
-  '/fight.me/90day-plan.html',
-  '/fight.me/onboarding.html',
-  '/fight.me/dashboard.html',
-  '/fight.me/session-log.html',
-  '/fight.me/program-generator.js',
-  '/fight.me/my-program.html',
-  '/fight.me/icon-192.svg',
-  '/fight.me/icon-512.svg'
+  'index.html', 'train.html', 'training.js', 'program-generator.js',
+  'dashboard.html', 'onboarding.html', 'fight-me-hub.html', 'fit-me-hub.html',
+  'fight-me.html', 'fight-me-coaches.html', 'fight-me-fighter.html', 'fight-me-analyzer.html',
+  '90day-plan.html', 'methodology.html', 'my-program.html', 'session-log.html',
+  'manifest.json', 'icon-192.svg', 'icon-512.svg'
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(ASSETS))
-  );
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).catch(() => {}));
   self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    )
+    caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(response => {
-        if (!response || response.status !== 200 || response.type === 'opaque') return response;
-        const clone = response.clone();
-        caches.open(CACHE).then(cache => cache.put(e.request, clone));
-        return response;
-      }).catch(() => caches.match('/index.html'));
-    })
+    fetch(e.request).then(res => {
+      if (res && res.status === 200 && res.type === 'basic') {
+        const copy = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, copy));
+      }
+      return res;
+    }).catch(() =>
+      caches.match(e.request, { ignoreSearch: true }).then(hit => hit || caches.match('train.html'))
+    )
   );
 });
