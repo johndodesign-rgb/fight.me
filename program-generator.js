@@ -10,8 +10,9 @@ const PROGRAM_GENERATOR = (() => {
   const EQUIPMENT = {
     bodyweight:    ['Bodyweight'],
     bands:         ['Bodyweight', 'Band'],
-    dumbbells:     ['Bodyweight', 'Band', 'Dumbbells', 'Dumbbell', 'Dumbbells, Bench', 'Dumbbell, Bench', 'Dumbbell or Band', 'Dumbbells or Bodyweight'],
-    full:          ['Bodyweight', 'Band', 'Dumbbells', 'Dumbbell', 'Dumbbells, Bench', 'Dumbbell, Bench', 'Barbell', 'Cable', 'Dumbbell or Band', 'Dumbbells or Bodyweight', 'Foam Roller', 'Doorframe', 'Wall']
+    dumbbells_nobench: ['Bodyweight', 'Band', 'Dumbbells', 'Dumbbell', 'Dumbbell or Band', 'Dumbbells or Bodyweight'],
+    dumbbells:     ['Bodyweight', 'Band', 'Dumbbells', 'Dumbbell', 'Bench', 'Dumbbells, Bench', 'Dumbbell, Bench', 'Dumbbell or Band', 'Dumbbells or Bodyweight'],
+    full:          ['Bodyweight', 'Band', 'Dumbbells', 'Dumbbell', 'Bench', 'Dumbbells, Bench', 'Dumbbell, Bench', 'Barbell', 'Cable', 'Dumbbell or Band', 'Dumbbells or Bodyweight', 'Foam Roller', 'Doorframe', 'Wall']
   };
 
 
@@ -164,7 +165,10 @@ const PROGRAM_GENERATOR = (() => {
     // ── PUSH ──
     { name:'DB Bench Press',        pattern:'push',   equipment:['Dumbbells','Bench'],     minTrack:0, complexity:1, bilateral:true,  ballistic:false, repRange:'8–12', sets:'3–4', tempo:'3-1-1', regression:'Push-Up',              progression:'DB Bench + Band',         combatValue:'Pressing foundation, guard maintenance' },
     { name:'DB Floor Press',        pattern:'push',   equipment:['Dumbbells'],             minTrack:0, complexity:1, bilateral:true,  ballistic:false, repRange:'8–12', sets:'3',   tempo:'Dead stop', regression:'Push-Up',           progression:'DB Bench Press',          combatValue:'Dead stop — rate of force development' },
-    { name:'Single-Arm DB Press',   pattern:'push',   equipment:['Dumbbells','Bench'],     minTrack:0, complexity:2, bilateral:false, ballistic:false, repRange:'8–10/side', sets:'3', tempo:'Controlled', regression:'DB Bench',   progression:'SA Press + Rotation',     combatValue:'Anti-rotation demand — punch recovery' },
+    { name:'Single-Arm DB Press',   pattern:'push',   equipment:['Dumbbells','Bench'],     minTrack:0, complexity:2, bilateral:false, ballistic:false, repRange:'8–10/side', sets:'3', tempo:'Controlled', regression:'DB Bench Press', progression:'SA Press + Rotation', combatValue:'Anti-rotation demand — punch recovery' },
+    { name:'Single-Arm DB Floor Press', pattern:'push', equipment:['Dumbbells'],          minTrack:0, complexity:2, bilateral:false, ballistic:false, repRange:'8–10/side', sets:'3', tempo:'Dead stop', regression:'DB Floor Press', progression:'Single-Arm DB Press', combatValue:'Anti-rotation from the floor — no bench needed' },
+    { name:'Band Single-Arm Press', pattern:'push',   equipment:['Band'],                  minTrack:0, complexity:2, bilateral:false, ballistic:false, repRange:'10–12/side', sets:'3', tempo:'Staggered stance, snap out', regression:'Band Chest Press', progression:null, combatValue:'Standing one-arm press — closest to a straight punch' },
+    { name:'Offset Push-Up',        pattern:'push',   equipment:['Bodyweight'],            minTrack:0, complexity:2, bilateral:false, ballistic:false, repRange:'6–10/side', sets:'3', tempo:'One hand on a step or thick book', regression:'Incline Push-Up', progression:'Archer Push-Up', combatValue:'Uneven load — trains one side to drive while the other stabilizes' },
     { name:'Push-Up',               pattern:'push',   equipment:['Bodyweight'],            minTrack:0, complexity:1, bilateral:true,  ballistic:false, repRange:'8–20', sets:'3',   tempo:'Full range', regression:'Incline Push-Up', progression:'Hand-Release Push-Up',  combatValue:'Foundational — scales infinitely' },
     { name:'Incline Push-Up',       pattern:'push',   equipment:['Bodyweight'],            minTrack:0, complexity:1, bilateral:true,  ballistic:false, repRange:'10–15', sets:'3',  tempo:'Controlled', regression:null,              progression:'Push-Up',               combatValue:'Beginner push foundation' },
     { name:'Hand-Release Push-Up',  pattern:'push',   equipment:['Bodyweight'],            minTrack:0, complexity:1, bilateral:true,  ballistic:true,  repRange:'6–10', sets:'4',   tempo:'Explosive up', regression:'Push-Up',      progression:'Plyometric Push-Up',    combatValue:'Dead stop + explosive — punch power' },

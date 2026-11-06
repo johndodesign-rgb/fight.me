@@ -571,6 +571,7 @@
       options: [
         { text: "Bodyweight only — no equipment", score: 0, equipment: 'bodyweight' },
         { text: "Bodyweight + resistance bands", score: 0, equipment: 'bands' },
+        { text: "Dumbbells and bands, no bench", score: 0, equipment: 'dumbbells_nobench' },
         { text: "Dumbbells, bands, and a bench", score: 0, equipment: 'dumbbells' },
         { text: "Full gym access", score: 0, equipment: 'full' }
       ]
@@ -714,7 +715,8 @@
     const labels = {
       bodyweight: 'Bodyweight only',
       bands: 'Bodyweight + bands',
-      dumbbells: 'Dumbbells + bands',
+      dumbbells_nobench: 'Dumbbells + bands, no bench',
+      dumbbells: 'Dumbbells, bands + bench',
       full: 'Full gym'
     };
     return labels[tier] || 'Dumbbells + bands';

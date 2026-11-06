@@ -665,7 +665,7 @@
   // ── SETTINGS ──
   function openSettings() {
     const b = T.block();
-    const eq = { bodyweight: 'Bodyweight only', bands: 'Bodyweight + bands', dumbbells: 'Dumbbells + bands', full: 'Full gym' };
+    const eq = { bodyweight: 'Bodyweight only', bands: 'Bodyweight + bands', dumbbells_nobench: 'Dumbbells + bands, no bench', dumbbells: 'Dumbbells, bands + bench', full: 'Full gym' };
     $('settings-body').innerHTML = `
       <div class="q"><div class="qt">This block started</div>
         <input type="date" value="${b.start}" onchange="changeStart(this.value)">

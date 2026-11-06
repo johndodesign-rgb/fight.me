@@ -1112,7 +1112,7 @@
     const weekNum = getWeekNumber(data.date);
 
     // Equipment badge
-    const eqLabels = { bodyweight: 'Bodyweight', bands: 'BW + Bands', dumbbells: 'DBs + Bands', full: 'Full Gym' };
+    const eqLabels = { bodyweight: 'Bodyweight', bands: 'BW + Bands', dumbbells_nobench: 'DBs + Bands', dumbbells: 'DBs + Bench', full: 'Full Gym' };
     const eqBadge = document.getElementById('equipment-badge');
     if (eqBadge) eqBadge.textContent = eqLabels[equipment] || equipment;
 
@@ -1305,7 +1305,8 @@
     const equipLabels = {
       bodyweight: 'Bodyweight only',
       bands: 'Bodyweight + bands',
-      dumbbells: 'Dumbbells + bands',
+      dumbbells_nobench: 'Dumbbells + bands, no bench',
+      dumbbells: 'Dumbbells, bands + bench',
       full: 'Full gym'
     };
 
