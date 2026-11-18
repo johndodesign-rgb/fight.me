@@ -1,8 +1,8 @@
 // Network first, so updates show up as soon as they're pushed.
 // The cache is only a fallback for when you're offline.
-const CACHE = 'fightfit-v3';
+const CACHE = 'fightfit-v4';
 const ASSETS = [
-  'index.html', 'train.html', 'training.js', 'program-generator.js',
+  'index.html', 'train.html', 'training.js', 'shadow.html', 'shadow-engine.js', 'program-generator.js',
   'dashboard.html', 'onboarding.html', 'fight-me-hub.html', 'fit-me-hub.html',
   'fight-me.html', 'fight-me-coaches.html', 'fight-me-fighter.html', 'fight-me-analyzer.html',
   '90day-plan.html', 'methodology.html', 'my-program.html', 'session-log.html',

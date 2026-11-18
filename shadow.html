@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#060606">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<title>Shadowboxing · fight.me</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #060606; --card: #131313; --card2: #1b1b1b; --line: #262626; --line2: #333;
+    --white: #f0ede7; --dim: #b3aea6; --faint: #8a857e;
+    --punch: #ff4a2e; --amber: #e39a3b; --green: #3cc76e; --blue: #5aacff;
+    --mono: 'DM Mono', ui-monospace, monospace; --display: 'Barlow Condensed', sans-serif; --body: 'Barlow', system-ui, sans-serif;
+    --safe-b: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { background: var(--black); color: var(--white); font-family: var(--body); font-size: 17px; line-height: 1.45; }
+  button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+  a { color: inherit; }
+  [hidden] { display: none !important; }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 0 16px; }
+
+  /* ── SETUP / SUMMARY ── */
+  header { padding: calc(env(safe-area-inset-top, 0px) + 16px) 0 4px; display: flex; align-items: center; gap: 12px; }
+  .back { width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--line); display: grid; place-items: center; font-size: 22px; color: var(--dim); text-decoration: none; }
+  .brand { font-family: var(--display); font-weight: 800; font-size: 26px; }
+  .brand span { color: var(--punch); }
+  h1 { font-family: var(--display); font-weight: 700; font-size: 34px; line-height: 1.05; margin-top: 16px; }
+  .sub { color: var(--dim); font-size: 15px; }
+  .label { font-family: var(--mono); font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); margin: 26px 0 10px; }
+  .choice { display: block; width: 100%; text-align: left; border: 1px solid var(--line2); border-radius: 14px; padding: 14px 16px; margin-top: 8px; min-height: 60px; }
+  .choice[aria-pressed="true"] { border-color: var(--punch); background: #1d0d0a; }
+  .choice .t { font-weight: 600; font-size: 18px; }
+  .choice .d { color: var(--dim); font-size: 15px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { min-height: 48px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line2); font-size: 16px; font-weight: 600; }
+  .chip[aria-pressed="true"] { border-color: var(--white); background: var(--card2); }
+  .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+  .row3 label { font-size: 14px; color: var(--dim); display: block; margin-bottom: 4px; }
+  select { width: 100%; min-height: 52px; background: var(--card); border: 1px solid var(--line2); border-radius: 12px; color: var(--white); font: inherit; font-size: 17px; padding: 0 12px; }
+  .tip { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-top: 10px; }
+  .tip ol { padding-left: 20px; color: var(--dim); }
+  .tip li { padding: 3px 0; }
+  .tip li strong { color: var(--white); font-weight: 600; }
+  .switch { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; text-align: left; border: 1px solid var(--line2); border-radius: 14px; padding: 12px 16px; min-height: 60px; }
+  .switch .knob { width: 52px; height: 32px; border-radius: 999px; background: var(--line2); position: relative; flex-shrink: 0; transition: background .15s; }
+  .switch .knob::after { content: ''; position: absolute; top: 4px; left: 4px; width: 24px; height: 24px; border-radius: 50%; background: var(--white); transition: transform .15s; }
+  .switch[aria-checked="true"] .knob { background: var(--green); }
+  .switch[aria-checked="true"] .knob::after { transform: translateX(20px); }
+  .btn { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 56px; border-radius: 14px; font-weight: 600; font-size: 18px; padding: 0 18px; text-decoration: none; }
+  .btn-primary { background: var(--punch); color: #fff; }
+  .btn-secondary { border: 1px solid var(--line2); }
+  .btn + .btn { margin-top: 10px; }
+  .actionbar { position: sticky; bottom: 0; padding: 14px 0 calc(14px + var(--safe-b)); background: linear-gradient(to top, var(--black) 75%, transparent); margin-top: 20px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-top: 12px; }
+  .card h3 { font-family: var(--display); font-weight: 700; font-size: 22px; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+  .stat { background: var(--card2); border-radius: 12px; padding: 10px; }
+  .stat .v { font-family: var(--display); font-weight: 700; font-size: 26px; line-height: 1; }
+  .stat .k { font-size: 14px; color: var(--dim); margin-top: 4px; }
+  .say { color: var(--dim); margin-top: 10px; font-size: 16px; }
+  .banner { border-radius: 14px; padding: 14px 16px; margin-top: 12px; border: 1px solid #5a3d17; background: #1d1408; }
+  .banner b { color: var(--amber); display: block; }
+  .feel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .feel button { min-height: 56px; border-radius: 12px; border: 1px solid var(--line2); font-weight: 600; }
+  .feel button[aria-pressed="true"] { border-color: var(--white); background: var(--card2); }
+  textarea { width: 100%; min-height: 90px; background: var(--card); border: 1px solid var(--line2); border-radius: 12px; color: var(--white); font: inherit; padding: 12px 14px; resize: vertical; }
+
+  /* ── STAGE (camera + rounds) ── */
+  #stage { position: fixed; inset: 0; background: #000; z-index: 40; overflow: hidden; }
+  #view { position: absolute; transform: scaleX(-1); }
+  #view video, #view canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #view video { object-fit: fill; }
+  #hud { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; text-align: center; pointer-events: none;
+         padding: calc(env(safe-area-inset-top, 0px) + 10px) 14px calc(var(--safe-b) + 10px); gap: 8px; }
+  #hud button { pointer-events: auto; }
+  #hud-top { display: flex; align-items: flex-start; gap: 12px; width: 100%; }
+  #hud-phase { font-family: var(--mono); font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: var(--white); background: rgba(0,0,0,.6); padding: 8px 12px; border-radius: 10px; }
+  .hud-x { margin-left: auto; width: 52px; height: 52px; border-radius: 14px; background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.2); font-size: 24px; display: grid; place-items: center; }
+  #hud-text { display: inline-block; max-width: 860px; font-size: clamp(18px, min(3.3vw, 7vh), 38px); font-weight: 600; line-height: 1.2; background: rgba(0,0,0,.68); padding: 8px 16px; border-radius: 14px; }
+  #hud-text:empty { display: none; }
+  #hud-hint { font-size: clamp(15px, min(2.2vw, 4.5vh), 19px); color: var(--dim); margin-top: 6px; text-shadow: 0 1px 6px #000; }
+  #hud-hint:empty { display: none; }
+  #hud-mid { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+  #hud-time { font-family: var(--display); font-weight: 800; font-size: min(17vw, 36vh); line-height: 1; text-shadow: 0 2px 16px rgba(0,0,0,.8); }
+  #hud-call { font-family: var(--display); font-weight: 800; font-size: min(10vw, 20vh); line-height: 1.05; color: var(--punch); text-shadow: 0 2px 16px rgba(0,0,0,.8); }
+  #hud-call:empty { display: none; }
+  #hud-bottom { width: 100%; }
+  #hud-checks { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+  #hud-checks span { font-size: 15px; font-weight: 600; padding: 6px 12px; border-radius: 999px; background: rgba(0,0,0,.65); border: 1px solid rgba(255,255,255,.18); color: var(--dim); }
+  #hud-checks span.ok { color: var(--green); border-color: rgba(60,199,110,.5); }
+  #hud-progress { width: min(420px, 80vw); height: 10px; margin: 10px auto 0; border-radius: 999px; background: rgba(255,255,255,.15); overflow: hidden; }
+  #hud-progress div { height: 100%; width: 0; background: var(--green); transition: width .1s; }
+  #hud-actions { display: flex; justify-content: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+  #hud-actions:empty { display: none; }
+  #hud-actions button { min-height: 52px; padding: 0 20px; border-radius: 14px; font-weight: 600; font-size: 17px; background: rgba(0,0,0,.7); border: 1px solid rgba(255,255,255,.3); }
+  #hud-actions button.primary { background: var(--punch); border-color: var(--punch); }
+  #hud-count { font-family: var(--mono); font-size: clamp(15px, 4.5vh, 22px); color: var(--white); margin-top: 6px; text-shadow: 0 1px 6px #000; }
+  #hud-count:empty { display: none; }
+  #stage.rest #hud-time { color: var(--amber); font-size: min(9vw, 17vh); }
+  #stage.rest #hud-text { font-size: clamp(17px, min(2.8vw, 6vh), 30px); font-weight: 500; }
+  .toast { position: fixed; left: 50%; bottom: calc(var(--safe-b) + 90px); transform: translateX(-50%); background: var(--white); color: var(--black); font-weight: 600; padding: 12px 20px; border-radius: 999px; z-index: 60; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- ══ SETUP ══ -->
+<section id="setup">
+  <div class="wrap">
+    <header>
+      <a class="back" href="train.html" aria-label="Back">‹</a>
+      <div class="brand">fight<span>.me</span></div>
+    </header>
+    <h1>Shadowboxing</h1>
+    <div class="sub">The phone calls the combos, watches your guard, and gives you one thing to fix between rounds.</div>
+
+    <div class="label">Focus</div>
+    <div id="focus-list"></div>
+
+    <div class="label">Rounds</div>
+    <div class="chips" id="preset-list"></div>
+    <div class="row3" id="custom" hidden>
+      <div><label for="c-rounds">Rounds</label><select id="c-rounds"></select></div>
+      <div><label for="c-len">Length</label><select id="c-len"></select></div>
+      <div><label for="c-rest">Rest</label><select id="c-rest"></select></div>
+    </div>
+
+    <div class="label">Calls</div>
+    <div class="chips" id="style-list"></div>
+
+    <div class="label">Camera</div>
+    <button class="switch" id="cam-switch" role="switch" aria-checked="true" onclick="toggleCam()">
+      <span><span style="font-weight:600;font-size:18px;display:block">Watch my form</span><span class="sub">Turn off for timer and calls only</span></span>
+      <span class="knob"></span>
+    </button>
+    <div class="tip" id="cam-tip">
+      <ol>
+        <li><strong>Turn the phone sideways</strong> and prop it up around waist height.</li>
+        <li><strong>Stand 6–8 feet back</strong>, with room to move.</li>
+        <li><strong>Put it a little toward your rear-hand side</strong> and punch past it, not straight at it. That way it can see both gloves and how far each punch goes.</li>
+        <li><strong>Turn the volume up.</strong> Everything after this is spoken.</li>
+      </ol>
+    </div>
+
+    <div class="actionbar"><button class="btn btn-primary" id="go-btn" onclick="enterStage()">Set up camera</button></div>
+  </div>
+</section>
+
+<!-- ══ STAGE ══ -->
+<section id="stage" hidden>
+  <div id="view"><video id="video" playsinline muted></video><canvas id="overlay"></canvas></div>
+  <div id="hud">
+  <div id="hud-top">
+    <div id="hud-phase">Camera check</div>
+    <button class="hud-x" onclick="askEnd()" aria-label="End session">✕</button>
+  </div>
+  <div id="hud-say"><div id="hud-text"></div><div id="hud-hint"></div></div>
+  <div id="hud-mid"><div id="hud-call"></div><div id="hud-time"></div></div>
+  <div id="hud-bottom">
+    <div id="hud-checks"></div>
+    <div id="hud-progress" hidden><div></div></div>
+    <div id="hud-count"></div>
+    <div id="hud-actions"></div>
+  </div>
+  </div>
+</section>
+
+<!-- ══ SUMMARY ══ -->
+<section id="summary" hidden>
+  <div class="wrap">
+    <header><a class="back" href="train.html" aria-label="Back">‹</a><div class="brand">fight<span>.me</span></div></header>
+    <h1>Session done</h1>
+    <div class="sub" id="sum-sub"></div>
+    <div id="sum-body"></div>
+    <div class="label">How did it feel?</div>
+    <div class="feel" id="sum-feel">
+      <button aria-pressed="false" data-v="3">Too easy</button><button aria-pressed="false" data-v="2">About right</button><button aria-pressed="false" data-v="1">Too hard</button>
+    </div>
+    <div class="label">Notes <span style="text-transform:none;letter-spacing:0">(optional)</span></div>
+    <textarea id="sum-notes" placeholder="Anything worth remembering"></textarea>
+    <div class="actionbar"><button class="btn btn-primary" id="save-btn" onclick="saveSession()">Save to history</button>
+      <a class="btn btn-secondary" href="train.html">Don’t save</a></div>
+  </div>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script src="program-generator.js"></script>
+<script src="training.js"></script>
+<script src="shadow-engine.js"></script>
+<script>
+  const S = SHADOW;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const QS = new URLSearchParams(location.search);
+  const MOCK = QS.has('mock');
+  const SPEED = MOCK ? Math.min(4, Math.max(1, +QS.get('speed') || 1)) : 1;   // test mode can run faster than real time
+  const now = () => performance.now() / 1000 * SPEED;
+  function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1800); }
+
+  // ══ SETTINGS ══
+  const PRESETS = [
+    { id: '3x2', label: '3 × 2:00', rounds: 3, len: 120, rest: 60 },
+    { id: '3x1', label: '3 × 1:00', rounds: 3, len: 60, rest: 30 },
+    { id: '6x2', label: '6 × 2:00', rounds: 6, len: 120, rest: 60 },
+    { id: '3x3', label: '3 × 3:00', rounds: 3, len: 180, rest: 60 },
+    { id: 'custom', label: 'Custom' },
+  ];
+  const STORE = 'fightme_shadow_prefs';
+  let prefs = { focus: 'jabcross', preset: '3x2', rounds: 3, len: 120, rest: 60, style: 'numbers', cam: true };
+  try { Object.assign(prefs, JSON.parse(localStorage.getItem(STORE) || '{}')); } catch (e) {}
+  const savePrefs = () => { try { localStorage.setItem(STORE, JSON.stringify(prefs)); } catch (e) {} };
+  const mmss = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`;
+
+  function renderSetup() {
+    $('focus-list').innerHTML = Object.entries(S.FOCUS).map(([k, f]) =>
+      `<button class="choice" aria-pressed="${prefs.focus === k}" onclick="prefs.focus='${k}';savePrefs();renderSetup()"><div class="t">${f.label}</div><div class="d">${f.desc}</div></button>`).join('');
+    $('preset-list').innerHTML = PRESETS.map(p =>
+      `<button class="chip" aria-pressed="${prefs.preset === p.id}" onclick="pickPreset('${p.id}')">${p.label}${p.rest ? ` <span class="sub">· ${mmss(p.rest)} rest</span>` : ''}</button>`).join('');
+    $('custom').hidden = prefs.preset !== 'custom';
+    $('style-list').innerHTML = [['numbers', 'Numbers  (“one two”)'], ['names', 'Names  (“jab cross”)']].map(([k, l]) =>
+      `<button class="chip" aria-pressed="${prefs.style === k}" onclick="prefs.style='${k}';savePrefs();renderSetup()">${l}</button>`).join('');
+    $('cam-switch').setAttribute('aria-checked', prefs.cam);
+    $('cam-tip').hidden = !prefs.cam;
+    $('go-btn').textContent = prefs.cam ? 'Set up camera' : 'Start';
+  }
+  function pickPreset(id) {
+    prefs.preset = id;
+    const p = PRESETS.find(x => x.id === id);
+    if (p.rounds) Object.assign(prefs, { rounds: p.rounds, len: p.len, rest: p.rest });
+    savePrefs(); renderSetup(); fillCustom();
+  }
+  function fillCustom() {
+    const opt = (vals, cur, fmt) => vals.map(v => `<option value="${v}" ${v === cur ? 'selected' : ''}>${fmt(v)}</option>`).join('');
+    $('c-rounds').innerHTML = opt([1, 2, 3, 4, 5, 6, 8, 10, 12], prefs.rounds, v => v);
+    $('c-len').innerHTML = opt([30, 60, 90, 120, 150, 180], prefs.len, mmss);
+    $('c-rest').innerHTML = opt([15, 30, 45, 60, 90], prefs.rest, mmss);
+  }
+  ['c-rounds', 'c-len', 'c-rest'].forEach(id => $(id).addEventListener('change', e => {
+    prefs[{ 'c-rounds': 'rounds', 'c-len': 'len', 'c-rest': 'rest' }[id]] = +e.target.value; savePrefs();
+  }));
+  function toggleCam() { prefs.cam = !prefs.cam; savePrefs(); renderSetup(); }
+
+  // ══ AUDIO ══
+  let actx = null;
+  function tone(freq, dur, type = 'sine', vol = 0.35, when = 0) {
+    if (!actx) return;
+    const t = actx.currentTime + when, o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur);
+  }
+  const bell = (n = 1) => { for (let i = 0; i < n; i++) { tone(880, 1.2, 'sine', 0.4, i * 0.35); tone(1320, 0.8, 'sine', 0.15, i * 0.35); } };
+  const beep = () => tone(660, 0.15, 'square', 0.15);
+  const clap = () => { tone(1800, 0.05, 'square', 0.25); tone(1800, 0.05, 'square', 0.25, 0.18); };
+
+  const Voice = {
+    voice: null,
+    init() {
+      if (!('speechSynthesis' in window)) return;
+      const pick = () => {
+        const vs = speechSynthesis.getVoices();
+        this.voice = vs.find(v => /^en(-|_)US/i.test(v.lang) && /google/i.test(v.name)) || vs.find(v => /^en/i.test(v.lang)) || null;
+      };
+      pick(); speechSynthesis.onvoiceschanged = pick;
+    },
+    // onstart(t) fires when speech actually begins (or a fallback if the engine never reports it)
+    say(text, { interrupt = false, rate = 1.0, onstart } = {}) {
+      let fired = false;
+      const fire = () => { if (!fired && onstart) { fired = true; onstart(now()); } };
+      if (!('speechSynthesis' in window) || !text) { fire(); return; }
+      if (interrupt) speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = rate; u.lang = 'en-US'; if (this.voice) u.voice = this.voice;
+      u.onstart = fire;
+      speechSynthesis.speak(u);
+      if (onstart) setTimeout(fire, 700 / SPEED);
+    },
+    stop() { if ('speechSynthesis' in window) speechSynthesis.cancel(); },
+  };
+  Voice.init();
+
+  // ══ STAGE STATE ══
+  let video = $('video'), canvas = $('overlay'), ctx = canvas.getContext('2d');
+  let vidW = 1280, vidH = 720, stream = null, detector = null, mock = null, wakeLock = null;
+  let smooth = null, kp = null, running = false;
+  let st = null;   // session state
+
+  function newState() {
+    return {
+      phase: 'frame', useCam: prefs.cam, focus: prefs.focus, style: prefs.style,
+      rounds: prefs.rounds, len: prefs.len, rest: prefs.rest,
+      round: 0, t: 0, readySince: null, lastSaid: '', lastSayT: -10, pendingSay: null, pendingSince: 0,
+      baseline: null, guard: null, calibrator: null, calib: null, tracker: null,
+      startHold: null, countdownEnd: 0, roundEnd: 0, restEnd: 0, nextCall: 0, lastCombo: null, said: {},
+      summaries: [], feedbacks: [], focusPrev: null, ended: false, startedAt: new Date(),
+    };
+  }
+
+  function setHUD({ phase, text, hint, time, call, checks, progress, count, actions } = {}) {
+    if (phase !== undefined) $('hud-phase').textContent = phase;
+    if (text !== undefined) $('hud-text').textContent = text;
+    if (hint !== undefined) $('hud-hint').textContent = hint;
+    if (time !== undefined) $('hud-time').textContent = time;
+    if (call !== undefined) $('hud-call').textContent = call;
+    if (count !== undefined) $('hud-count').textContent = count;
+    if (checks !== undefined) $('hud-checks').innerHTML = (checks || []).map(c => `<span class="${c.ok ? 'ok' : ''}">${c.ok ? '✓ ' : ''}${esc(c.label)}</span>`).join('');
+    if (progress !== undefined) {
+      $('hud-progress').hidden = progress === null;
+      if (progress !== null) $('hud-progress').firstElementChild.style.width = `${Math.round(progress * 100)}%`;
+    }
+    if (actions !== undefined) $('hud-actions').innerHTML = (actions || []).map(a => `<button class="${a.primary ? 'primary' : ''}" onclick="${a.on}">${esc(a.label)}</button>`).join('');
+  }
+
+  // Speak a guidance line once it has been stable for a moment, and not too often
+  function guide(text, t, { force = false } = {}) {
+    setHUD({ text });
+    if (force) { st.lastSaid = text; st.lastSayT = t; Voice.say(text, { interrupt: true }); return; }
+    if (text === st.lastSaid) return;
+    if (st.pendingSay !== text) { st.pendingSay = text; st.pendingSince = t; return; }
+    if (t - st.pendingSince > 0.8 && t - st.lastSayT > 2.5) { st.lastSaid = text; st.lastSayT = t; Voice.say(text, { interrupt: true }); }
+  }
+
+  // ══ ENTER / EXIT ══
+  async function enterStage() {
+    // Unlock audio + speech on this tap (phones require a tap first)
+    try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); await actx.resume(); } catch (e) {}
+    Voice.say(' ');
+    st = newState();
+    $('setup').hidden = true; $('stage').hidden = false;
+    $('stage').className = '';
+    try { await document.documentElement.requestFullscreen({ navigationUI: 'hide' }); } catch (e) {}
+    try { await screen.orientation.lock('landscape'); } catch (e) {}
+    try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+
+    if (!st.useCam) { goReady(); startLoop(); return; }
+
+    setHUD({ phase: 'Camera check', text: 'Starting the camera…', hint: '', checks: [], progress: null, actions: [] });
+    if (MOCK) {
+      vidW = 1280; vidH = 720; mock = createMockBoxer(vidW, vidH); video.hidden = true; layout(); startLoop(); return;
+    }
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } });
+      video.srcObject = stream; await video.play();
+      vidW = video.videoWidth || 1280; vidH = video.videoHeight || 720; layout();
+    } catch (err) {
+      setHUD({ text: err && err.name === 'NotAllowedError' ? 'Camera access was blocked.' : 'The camera didn’t start.',
+        hint: 'Allow the camera for this site in Chrome, or go without it.',
+        actions: [{ label: 'Try again', on: 'retryCam()', primary: true }, { label: 'Timer and calls only', on: 'noCam()' }] });
+      return;
+    }
+    setHUD({ text: 'Loading the pose model…', hint: 'First time takes a few seconds.' });
+    try {
+      await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js');
+      await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js');
+      await tf.setBackend('webgl'); await tf.ready();
+      detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING });
+    } catch (e) {
+      setHUD({ text: 'Couldn’t load the pose model.', hint: 'Check your connection, or go without it.',
+        actions: [{ label: 'Try again', on: 'retryCam()', primary: true }, { label: 'Timer and calls only', on: 'noCam()' }] });
+      return;
+    }
+    setHUD({ hint: '' });
+    startLoop();
+  }
+  function retryCam() { exitStage(true); enterStage(); }
+  function noCam() { exitStage(true); prefs.cam = false; savePrefs(); renderSetup(); enterStage(); }
+
+  function loadScript(src) {
+    if (document.querySelector(`script[src="${src}"]`)) return Promise.resolve();
+    return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+  }
+
+  function exitStage(quiet, keepVoice) {
+    running = false;
+    if (!keepVoice) Voice.stop();
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    try { if (wakeLock) wakeLock.release(); } catch (e) {}
+    wakeLock = null;
+    try { if (document.fullscreenElement) document.exitFullscreen(); } catch (e) {}
+    $('stage').hidden = true;
+    if (!quiet) { $('setup').hidden = false; }
+  }
+
+  function askEnd() {
+    if (st.phase === 'confirm-end') return;
+    st.prevPhase = st.phase;
+    const done = st.summaries.length;
+    setHUD({ actions: [{ label: 'Keep going', on: 'cancelEnd()' }, { label: done ? 'End and see summary' : 'End session', on: 'endSession()', primary: true }] });
+    st.confirmEnd = true;
+  }
+  function cancelEnd() { st.confirmEnd = false; refreshActions(); }
+  function endSession() {
+    if (st.phase === 'round' && st.tracker && st.tracker.inRound) finishRound(now(), true);
+    exitStage(true);
+    if (st.summaries.length) showSummary();
+    else { $('setup').hidden = false; }
+  }
+
+  function layout() {
+    canvas.width = vidW; canvas.height = vidH;
+    const W = window.innerWidth, H = window.innerHeight, a = vidW / vidH;
+    let w = W, h = W / a;
+    if (h > H) { h = H; w = H * a; }
+    Object.assign($('view').style, { width: `${w}px`, height: `${h}px`, left: `${(W - w) / 2}px`, top: `${(H - h) / 2}px` });
+  }
+  window.addEventListener('resize', () => { if (!$('stage').hidden) layout(); });
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible' && running) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {} }
+  });
+
+  // ══ MAIN LOOP ══
+  function startLoop() {
+    running = true; smooth = S.makeSmoother();
+    let busy = false;
+    const step = async () => {
+      if (!running) return;
+      if (!busy) {
+        busy = true;
+        try {
+          const t = now();
+          let raw = null;
+          if (mock) raw = mock.pose(t);
+          else if (detector && video.readyState >= 2) {
+            const poses = await detector.estimatePoses(video, { flipHorizontal: false });
+            raw = poses && poses[0] ? poses[0].keypoints : null;
+          }
+          kp = st.useCam ? smooth(raw) : null;
+          tick(t);
+          draw();
+        } catch (e) { console.error(e); }
+        busy = false;
+      }
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  function refreshActions() {
+    if (st.confirmEnd) return;
+    const p = st.phase;
+    if (p === 'ready') setHUD({ actions: [{ label: 'Start now', on: 'beginCountdown(now())', primary: true }, ...(st.useCam ? [{ label: 'Redo camera check', on: 'restartSetup()' }] : [])] });
+    else if (p === 'rest') setHUD({ actions: [{ label: 'Skip rest', on: 'skipRest()' }] });
+    else if (p === 'calib-jab' || p === 'calib-cross') setHUD({ actions: [{ label: 'Start over', on: 'restartSetup()' }] });
+    else setHUD({ actions: [] });
+  }
+  function setPhase(p) { st.phase = p; $('stage').className = p === 'rest' ? 'rest' : ''; refreshActions(); }
+
+  function restartSetup() {
+    st.baseline = st.calib = st.calibrator = st.guard = null; st.readySince = null; st.lastSaid = '';
+    setHUD({ time: '', call: '', count: '', progress: null });
+    setPhase('frame');
+  }
+
+  function tick(t) {
+    st.t = t;
+    switch (st.phase) {
+      case 'frame': return tickFrame(t);
+      case 'guard': return tickGuard(t);
+      case 'calib-jab': case 'calib-cross': return tickCalib(t);
+      case 'ready': return tickReady(t);
+      case 'countdown': return tickCountdown(t);
+      case 'round': return tickRound(t);
+      case 'rest': return tickRest(t);
+    }
+  }
+
+  // ── 1. FRAMING ──
+  function tickFrame(t) {
+    const a = S.assessFrame(kp, vidW, vidH);
+    setHUD({ phase: 'Camera check', checks: a.checks, hint: vidH > vidW ? 'Tip: turning the phone sideways gives your punches more room.' : '' });
+    if (a.ready) {
+      st.readySince = st.readySince ?? t;
+      setHUD({ progress: Math.min(1, (t - st.readySince) / 1.0) });
+      if (t - st.readySince >= 1.0) {
+        st.guard = S.makeGuardCapture();
+        setPhase('guard');
+        setHUD({ checks: [], progress: 0 });
+        guide('Good. Now get in your guard and hold still.', t, { force: true });
+        return;
+      }
+      guide('Good. Hold it there.', t);
+    } else {
+      st.readySince = null;
+      setHUD({ progress: null });
+      guide(a.instruction, t);
+    }
+  }
+
+  // ── 2. GUARD BASELINE ──
+  function tickGuard(t) {
+    const a = S.assessFrame(kp, vidW, vidH);
+    if (!a.ready) {
+      st.lostSince = st.lostSince ?? t;
+      if (t - st.lostSince > 1.5) { st.lostSince = null; st.readySince = null; setPhase('frame'); return; }
+    } else st.lostSince = null;
+    const r = st.guard.update(kp, t);
+    setHUD({ phase: 'Guard check', progress: r.progress, hint: r.reason === 'hands' ? 'Hands up by your face.' : r.reason === 'moving' ? 'Hold still for a second.' : '' });
+    if (r.baseline) {
+      st.baseline = r.baseline;
+      st.calibrator = S.makeCalibrator(st.baseline);
+      setPhase('calib-jab');
+      setHUD({ progress: null, hint: 'Normal speed is fine. Come back to your guard each time.', count: 'Jabs  0 / 3' });
+      guide('Got it. Now throw three jabs.', t, { force: true });
+      if (mock) mock.throwN('lead', 3, t + 1.5);
+    }
+  }
+
+  // ── 3. PUNCH CHECK ──
+  function tickCalib(t) {
+    const r = st.calibrator.update(kp, t, vidW, vidH);
+    setHUD({ phase: 'Punch check' });
+    if (r.justFinished === 'jab') {
+      setPhase('calib-cross');
+      setHUD({ count: 'Crosses  0 / 3' });
+      guide('Good. Now three crosses.', t, { force: true });
+      if (mock) mock.throwN('rear', 3, t + 1.2);
+      return;
+    }
+    if (r.step === 'jab' || r.step === 'cross') {
+      setHUD({ count: `${r.step === 'jab' ? 'Jabs' : 'Crosses'}  ${Math.min(3, r.count || 0)} / 3` });
+      return;
+    }
+    if (r.step === 'done') {
+      if (r.offFrame) { restartSetup(); guide('Your punches are leaving the picture. Take a step back.', t, { force: true }); return; }
+      if (r.tooSmall) { restartSetup(); guide('I can barely see your punches. Move the phone a little more to your rear-hand side, and we’ll try again.', t, { force: true }); return; }
+      st.calib = r;
+      st.tracker = S.makeTracker(st.baseline, st.calib);
+      goReady(`You’re set. ${r.stance === 'orthodox' ? 'Orthodox' : 'Southpaw'} stance.`);
+    }
+  }
+
+  // ── 4. READY ──
+  function goReady(prefix = '') {
+    setPhase('ready');
+    st.startHold = null;
+    const msg = st.useCam ? `${prefix} Hold your guard to start round one.` : 'Tap start when you’re in position.';
+    setHUD({ phase: 'Ready', count: '', checks: [], progress: st.useCam ? 0 : null, time: '', call: '', hint: st.useCam ? 'Or tap Start now.' : '' });
+    guide(msg.trim(), st.t || now(), { force: true });
+  }
+
+  function guardHeld(t) {
+    if (!kp || !st.baseline || !st.calib) return 0;
+    const g = S.geom(kp);
+    if (!g.valid) { st.startHold = null; return 0; }
+    const near = ['left', 'right'].every(s => { const d = S.displacement(g, st.baseline, s); return d !== null && d < st.calib.thresholds.back * 1.8; });
+    if (!near) { st.startHold = null; return 0; }
+    st.startHold = st.startHold ?? t;
+    return Math.min(1, (t - st.startHold) / 1.5);
+  }
+
+  function tickReady(t) {
+    if (!st.useCam) return;
+    const p = guardHeld(t);
+    setHUD({ progress: p });
+    if (p >= 1) beginCountdown(t);
+  }
+
+  // ── 5. COUNTDOWN ──
+  function beginCountdown(t) {
+    if (st.phase !== 'ready') return;
+    st.round++;
+    setPhase('countdown');
+    st.countdownEnd = t + 4;
+    st.said = {};
+    setHUD({ phase: `Round ${st.round} of ${st.rounds}`, progress: null, hint: '', count: '', checks: [], text: `Round ${st.round}`, call: '' });
+    Voice.say(`Round ${numberWord(st.round)}.`, { interrupt: true });
+  }
+  function tickCountdown(t) {
+    const left = Math.ceil(st.countdownEnd - t);
+    setHUD({ time: left > 0 && left <= 3 ? String(left) : '' });
+    for (const n of [3, 2, 1]) if (left === n && !st.said[`c${n}`]) { st.said[`c${n}`] = 1; beep(); }
+    if (t >= st.countdownEnd) startRound(t);
+  }
+
+  // ── 6. ROUND ──
+  function startRound(t) {
+    setPhase('round');
+    st.roundStart = t;
+    st.roundEnd = t + st.len;
+    st.nextCall = t + 2.5;
+    st.said = {};
+    bell(1);
+    setHUD({ text: '', call: '', hint: '' });
+    if (st.tracker) st.tracker.startRound(t, { round: st.round });
+    st.basicCalls = 0;
+  }
+
+  function tickRound(t) {
+    const left = st.roundEnd - t;
+    setHUD({ time: mmss(Math.max(0, Math.ceil(left))) });
+    if (st.tracker) {
+      st.tracker.update(kp, t);
+      const g = kp ? S.geom(kp) : { valid: false };
+      setHUD({ hint: g.valid ? '' : 'I can’t see you' });
+    }
+    const calls = S.FOCUS[st.focus].calls;
+    if (calls.length && t >= st.nextCall && left > 2.5) doCall(t, calls);
+    if (t - (st.lastCallT || 0) > 1.6) setHUD({ call: '' });
+    if (left <= 10 && !st.said.ten) { st.said.ten = 1; clap(); }
+    if (left <= 0) finishRound(t);
+  }
+
+  function doCall(t, calls) {
+    let combo;
+    do { combo = calls[Math.floor(Math.random() * calls.length)]; } while (calls.length > 2 && combo === st.lastCombo);
+    st.lastCombo = combo;
+    const info = S.comboInfo(combo, st.style);
+    st.lastCallT = t;
+    st.basicCalls++;
+    setHUD({ call: info.display });
+    Voice.say(info.speech, { interrupt: true, rate: 1.25, onstart: ts => {
+      if (st.tracker && st.tracker.inRound) st.tracker.addCall(ts, info);
+      if (mock) mock.call(info.hands, ts);
+    } });
+    st.nextCall = t + S.nextCallGap(info.n);
+  }
+
+  function finishRound(t, early = false) {
+    bell(3);
+    setHUD({ call: '', time: '' });
+    let summary, fb = null;
+    if (st.tracker) {
+      summary = st.tracker.endRound(t);
+      const prev = st.summaries[st.summaries.length - 1];
+      fb = S.roundFeedback(summary, prev, st.focusPrev, st.round, st.rounds);
+      st.focusPrev = fb.focus;
+    } else {
+      summary = { seconds: Math.round(t - st.roundStart), calls: st.basicCalls, punches: null };
+    }
+    summary.early = early;
+    st.summaries.push(summary);
+    st.feedbacks.push(fb);
+    if (early) return;
+    const last = st.round >= st.rounds;
+    const text = fb ? fb.text : (last ? '' : 'Rest. Breathe through your nose.');
+    if (last) {
+      setPhase('done');
+      setHUD({ phase: 'Done', text: text || 'That’s the session.', hint: '' });
+      setTimeout(() => Voice.say(`Time. ${text} That’s the session.`, { interrupt: true }), 900 / SPEED);
+      setTimeout(() => { exitStage(true, true); showSummary(); }, 2500 / SPEED);
+      return;
+    }
+    setPhase('rest');
+    st.restEnd = t + st.rest;
+    st.said = {};
+    setHUD({ phase: `Rest · next is round ${st.round + 1}`, text, hint: '' });
+    setTimeout(() => Voice.say(`Time. ${text}`, { interrupt: true }), 900 / SPEED);
+  }
+
+  // ── 7. REST ──
+  function tickRest(t) {
+    const left = st.restEnd - t;
+    setHUD({ time: mmss(Math.max(0, Math.ceil(left))) });
+    if (left <= 10 && !st.said.ten && st.rest > 15) { st.said.ten = 1; Voice.say('Ten seconds. Get in your guard.'); }
+    if (left <= 4 && !st.said.next) {
+      st.said.next = 1;
+      st.round++;
+      setPhase('countdown');
+      st.countdownEnd = st.restEnd;
+      setHUD({ phase: `Round ${st.round} of ${st.rounds}`, text: `Round ${st.round}`, hint: '' });
+      Voice.say(`Round ${numberWord(st.round)}.`, { interrupt: true });
+    }
+  }
+  function skipRest() { if (st.phase === 'rest') st.restEnd = now() + 4.2; }
+
+  const numberWord = n => ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'][n] || String(n);
+
+  // ══ DRAWING ══
+  const BONES = [[5, 6], [5, 7], [7, 9], [6, 8], [8, 10], [5, 11], [6, 12], [11, 12], [11, 13], [13, 15], [12, 14], [14, 16], [0, 5], [0, 6]];
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!st.useCam) return;
+    if (mock) { ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+    const W = canvas.width, H = canvas.height, lw = Math.max(3, W / 250);
+    // Target zone during the camera check
+    if (st.phase === 'frame' || st.phase === 'guard') {
+      ctx.setLineDash([lw * 4, lw * 3]); ctx.lineWidth = lw; ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+      const bw = W * 0.4, bx = (W - bw) / 2;
+      ctx.strokeRect(bx, H * 0.06, bw, H * 0.9);
+      ctx.setLineDash([]);
+    }
+    if (!kp) return;
+    const okFrame = st.phase !== 'frame' || S.assessFrame(kp, W, H).ready;
+    const col = okFrame ? '#3cc76e' : '#e39a3b';
+    ctx.lineWidth = lw; ctx.lineCap = 'round'; ctx.strokeStyle = col;
+    BONES.forEach(([a, b]) => {
+      const p = kp[a], q = kp[b];
+      if (p.score > 0.3 && q.score > 0.3) { ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); }
+    });
+    kp.forEach((p, i) => {
+      if (p.score < 0.3 || (i > 0 && i < 5)) return;
+      const wrist = i === 9 || i === 10;
+      ctx.fillStyle = wrist ? '#ff4a2e' : col;
+      ctx.beginPath(); ctx.arc(p.x, p.y, wrist ? lw * 3 : lw * 1.6, 0, Math.PI * 2); ctx.fill();
+    });
+  }
+
+  // ══ SUMMARY ══
+  let feel = null;
+  function showSummary() {
+    $('summary').hidden = false; $('setup').hidden = true;
+    window.scrollTo(0, 0);
+    const R = st.summaries;
+    const done = R.filter(r => !r.early).length;
+    const focus = S.FOCUS[st.focus];
+    $('sum-sub').textContent = `${focus.label} · ${done} of ${st.rounds} rounds · ${mmss(st.len)} each`;
+    let h = '';
+    if (st.useCam && R.some(r => r.punches !== null)) {
+      const sess = S.sessionSummary(R.filter(r => r.punches !== null), st.feedbacks);
+      st.session = sess;
+      const totalCalls = R.reduce((a, r) => a + (r.calls || 0), 0);
+      const resp = R.reduce((a, r) => a + (r.responded || 0), 0);
+      h += `<div class="card"><div class="stats">
+        <div class="stat"><div class="v">${sess.total}</div><div class="k">punches seen</div></div>
+        <div class="stat"><div class="v">${totalCalls ? Math.round(100 * resp / totalCalls) + '%' : '—'}</div><div class="k">${totalCalls ? 'calls answered' : 'free rounds'}</div></div>
+        <div class="stat"><div class="v">${R[0].reaction ? avgOf(R.map(r => r.reaction)).toFixed(1) + 's' : '—'}</div><div class="k">reaction</div></div>
+      </div>
+      ${sess.topFix ? `<div class="say"><strong style="color:var(--white)">Main thing to work on:</strong> ${esc(sess.topFix.text)}</div>` : `<div class="say">No recurring problems. Nice work.</div>`}
+      </div>`;
+      if (sess.flags.includes('gassed_out')) h += `<div class="banner"><b>Output dropped late</b>You threw about ${Math.round(sess.fade * 100)}% less by the last round. That’s conditioning more than technique, so the aerobic work in fit.me is what fixes it.</div>`;
+      R.forEach((r, i) => {
+        const fb = st.feedbacks[i];
+        if (r.punches === null) return;
+        h += `<div class="card"><h3>Round ${i + 1}${r.early ? ' (ended early)' : ''}</h3>
+          <div class="stats">
+            <div class="stat"><div class="v">${r.punches}</div><div class="k">punches</div></div>
+            <div class="stat"><div class="v">${r.punches ? Math.round(100 * (1 - r.slowShare)) + '%' : '—'}</div><div class="k">came back fast</div></div>
+            <div class="stat"><div class="v">${r.calls ? `${r.responded}/${r.calls}` : r.perMin}</div><div class="k">${r.calls ? 'calls answered' : 'per minute'}</div></div>
+          </div>
+          ${fb && !r.early ? `<div class="say">${esc(fb.text)}</div>` : ''}</div>`;
+      });
+    } else {
+      h += `<div class="card"><div class="say">Timer and calls only. ${R.reduce((a, r) => a + (r.calls || 0), 0)} combos called across ${R.length} round${R.length === 1 ? '' : 's'}.</div></div>`;
+    }
+    $('sum-body').innerHTML = h;
+    document.querySelectorAll('#sum-feel button').forEach(b => b.onclick = () => {
+      feel = +b.dataset.v;
+      document.querySelectorAll('#sum-feel button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    });
+  }
+  const avgOf = a => { const v = a.filter(x => x !== null && x !== undefined); return v.length ? v.reduce((x, y) => x + y, 0) / v.length : 0; };
+
+  function saveSession() {
+    const R = st.summaries;
+    const done = R.filter(r => !r.early).length;
+    const sess = st.session;
+    const focus = S.FOCUS[st.focus];
+    const auto = [`${focus.label}, ${done}/${st.rounds} rounds of ${mmss(st.len)}.`];
+    if (sess) { auto.push(`${sess.total} punches seen.`); if (sess.topFix) auto.push(`Main fix: ${sess.topFix.cue}.`); }
+    const notes = [auto.join(' '), $('sum-notes').value.trim()].filter(Boolean).join('\n');
+    const today = TRAINING.todayKey();
+    const entry = {
+      id: Date.now(), source: 'fight', kind: 'shadow', dateKey: today,
+      date: new Date().toISOString(), day: new Date().toLocaleDateString('en-US', { weekday: 'long' }),
+      session: `Shadowboxing · ${focus.label}`,
+      completion: done >= st.rounds ? 'full' : done > 0 ? 'partial' : 'no',
+      feel: feel, flags: sess ? sess.flags : [], notes, patternFeel: {}, patterns: [],
+      metrics: {
+        focus: st.focus, rounds: st.rounds, len: st.len, rest: st.rest,
+        stance: st.calib ? st.calib.stance : null,
+        perRound: R.map(r => ({ punches: r.punches, perMin: r.perMin ?? null, slowShare: r.slowShare ?? null, driftShare: r.driftShare ?? null, calls: r.calls, responded: r.responded ?? null, clean: r.clean ?? null, reaction: r.reaction ?? null })),
+        topFix: sess && sess.topFix ? sess.topFix.id : null,
+      },
+    };
+    if (!TRAINING.block()) { toast('Saved on this phone'); }
+    const ok = TRAINING.saveLog(entry);
+    if (!ok) { toast('Couldn’t save — storage is full or blocked'); return; }
+    toast('Saved');
+    setTimeout(() => location.href = 'train.html#history', 600);
+  }
+
+  // ══ INIT ══
+  renderSetup(); fillCustom();
+  if (MOCK) { const s = document.createElement('script'); s.src = 'shadow-mock.js'; document.head.appendChild(s); }
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>

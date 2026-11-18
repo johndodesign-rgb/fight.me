@@ -358,6 +358,7 @@
     if (!isFuture && w >= 1) {
       h += `<div style="margin-top:14px">`;
       if (!session && !plog) h += `<button class="btn btn-secondary" onclick="openLog({dateKey:'${k}',kind:'extra'})">Log a workout anyway</button>`;
+      if (isToday) h += `<a class="btn btn-secondary" href="shadow.html">Start shadowboxing</a>`;
       h += `<button class="btn btn-secondary" onclick="openLog({dateKey:'${k}',source:'fight'})">Log a boxing session</button></div>`;
     }
 
@@ -391,7 +392,7 @@
 
   function loggedHTML(l) {
     const icon = l.completion === 'no' ? '✕' : l.completion === 'partial' ? '◐' : '✓';
-    const title = l.source === 'fight' ? 'Boxing session' : l.kind === 'extra' ? (l.session || 'Extra workout') : 'Logged';
+    const title = l.source === 'fight' ? (l.session || 'Boxing session') : l.kind === 'extra' ? (l.session || 'Extra workout') : 'Logged';
     const bits = [COMPLETION[l.completion]];
     if (l.completion !== 'no' && FEEL[l.feel]) bits.push(FEEL[l.feel]);
     return `<div class="card">
@@ -474,7 +475,7 @@
 
     if (!all.length) h += `<div class="empty">Nothing logged yet.</div>`;
     else h += all.map(l => {
-      const name = l.source === 'fight' ? 'Boxing session' : (l.session || 'Workout');
+      const name = l.source === 'fight' ? (l.session || 'Boxing session') : (l.session || 'Workout');
       return `<button class="hist-item" onclick="openLog({id:${l.id}})">
         <div class="hist-top"><span class="hist-name">${esc(name)}</span><span class="chip ${l.completion}">${COMPLETION[l.completion] || '—'}</span></div>
         <div class="hist-date">${esc(fmt(l.dateKey, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }))}${l.completion !== 'no' && FEEL[l.feel] ? ' · ' + FEEL[l.feel] : ''}</div>
